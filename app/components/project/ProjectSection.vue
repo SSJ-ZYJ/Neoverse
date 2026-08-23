@@ -2,7 +2,8 @@
 import { PROJECTS } from '#shared/constants';
 
 const { t } = useI18n();
-const { data: previews } = await useProjectPreviews();
+const { data: previews, status: previewStatus } = useProjectPreviews();
+const previewLoading = computed(() => previewStatus.value === 'idle' || previewStatus.value === 'pending');
 </script>
 
 <template>
@@ -18,6 +19,7 @@ const { data: previews } = await useProjectPreviews();
         :key="project.id"
         :project="project"
         :preview="project.id === 'docs' ? previews.docs : previews.blog"
+        :loading="previewLoading"
       />
     </div>
   </section>

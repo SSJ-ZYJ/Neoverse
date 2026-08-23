@@ -5,16 +5,20 @@ import IconLucideBookOpen from '~icons/lucide/book-open';
 import IconLucidePenLine from '~icons/lucide/pen-line';
 import IconSimpleIconsGithub from '~icons/simple-icons/github';
 
-const props = defineProps<{
-  project: {
-    id: ProjectId;
-    href: string;
-    repoHref: string;
-    icon: ProjectIcon;
-    tone: ProjectTone;
-  };
-  preview: ProjectPreview;
-}>();
+const props = withDefaults(
+  defineProps<{
+    project: {
+      id: ProjectId;
+      href: string;
+      repoHref: string;
+      icon: ProjectIcon;
+      tone: ProjectTone;
+    };
+    preview: ProjectPreview;
+    loading?: boolean;
+  }>(),
+  { loading: false },
+);
 
 const { t, tm, rt, locale } = useI18n();
 const translateMessage = rt as (message: unknown) => string;
@@ -41,6 +45,7 @@ const docsContent = computed(() => {
   const fallbackLocale = preferredLocale === 'zh' ? 'en' : 'zh';
   return preview.content[preferredLocale].length ? preview.content[preferredLocale] : preview.content[fallbackLocale];
 });
+const docsAfterword = computed(() => docsContent.value.find((item) => item.featured));
 const formatArticleDate = (value: string | null) => {
   if (!value) return '';
   return new Intl.DateTimeFormat(locale.value, {
@@ -55,13 +60,42 @@ const formatArticleDate = (value: string | null) => {
   <article class="project-card glass-card">
     <div class="project-card__main">
       <div class="project-card__preview">
-        <div class="project-card__preview-frame" :aria-label="t('projects.preview.label', { title: copy.title })">
+        <div
+          class="project-card__preview-frame"
+          :aria-label="t('projects.preview.label', { title: copy.title })"
+          :aria-busy="loading"
+        >
           <header class="project-card__preview-head">
             <span>{{ t(`projects.preview.${project.id}Title`) }}</span>
             <small>{{ projectHost }}</small>
           </header>
 
-          <template v-if="docsPreview && docsContent.length">
+          <template v-if="loading">
+            <ol v-if="project.id === 'docs'" class="project-card__docs-list project-card__preview-loading">
+              <li v-for="row in 3" :key="row" class="project-card__loading-row" aria-hidden="true">
+                <div>
+                  <i class="skeleton-surface project-card__loading-line project-card__loading-line--title" />
+                  <i class="skeleton-surface project-card__loading-line project-card__loading-line--description" />
+                </div>
+              </li>
+              <li v-if="docsAfterword" class="is-featured">
+                <a :href="docsAfterword.href" target="_blank" rel="noreferrer">
+                  <strong>{{ t('projects.preview.afterwordTitle') }}</strong>
+                  <span>{{ t('projects.preview.afterwordDescription') }}</span>
+                </a>
+              </li>
+            </ol>
+            <ol v-else class="project-card__article-list project-card__preview-loading">
+              <li v-for="row in 3" :key="row" class="project-card__loading-row" aria-hidden="true">
+                <div>
+                  <i class="skeleton-surface project-card__loading-line project-card__loading-line--date" />
+                  <i class="skeleton-surface project-card__loading-line" />
+                </div>
+              </li>
+            </ol>
+          </template>
+
+          <template v-else-if="docsPreview && docsContent.length">
             <ol class="project-card__docs-list">
               <li v-for="item in docsContent" :key="item.title" :class="{ 'is-featured': item.featured }">
                 <a :href="item.href" target="_blank" rel="noreferrer">
@@ -289,6 +323,23 @@ const formatArticleDate = (value: string | null) => {
   font-weight: var(--weight-semibold);
   -webkit-line-clamp: 2;
 }
+.project-card__loading-row > div {
+  display: grid;
+  width: 100%;
+  align-content: center;
+  gap: 0.32rem;
+  padding: 0.45rem 0;
+}
+.project-card__loading-line {
+  display: block;
+  width: 72%;
+  height: 0.58rem;
+  border-radius: var(--radius-control);
+  opacity: 0.34;
+}
+.project-card__loading-line--title { width: 42%; height: 0.68rem; opacity: 0.46; }
+.project-card__loading-line--description { width: 78%; }
+.project-card__loading-line--date { width: 24%; height: 0.5rem; opacity: 0.28; }
 .project-card__docs-list a:hover strong,
 .project-card__article-list a:hover strong { color: var(--accent-primary); }
 .project-card__preview-unavailable {
@@ -312,4 +363,29 @@ const formatArticleDate = (value: string | null) => {
 .project-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.65rem clamp(0.9rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.3vw, 1.15rem); border-top: 1px solid var(--glass-border-hairline); }
 .project-card__tags { display: flex; min-width: 0; flex-wrap: wrap; gap: 0.3rem; }
 @media (prefers-reduced-motion: reduce) { .project-card:hover, .project-card:has(.project-card__repo:hover) { transform: none; } }
+@media (max-width: 520px) {
+  .project-card__preview {
+    aspect-ratio: 4 / 3;
+    padding: 0.45rem;
+  }
+  .project-card__preview-frame { padding: 0.65rem; }
+  .project-card__preview-head {
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .project-card__preview-head small { max-width: 46%; }
+  .project-card__docs-list a,
+  .project-card__article-list a { padding-block: 0.35rem; }
+  .project-card__loading-row > div { padding-block: 0.35rem; }
+  .project-card__docs-list span { display: none; }
+  .project-card__copy {
+    gap: 0.45rem;
+    padding: 0.85rem;
+  }
+  .project-card__footer {
+    gap: 0.6rem;
+    padding: 0.6rem 0.85rem 0.85rem;
+  }
+  .project-card__tags { gap: 0.25rem; }
+}
 </style>

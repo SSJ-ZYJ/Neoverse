@@ -574,6 +574,27 @@ const emptyPulse = createEmptyPulse();
   .dashboard-loading__project-card--docs .dashboard-loading__project-line--description-2 { display: block; }
 }
 
+@media (max-width: 520px) {
+  .dashboard-loading__project-preview {
+    aspect-ratio: 4 / 3;
+    padding: 0.45rem;
+  }
+  .dashboard-loading__project-preview-frame { padding: 0.65rem; }
+  .dashboard-loading__project-preview-head {
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  .dashboard-loading__project-copy {
+    gap: 0.45rem;
+    padding: 0.85rem;
+  }
+  .dashboard-loading__project-footer {
+    gap: 0.6rem;
+    padding: 0.6rem 0.85rem 0.85rem;
+  }
+  .dashboard-loading__project-tags { gap: 0.25rem; }
+}
+
 @media (max-width: 380px) {
   .dashboard-loading__track-row:last-child { min-height: 9.35rem; }
 }
