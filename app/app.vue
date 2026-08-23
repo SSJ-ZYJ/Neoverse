@@ -21,6 +21,7 @@ const skeletonView = computed(() => {
   if (route.path === '/projects') return 'projects';
   if (route.path === '/focus') return 'focus';
   if (route.path === '/pulse') return 'pulse';
+  if (route.path === '/design') return 'design';
   return 'home';
 });
 

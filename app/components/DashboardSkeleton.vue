@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { createEmptyPulse, FOCUS_DOMAINS, HOME_LINKS, PROJECTS } from '#shared/constants';
+import { createEmptyPulse, FOCUS_DOMAINS, HOME_LINKS, PROJECTS, type ViewId } from '#shared/constants';
 
-defineProps<{ view: 'home' | 'projects' | 'focus' | 'pulse' }>();
+type SkeletonView = ViewId | 'design';
+
+defineProps<{ view: SkeletonView }>();
 const { t } = useI18n();
 const emptyPulse = createEmptyPulse();
 </script>
 
 <template>
-  <div class="dashboard-loading" role="status" aria-live="polite" :aria-label="t('common.loading')">
+  <div
+    class="dashboard-loading"
+    :class="{ 'dashboard-loading--orbit': view === 'projects' || view === 'focus' || view === 'pulse' }"
+    role="status"
+    aria-live="polite"
+    :aria-label="t('common.loading')"
+  >
     <span class="dashboard-loading__label">{{ t('common.loading') }}</span>
     <div class="dashboard-loading__shell">
       <section v-if="view === 'home'" class="dashboard-loading__panel dashboard-loading__panel--home">
@@ -146,8 +154,46 @@ const emptyPulse = createEmptyPulse();
         </div>
       </section>
 
-      <section v-else class="dashboard-loading__panel dashboard-loading__panel--pulse">
+      <section v-else-if="view === 'pulse'" class="dashboard-loading__panel dashboard-loading__panel--pulse">
         <PulseSection :pulse="emptyPulse" :loading="true" />
+      </section>
+
+      <section v-else-if="view === 'design'" class="dashboard-loading__panel dashboard-loading__panel--design">
+        <header class="dashboard-loading__design-header">
+          <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--kicker" />
+          <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--title" />
+          <div class="dashboard-loading__design-description">
+            <div class="skeleton-surface dashboard-loading__design-line" />
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--description-2" />
+          </div>
+        </header>
+
+        <div class="dashboard-loading__design-stack">
+          <section class="dashboard-loading__design-block">
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--block-title" />
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--hint" />
+            <div class="dashboard-loading__design-buttons">
+              <span v-for="button in 5" :key="button" class="skeleton-surface" />
+            </div>
+          </section>
+
+          <section class="dashboard-loading__design-block">
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--block-title" />
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--hint" />
+            <div class="skeleton-surface dashboard-loading__design-segmented" />
+          </section>
+
+          <section class="dashboard-loading__design-block">
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--block-title" />
+            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--hint" />
+            <div class="dashboard-loading__design-swatches">
+              <span v-for="swatch in 5" :key="swatch">
+                <i class="skeleton-surface" />
+                <b class="skeleton-surface" />
+              </span>
+            </div>
+          </section>
+        </div>
       </section>
     </div>
   </div>
@@ -162,6 +208,14 @@ const emptyPulse = createEmptyPulse();
   padding: 0;
   background: var(--background-primary);
   scrollbar-width: none;
+}
+
+.dashboard-loading--orbit {
+  background-color: var(--surface-elevated);
+  background-image: var(--section-orbit-background);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .dashboard-loading::-webkit-scrollbar { display: none; width: 0; height: 0; }
@@ -179,12 +233,13 @@ const emptyPulse = createEmptyPulse();
   display: grid;
   width: 100%;
   min-height: 100svh;
+  align-items: start;
   margin-inline: auto;
   grid-template-columns: 1fr;
 }
 
 .dashboard-loading__panel {
-  min-height: max(34rem, 100svh);
+  min-height: 0;
   border: 0;
   border-radius: 0;
   padding: var(--page-block-start) var(--page-inline) var(--dock-safe-space);
@@ -196,15 +251,14 @@ const emptyPulse = createEmptyPulse();
   display: flex;
   min-height: 100svh;
   flex-direction: column;
-  background: #07172a;
+  background:
+    linear-gradient(90deg, rgb(2 8 18 / 82%), rgb(2 8 18 / 24%)),
+    url('/images/home-city.webp') center / cover no-repeat,
+    #020812;
 }
 
 :is(.dashboard-loading__panel--projects, .dashboard-loading__panel--focus, .dashboard-loading__panel--pulse) {
-  background-color: var(--surface-elevated);
-  background-image: var(--section-orbit-background);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background: transparent;
 }
 
 .dashboard-loading__home-header {
@@ -218,7 +272,7 @@ const emptyPulse = createEmptyPulse();
 
 .dashboard-loading__brand { width: 8rem; height: 1.55rem; border-radius: var(--radius-control); opacity: 1; }
 .dashboard-loading__profile { position: relative; z-index: 2; display: grid; width: 100%; max-width: var(--home-content-max); flex: 1; grid-template-areas: "avatar identity" ". links" ". status"; grid-template-columns: auto minmax(0, 1fr); align-content: safe center; column-gap: clamp(2.25rem, 4.5vw, 4.25rem); row-gap: 1.5rem; margin-inline: 0 auto; padding-block: clamp(1.5rem, 4vh, 3rem); }
-.dashboard-loading__avatar { --skeleton-avatar-size: clamp(6.8rem, 12vw, 9.2rem); width: var(--skeleton-avatar-size); height: var(--skeleton-avatar-size); grid-area: avatar; align-self: center; border: 0; border-radius: 20%; padding: 0; opacity: 1; }
+.dashboard-loading__avatar { --skeleton-avatar-size: clamp(6.8rem, 12vw, 9.2rem); width: var(--skeleton-avatar-size); height: var(--skeleton-avatar-size); grid-area: avatar; align-self: center; border: 0; border-radius: 24%; padding: 0; opacity: 1; }
 .dashboard-loading__copy { display: flex; width: min(100%, 28.625rem); min-width: 0; flex-direction: column; align-items: flex-start; }
 .dashboard-loading__line { width: 100%; height: 0.76rem; border-radius: var(--radius-control); }
 .dashboard-loading__panel--home .dashboard-loading__line { opacity: 1; }
@@ -233,7 +287,6 @@ const emptyPulse = createEmptyPulse();
 .dashboard-loading__line--status { width: 14rem; height: 1.2rem; grid-area: status; }
 .dashboard-loading__panel--projects {
   display: flex;
-  min-height: max(34rem, 100svh);
   flex-direction: column;
 }
 
@@ -536,6 +589,46 @@ const emptyPulse = createEmptyPulse();
 .dashboard-loading__focus-interests-list span:nth-child(3) { width: 5.75rem; }
 .dashboard-loading__focus-interests-list span:nth-child(4) { width: 2.4rem; }
 
+.dashboard-loading__panel--design {
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard-loading__design-header,
+.dashboard-loading__design-stack {
+  width: 100%;
+  max-width: var(--home-content-max);
+}
+
+.dashboard-loading__design-line {
+  width: 100%;
+  height: 0.86rem;
+  border-radius: var(--radius-control);
+  opacity: 0.46;
+}
+
+.dashboard-loading__design-line--kicker { width: 5.4rem; height: var(--text-sm); }
+.dashboard-loading__design-line--title { width: min(16rem, 68%); height: clamp(2.2rem, 4vw, 3.3rem); margin-top: 0.4rem; }
+.dashboard-loading__design-description { display: grid; width: min(100%, 38rem); gap: 0.4rem; margin-top: 0.6rem; }
+.dashboard-loading__design-line--description-2 { width: 72%; }
+.dashboard-loading__design-stack { display: grid; gap: 2.25rem; }
+.dashboard-loading__design-block { min-width: 0; }
+.dashboard-loading__design-line--block-title { width: 9rem; height: var(--text-base); }
+.dashboard-loading__design-line--hint { width: min(21rem, 76%); height: var(--text-md); margin-top: 0.35rem; opacity: 0.34; }
+.dashboard-loading__design-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; margin-top: 1.1rem; }
+.dashboard-loading__design-buttons span { width: 7.2rem; height: var(--control-height-lg); border-radius: var(--radius-control); opacity: 0.5; }
+.dashboard-loading__design-buttons span:nth-child(2) { width: 8.4rem; }
+.dashboard-loading__design-buttons span:nth-child(3) { width: 6.4rem; height: var(--control-height-md); }
+.dashboard-loading__design-buttons span:nth-child(4) { width: 7.8rem; height: var(--control-height-md); }
+.dashboard-loading__design-buttons span:nth-child(5) { width: 6.8rem; height: var(--control-height-sm); }
+.dashboard-loading__design-segmented { width: 11rem; height: calc(var(--control-height-md) + 0.44rem); margin-top: 1.1rem; border-radius: var(--radius-control); opacity: 0.5; }
+.dashboard-loading__design-swatches { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.1rem; }
+.dashboard-loading__design-swatches > span { display: inline-flex; align-items: center; gap: 0.5rem; }
+.dashboard-loading__design-swatches i { width: 2.2rem; height: 2.2rem; border-radius: var(--radius-sm); opacity: 0.46; }
+.dashboard-loading__design-swatches b { width: 7.5rem; height: var(--text-sm); border-radius: var(--radius-control); opacity: 0.3; }
+
 @media (max-width: 900px) {
   .dashboard-loading__stage-head { grid-template-columns: 1fr; gap: 0.3rem; }
   .dashboard-loading__stage-spacer { display: none; }
@@ -546,6 +639,15 @@ const emptyPulse = createEmptyPulse();
 
 @media (max-width: 700px) {
   .dashboard-loading__panel-heading { gap: 0.65rem; }
+}
+
+@media (max-width: 760px) {
+  .dashboard-loading__focus-journey-bar { min-height: 2.64rem; padding: 0.62rem 0.9rem; }
+  .dashboard-loading__focus-journey-body { padding: 0.95rem 0.9rem 0.2rem; }
+  .dashboard-loading__focus-footnote { min-height: 2.45rem; padding: 0.6rem 0.95rem; }
+  .dashboard-loading__focus-interests-head { min-height: 2.64rem; padding: 0.62rem 0.9rem; }
+  .dashboard-loading__focus-interests-hint { display: none; }
+  .dashboard-loading__focus-interests-list { padding: 0.8rem 0.9rem 0.9rem; }
 }
 
 @media (max-width: 620px) {
@@ -560,12 +662,6 @@ const emptyPulse = createEmptyPulse();
   .dashboard-loading__panel-heading--focus .dashboard-loading__heading-line--description-2 { display: none; }
   .dashboard-loading__panel-heading--projects .dashboard-loading__heading-line--description-3,
   .dashboard-loading__panel-heading--pulse .dashboard-loading__heading-line--description-3 { display: block; width: 74%; }
-  .dashboard-loading__focus-journey-bar { min-height: 2.64rem; padding: 0.62rem 0.9rem; }
-  .dashboard-loading__focus-journey-body { padding: 0.95rem 0.9rem 0.2rem; }
-  .dashboard-loading__focus-footnote { min-height: 2.45rem; padding: 0.6rem 0.95rem; }
-  .dashboard-loading__focus-interests-head { min-height: 2.64rem; padding: 0.62rem 0.9rem; }
-  .dashboard-loading__focus-interests-hint { display: none; }
-  .dashboard-loading__focus-interests-list { padding: 0.8rem 0.9rem 0.9rem; }
 }
 
 @media (max-width: 580px) {
