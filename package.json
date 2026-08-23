@@ -13,6 +13,8 @@
     "test:home-behavior": "bun scripts/check-home-behavior.ts",
     "test:projects-mobile": "bun scripts/check-projects-mobile.ts",
     "test:route-background": "bun scripts/check-route-background.ts",
+    "test:projects-skeleton": "bun scripts/check-projects-skeleton.ts",
+    "test:pulse-mobile-heatmap": "bun scripts/check-pulse-mobile-heatmap.ts",
     "test:pulse-transition": "bun scripts/check-pulse-transition.ts",
     "test:skeleton-alignment": "bun scripts/check-skeleton-alignment.ts",
     "typecheck": "nuxt typecheck",

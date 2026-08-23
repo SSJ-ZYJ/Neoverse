@@ -6,6 +6,7 @@ const { t, locale } = useI18n();
 type ContributionDay = GithubPulse['contributions']['days'][number];
 
 const cardElement = ref<HTMLElement | null>(null);
+const chartScroller = ref<HTMLElement | null>(null);
 const activeDay = ref<ContributionDay | null>(null);
 const tooltipPlacement = ref<'center' | 'start' | 'end'>('center');
 const tooltipStyle = ref({ left: '0px', top: '0px' });
@@ -70,6 +71,16 @@ function clearDayTooltip() {
   if (activeDay.value) activeDay.value = null;
 }
 
+async function scrollToLatestContributions() {
+  await nextTick();
+  const scroller = chartScroller.value;
+  if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return;
+  scroller.scrollLeft = scroller.scrollWidth;
+}
+
+onMounted(scrollToLatestContributions);
+watch(() => props.contributions.days.at(-1)?.date, scrollToLatestContributions);
+
 let scrollRaf = 0;
 function onChartScroll() {
   if (!activeDay.value) return;
@@ -105,7 +116,7 @@ function hideDayTooltip(day: ContributionDay) {
     </div>
 
     <div class="contribution-card__body">
-      <div class="contribution-card__chart" @scroll.passive="onChartScroll">
+      <div ref="chartScroller" class="contribution-card__chart" @scroll.passive="onChartScroll">
         <template v-if="loading">
           <div class="contribution-card__loading-chart" aria-hidden="true">
             <div class="contribution-card__skeleton-grid">

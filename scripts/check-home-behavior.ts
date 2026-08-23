@@ -14,8 +14,11 @@ if (!constantsSource.includes('export const HOME_LINKS')) {
 if (!homeSource.includes('v-for="(link, index) in HOME_LINKS"')) {
   failures.push('Home links are not rendered from the canonical list.');
 }
-if (!skeletonSource.includes('v-for="link in HOME_LINKS"')) {
-  failures.push('Home skeleton does not mirror the canonical link count.');
+if (!skeletonSource.includes('<HomeSection v-if="view === \'home\'" skeleton />')) {
+  failures.push('Home skeleton does not reuse the canonical HomeSection layout and link count.');
+}
+if (skeletonSource.includes('class="dashboard-loading__profile"')) {
+  failures.push('DashboardSkeleton still duplicates the canonical Home layout.');
 }
 if (/\.home-socials a:nth-child\(/.test(homeSource)) {
   failures.push('Home link animation timing is still hard-coded to fixed child positions.');
@@ -52,14 +55,7 @@ if (/@media \(min-width:\s*1200px\)[\s\S]*?\.home-panel__content/.test(homeSourc
   failures.push('Home content still changes its horizontal alignment at the 1200px breakpoint.');
 }
 
-const skeletonProfileRule = skeletonSource.match(/\.dashboard-loading__profile\s*\{([^}]*)\}/)?.[1] ?? '';
-for (const requiredSkeletonLayout of ['display: grid', 'max-width: var(--home-content-max)', 'margin-inline: 0 auto']) {
-  if (!skeletonProfileRule.includes(requiredSkeletonLayout)) {
-    failures.push(`Home skeleton is missing the stable layout rule: ${requiredSkeletonLayout}.`);
-  }
-}
-
-const statusRule = homeSource.match(/\.home-panel__status\s*\{([^}]*)\}/)?.[1] ?? '';
+const statusRule = homeSource.match(/^\.home-panel__status\s*\{([^}]*)\}/m)?.[1] ?? '';
 if (!statusRule.includes('animation: home-status-enter')) {
   failures.push('Currently Building does not have an independent fade animation.');
 }

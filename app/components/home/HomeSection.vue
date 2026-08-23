@@ -17,6 +17,7 @@ const LINK_ICONS: Record<string, Component> = {
   'simple-icons:github': IconSimpleIconsGithub,
 };
 
+const props = withDefaults(defineProps<{ skeleton?: boolean }>(), { skeleton: false });
 const { t } = useI18n();
 const avatarLoaded = ref(false);
 const avatarImg = ref<HTMLImageElement | null>(null);
@@ -28,18 +29,29 @@ const getHomeLinkStyle = (index: number) => ({
 });
 
 onMounted(() => {
+  if (props.skeleton) return;
   const img = avatarImg.value;
   if (img?.complete && img.naturalWidth > 0) avatarLoaded.value = true;
 });
 </script>
 
 <template>
-  <section id="home" class="dashboard-panel home-panel" aria-labelledby="home-title">
-    <HomeCosmos />
+  <section
+    :id="skeleton ? undefined : 'home'"
+    class="dashboard-panel home-panel"
+    :class="{ 'home-panel--skeleton': skeleton }"
+    :aria-labelledby="skeleton ? undefined : 'home-title'"
+    :aria-hidden="skeleton || undefined"
+  >
+    <HomeCosmos v-if="!skeleton" />
     <div class="home-panel__shade" aria-hidden="true" />
 
     <header class="home-panel__header">
-      <NuxtLink class="home-brand" to="/" aria-label="Neoverse home">
+      <span v-if="skeleton" class="home-brand home-brand--skeleton" aria-hidden="true">
+        <span class="home-brand__mark skeleton-surface" />
+        <span class="home-skeleton-measure">Neoverse</span>
+      </span>
+      <NuxtLink v-else class="home-brand" to="/" aria-label="Neoverse home">
         <span class="home-brand__mark" aria-hidden="true">
           <svg viewBox="0 0 32 32" focusable="false">
             <defs>
@@ -108,9 +120,10 @@ onMounted(() => {
     </header>
 
     <div class="home-panel__content">
-      <div class="home-avatar" :class="{ 'is-loading': !avatarLoaded }">
-        <span class="home-avatar__skeleton" :class="{ 'is-hidden': avatarLoaded }" aria-hidden="true" />
+      <div class="home-avatar" :class="{ 'is-loading': skeleton || !avatarLoaded }">
+        <span class="home-avatar__skeleton" :class="{ 'is-hidden': !skeleton && avatarLoaded }" aria-hidden="true" />
         <img
+          v-if="!skeleton"
           ref="avatarImg"
           :src="SITE.avatar"
           alt=""
@@ -122,24 +135,36 @@ onMounted(() => {
       </div>
 
       <div class="home-panel__copy">
-        <p class="home-panel__kicker">{{ t('home.tagline') }}</p>
-        <h1 id="home-title">Shenshijun</h1>
-        <p class="home-panel__role">{{ t('home.role') }}</p>
-        <p class="home-panel__bio">{{ t('home.bio') }}</p>
+        <p class="home-panel__kicker">
+          <span :class="{ 'home-skeleton-measure': skeleton }">{{ t('home.tagline') }}</span>
+        </p>
+        <h1 :id="skeleton ? undefined : 'home-title'">
+          <span :class="{ 'home-skeleton-measure': skeleton }">Shenshijun</span>
+        </h1>
+        <p class="home-panel__role">
+          <span :class="{ 'home-skeleton-measure': skeleton }">{{ t('home.role') }}</span>
+        </p>
+        <p class="home-panel__bio">
+          <span :class="{ 'home-skeleton-measure': skeleton }">{{ t('home.bio') }}</span>
+        </p>
       </div>
 
       <nav class="home-socials" :aria-label="t('home.linksAria')">
         <UiGlassButton
           v-for="(link, index) in HOME_LINKS"
           :key="link.id"
-          :href="link.href"
-          :target="link.external ? '_blank' : undefined"
-          rel="noreferrer"
-          :aria-label="t(link.labelKey)"
+          :class="{ 'skeleton-surface home-socials__skeleton-button': skeleton }"
+          :href="skeleton ? undefined : link.href"
+          :target="!skeleton && link.external ? '_blank' : undefined"
+          :rel="skeleton ? undefined : 'noreferrer'"
+          :aria-label="skeleton ? undefined : t(link.labelKey)"
+          :aria-hidden="skeleton || undefined"
+          :disabled="skeleton || undefined"
+          :tabindex="skeleton ? -1 : undefined"
           variant="glass"
           size="lg"
           :filled-icon="link.filledIcon"
-          :style="getHomeLinkStyle(index)"
+          :style="skeleton ? undefined : getHomeLinkStyle(index)"
         >
           <template #icon>
             <component :is="LINK_ICONS[link.icon]" aria-hidden="true" />
@@ -149,8 +174,10 @@ onMounted(() => {
       </nav>
 
       <p class="home-panel__status" :style="homeStatusStyle">
-        <i aria-hidden="true" />
-        <span>{{ t('home.currentlyBuilding') }} <strong>{{ t('projects.docs.title') }}</strong></span>
+        <i :class="{ 'skeleton-surface': skeleton }" aria-hidden="true" />
+        <span :class="{ 'home-skeleton-measure': skeleton }">
+          {{ t('home.currentlyBuilding') }} <strong>{{ t('projects.docs.title') }}</strong>
+        </span>
       </p>
     </div>
   </section>
@@ -168,8 +195,25 @@ onMounted(() => {
   -webkit-user-select: none;
 }
 
+.home-panel--skeleton {
+  background:
+    linear-gradient(90deg, rgb(2 8 18 / 82%), rgb(2 8 18 / 24%)),
+    url('/images/home-city.webp') center / cover no-repeat,
+    #020812;
+}
+
 .home-panel__shade { position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg, rgb(2 8 18 / 48%), transparent 66%), linear-gradient(0deg, rgb(2 8 18 / 32%), transparent 48%); pointer-events: none; }
 .home-panel__header { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.home-panel--skeleton .home-panel__header,
+.home-panel--skeleton .home-avatar,
+.home-panel--skeleton .home-panel__copy,
+.home-panel--skeleton .home-panel__status {
+  opacity: 1;
+  animation: none;
+  filter: none;
+  transform: none;
+  will-change: auto;
+}
 .home-panel__header,
 .home-avatar,
 .home-panel__copy,
@@ -233,6 +277,23 @@ onMounted(() => {
 .home-brand { display: inline-flex; align-items: center; gap: 0.58rem; color: #f7fbff; font-size: var(--text-base); font-weight: var(--weight-bold); letter-spacing: -0.02em; text-decoration: none; }
 .home-brand__mark { display: inline-flex; width: 1.55rem; height: 1.55rem; flex: 0 0 auto; align-items: center; justify-content: center; }
 .home-brand__mark svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.home-brand--skeleton { pointer-events: none; }
+.home-brand--skeleton .home-brand__mark { border-radius: var(--radius-control); }
+.home-skeleton-measure {
+  color: transparent !important;
+  border-radius: var(--radius-control);
+  background:
+    linear-gradient(100deg, transparent 24%, var(--skeleton-highlight) 50%, transparent 76%) 100% 0 / 200% 100%,
+    var(--skeleton-fill);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  box-shadow: var(--skeleton-edge);
+  animation: home-inline-skeleton-shimmer 1.25s ease-in-out infinite;
+}
+.home-skeleton-measure * { color: transparent !important; }
+@keyframes home-inline-skeleton-shimmer {
+  to { background-position: -100% 0, 0 0; }
+}
 .home-panel__content {
   position: relative;
   z-index: 2;
@@ -335,6 +396,19 @@ onMounted(() => {
   animation-name: home-social-link-enter;
   will-change: auto;
 }
+.home-panel--skeleton .home-socials__skeleton-button {
+  overflow: hidden;
+  color: transparent;
+  background: var(--skeleton-fill);
+  box-shadow: var(--skeleton-edge);
+  cursor: default;
+  pointer-events: none;
+}
+.home-panel--skeleton .home-panel__status i {
+  background: var(--skeleton-fill);
+  box-shadow: var(--skeleton-edge);
+}
+.home-panel--skeleton .home-panel__status i::after { display: none; }
 .home-panel__status { display: inline-flex; grid-area: status; align-items: center; justify-self: start; gap: 0.42rem; margin: 0; opacity: 0; color: rgb(225 240 250 / 67%); font-size: var(--text-sm); line-height: 1.4; animation: home-status-enter var(--motion-standard) var(--motion-ease-standard) var(--home-status-entry-delay) both; animation-play-state: var(--home-entry-animation-play-state, running); }
 .home-panel__status i { position: relative; width: 0.42rem; height: 0.42rem; flex: 0 0 auto; border-radius: 50%; background: #36d49b; box-shadow: 0 0 0.5rem rgb(54 212 155 / 42%); }
 .home-panel__status i::after { content: ""; position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; border-radius: 50%; background: rgb(54 212 155 / 88%); box-shadow: 0 0 0.55rem rgb(54 212 155 / 38%); transform: translate(-50%, -50%) scale(1); opacity: 0.9; animation: home-status-halo 1.55s cubic-bezier(0.33, 0, 0.2, 1) infinite; pointer-events: none; will-change: transform, opacity; }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createEmptyPulse, FOCUS_DOMAINS, HOME_LINKS, PROJECTS, type ViewId } from '#shared/constants';
+import { createEmptyPulse, FOCUS_DOMAINS, PROJECTS, type ViewId } from '#shared/constants';
 
 type SkeletonView = ViewId | 'design';
 
@@ -18,31 +18,7 @@ const emptyPulse = createEmptyPulse();
   >
     <span class="dashboard-loading__label">{{ t('common.loading') }}</span>
     <div class="dashboard-loading__shell">
-      <section v-if="view === 'home'" class="dashboard-loading__panel dashboard-loading__panel--home">
-        <header class="dashboard-loading__home-header">
-          <div class="skeleton-surface dashboard-loading__brand" />
-        </header>
-
-        <div class="dashboard-loading__profile">
-          <div class="skeleton-surface dashboard-loading__avatar" />
-          <div class="dashboard-loading__copy">
-            <div class="skeleton-surface dashboard-loading__line dashboard-loading__line--kicker" />
-            <div class="skeleton-surface dashboard-loading__line dashboard-loading__line--title" />
-            <div class="skeleton-surface dashboard-loading__line dashboard-loading__line--accent" />
-            <div class="skeleton-surface dashboard-loading__line dashboard-loading__line--body" />
-            <div class="skeleton-surface dashboard-loading__line dashboard-loading__line--short" />
-          </div>
-          <div class="dashboard-loading__socials">
-            <div
-              v-for="link in HOME_LINKS"
-              :key="link.id"
-              class="skeleton-surface dashboard-loading__social"
-              :style="{ '--home-skeleton-link-width': link.skeletonWidth }"
-            />
-          </div>
-          <div class="skeleton-surface dashboard-loading__line dashboard-loading__line--status" />
-        </div>
-      </section>
+      <HomeSection v-if="view === 'home'" skeleton />
 
       <section v-else-if="view === 'projects'" class="dashboard-loading__panel dashboard-loading__panel--projects">
         <div class="dashboard-loading__panel-heading dashboard-loading__panel-heading--projects">
@@ -68,7 +44,16 @@ const emptyPulse = createEmptyPulse();
                   <span class="skeleton-surface" />
                 </div>
                 <div class="dashboard-loading__project-preview-rows">
-                  <span v-for="row in project.id === 'docs' ? 4 : 3" :key="row" class="skeleton-surface" />
+                  <div
+                    v-for="row in project.id === 'docs' ? 4 : 3"
+                    :key="row"
+                    class="dashboard-loading__project-preview-row"
+                  >
+                    <span
+                      class="skeleton-surface dashboard-loading__project-preview-line dashboard-loading__project-preview-line--primary"
+                    />
+                    <span class="skeleton-surface dashboard-loading__project-preview-line" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -211,11 +196,7 @@ const emptyPulse = createEmptyPulse();
 }
 
 .dashboard-loading--orbit {
-  background-color: var(--surface-elevated);
-  background-image: var(--section-orbit-background);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background: transparent;
 }
 
 .dashboard-loading::-webkit-scrollbar { display: none; width: 0; height: 0; }
@@ -247,44 +228,9 @@ const emptyPulse = createEmptyPulse();
   box-shadow: none;
 }
 
-.dashboard-loading__panel--home {
-  display: flex;
-  min-height: 100svh;
-  flex-direction: column;
-  background:
-    linear-gradient(90deg, rgb(2 8 18 / 82%), rgb(2 8 18 / 24%)),
-    url('/images/home-city.webp') center / cover no-repeat,
-    #020812;
-}
-
 :is(.dashboard-loading__panel--projects, .dashboard-loading__panel--focus, .dashboard-loading__panel--pulse) {
   background: transparent;
 }
-
-.dashboard-loading__home-header {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.dashboard-loading__brand { width: 8rem; height: 1.55rem; border-radius: var(--radius-control); opacity: 1; }
-.dashboard-loading__profile { position: relative; z-index: 2; display: grid; width: 100%; max-width: var(--home-content-max); flex: 1; grid-template-areas: "avatar identity" ". links" ". status"; grid-template-columns: auto minmax(0, 1fr); align-content: safe center; column-gap: clamp(2.25rem, 4.5vw, 4.25rem); row-gap: 1.5rem; margin-inline: 0 auto; padding-block: clamp(1.5rem, 4vh, 3rem); }
-.dashboard-loading__avatar { --skeleton-avatar-size: clamp(6.8rem, 12vw, 9.2rem); width: var(--skeleton-avatar-size); height: var(--skeleton-avatar-size); grid-area: avatar; align-self: center; border: 0; border-radius: 24%; padding: 0; opacity: 1; }
-.dashboard-loading__copy { display: flex; width: min(100%, 28.625rem); min-width: 0; flex-direction: column; align-items: flex-start; }
-.dashboard-loading__line { width: 100%; height: 0.76rem; border-radius: var(--radius-control); }
-.dashboard-loading__panel--home .dashboard-loading__line { opacity: 1; }
-.dashboard-loading__line--kicker { width: 45%; height: clamp(1.425rem, 1.94vw, 1.55rem); margin-bottom: 0.6rem; }
-.dashboard-loading__line--title { width: 78%; height: clamp(2.95rem, 5.6vw, 4.3rem); }
-.dashboard-loading__line--accent { width: 58%; height: clamp(1.55rem, 2.4vw, 1.92rem); margin-top: 0.85rem; }
-.dashboard-loading__line--body { height: 1.565rem; margin-top: 0.7rem; }
-.dashboard-loading__line--short { display: none; width: 70%; height: 1.565rem; }
-.dashboard-loading__copy { grid-area: identity; align-self: center; }
-.dashboard-loading__socials { display: flex; width: 100%; flex-wrap: wrap; grid-area: links; gap: 0.65rem; }
-.dashboard-loading__social { width: var(--home-skeleton-link-width, 6rem); height: 2.75rem; border-radius: var(--radius-control); opacity: 1; }
-.dashboard-loading__line--status { width: 14rem; height: 1.2rem; grid-area: status; }
 .dashboard-loading__panel--projects {
   display: flex;
   flex-direction: column;
@@ -413,15 +359,23 @@ const emptyPulse = createEmptyPulse();
 .dashboard-loading__project-preview-head span:first-child { width: 5.4rem; height: 0.78rem; opacity: 0.52; }
 .dashboard-loading__project-preview-head span:last-child { width: 7.2rem; height: 0.62rem; opacity: 0.36; }
 .dashboard-loading__project-preview-rows { display: flex; min-height: 0; flex: 1; flex-direction: column; }
-.dashboard-loading__project-preview-rows span {
-  min-height: 0.8rem;
+.dashboard-loading__project-preview-row {
+  display: grid;
+  min-height: 0;
   flex: 1;
-  border-radius: 0;
+  align-content: center;
+  gap: 0.32rem;
   border-bottom: 1px solid var(--glass-border-hairline);
-  background: linear-gradient(90deg, var(--skeleton-fill) 0 62%, transparent 62%);
-  opacity: 0.36;
 }
-.dashboard-loading__project-preview-rows span:last-child { border-bottom: 0; }
+.dashboard-loading__project-preview-row:last-child { border-bottom: 0; }
+.dashboard-loading__project-preview-line {
+  display: block;
+  width: 72%;
+  height: 0.58rem;
+  border-radius: var(--radius-control);
+  opacity: 0.34;
+}
+.dashboard-loading__project-preview-line--primary { width: 42%; height: 0.68rem; opacity: 0.46; }
 
 .dashboard-loading__project-copy {
   display: flex;
@@ -651,13 +605,6 @@ const emptyPulse = createEmptyPulse();
 }
 
 @media (max-width: 620px) {
-  .dashboard-loading__profile { grid-template-areas: "avatar" "identity" "links" "status"; grid-template-columns: minmax(0, 1fr); row-gap: 1rem; padding-block: clamp(0.75rem, 2vh, 1.5rem); }
-  .dashboard-loading__avatar { --skeleton-avatar-size: 6.3rem; }
-  .dashboard-loading__copy { width: 100%; }
-  .dashboard-loading__line--status { margin-top: 0.45rem; }
-  .dashboard-loading__line--title { height: clamp(2.7rem, 15vw, 4.2rem); }
-  .dashboard-loading__line--short { display: block; }
-
   .dashboard-loading__heading-line--description-2 { display: block; width: 92%; }
   .dashboard-loading__panel-heading--focus .dashboard-loading__heading-line--description-2 { display: none; }
   .dashboard-loading__panel-heading--projects .dashboard-loading__heading-line--description-3,

@@ -377,7 +377,6 @@ const formatArticleDate = (value: string | null) => {
   .project-card__docs-list a,
   .project-card__article-list a { padding-block: 0.35rem; }
   .project-card__loading-row > div { padding-block: 0.35rem; }
-  .project-card__docs-list span { display: none; }
   .project-card__copy {
     gap: 0.45rem;
     padding: 0.85rem;

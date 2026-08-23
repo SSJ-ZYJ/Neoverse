@@ -1,0 +1,33 @@
+const dashboardSource = await Bun.file('app/components/DashboardSkeleton.vue').text();
+const mainStyles = await Bun.file('app/assets/css/main.css').text();
+const failures: string[] = [];
+
+if (!dashboardSource.includes('class="dashboard-loading__project-preview-row"')) {
+  failures.push('Projects boot preview still renders each row as one joined skeleton block.');
+}
+if (!dashboardSource.includes('dashboard-loading__project-preview-line--primary')) {
+  failures.push('Projects boot preview rows do not contain separate rounded text lines.');
+}
+
+const orbitRule = dashboardSource.match(/\.dashboard-loading--orbit\s*\{([^}]*)\}/)?.[1] ?? '';
+if (!orbitRule.includes('background: transparent;')) {
+  failures.push(
+    'Projects boot skeleton still paints a separate orbit background instead of revealing the live backdrop.',
+  );
+}
+if (orbitRule.includes('--section-orbit-background')) {
+  failures.push('Projects boot skeleton still duplicates the live orbit image and can use a different crop or scale.');
+}
+if (
+  !mainStyles.includes('.app-view-stage--orbit::before') ||
+  !mainStyles.includes('scale(1.055)') ||
+  !mainStyles.includes('animation: section-orbit-drift')
+) {
+  failures.push('The shared live orbit backdrop contract is missing.');
+}
+
+if (failures.length > 0) {
+  throw new Error(`Projects skeleton regression check failed:\n- ${failures.join('\n- ')}`);
+}
+
+console.log('Projects skeleton preview geometry and orbit backdrop are aligned with the live page.');

@@ -1,4 +1,5 @@
 const dashboardSource = await Bun.file('app/components/DashboardSkeleton.vue').text();
+const homeSource = await Bun.file('app/components/home/HomeSection.vue').text();
 const appSource = await Bun.file('app/app.vue').text();
 const landscapeSource = await Bun.file('app/components/pulse/ContributionLandscape.vue').text();
 const projectsSource = await Bun.file('app/components/pulse/ContributionProjects.vue').text();
@@ -6,6 +7,22 @@ const baseSkeletonSource = await Bun.file('app/components/BaseSkeleton.vue').tex
 const mainStyles = await Bun.file('app/assets/css/main.css').text();
 const tokenSource = await Bun.file('app/assets/css/tokens.css').text();
 const failures: string[] = [];
+
+if (!dashboardSource.includes('<HomeSection v-if="view === \'home\'" skeleton />')) {
+  failures.push('Home boot skeleton does not reuse the live HomeSection layout.');
+}
+if (dashboardSource.includes('class="dashboard-loading__profile"')) {
+  failures.push('DashboardSkeleton still maintains a duplicate Home profile layout.');
+}
+if (!homeSource.includes('defineProps<{ skeleton?: boolean }>()')) {
+  failures.push('HomeSection does not expose its shared skeleton rendering mode.');
+}
+if (!homeSource.includes("'skeleton-surface home-socials__skeleton-button': skeleton")) {
+  failures.push('Home skeleton buttons do not reuse the live social-button geometry.');
+}
+if (!homeSource.includes('-webkit-box-decoration-break: clone;')) {
+  failures.push('Wrapped Home skeleton text does not preserve separate line fragments.');
+}
 
 if (!appSource.includes("if (route.path === '/design') return 'design';")) {
   failures.push('The /design route still falls back to the Home boot skeleton.');
@@ -22,10 +39,10 @@ if (!dashboardSource.includes('.dashboard-loading__panel {\n  min-height: 0;')) 
 if (!dashboardSource.includes('@media (max-width: 760px)')) {
   failures.push('Focus skeleton does not mirror the live 760px compact-spacing breakpoint.');
 }
-if (!dashboardSource.includes("url('/images/home-city.webp') center / cover no-repeat")) {
+if (!homeSource.includes("url('/images/home-city.webp') center / cover no-repeat")) {
   failures.push('Home boot skeleton does not reuse the live Home backdrop on narrow screens.');
 }
-if (!dashboardSource.includes('border-radius: 24%;')) {
+if (!homeSource.includes('border-radius: 24%;')) {
   failures.push('Home boot skeleton avatar does not match the live avatar geometry.');
 }
 
