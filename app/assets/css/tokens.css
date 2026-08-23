@@ -1,0 +1,169 @@
+:root {
+  color-scheme: dark;
+  --background-primary: #050b14;
+  --background-secondary: #091321;
+  --surface-subtle: rgb(19 33 52 / 62%);
+  --surface-elevated: rgb(12 23 39 / 92%);
+  --surface-glass: rgb(12 24 41 / 82%);
+  --surface-primary: var(--surface-elevated);
+  --surface-secondary: var(--surface-glass);
+  --section-orbit-image: url("/images/home-orbit.png");
+  --section-orbit-overlay: linear-gradient(180deg, rgb(2 8 18 / 46%), rgb(2 8 18 / 76%));
+  --section-orbit-background: var(--section-orbit-overlay), var(--section-orbit-image);
+  --border-subtle: rgb(219 234 254 / 13%);
+  --border-strong: rgb(219 234 254 / 22%);
+  --border-interactive: rgb(56 189 248 / 50%);
+  --text-primary: #f4f8fc;
+  --text-secondary: #b5c5d5;
+  --text-muted: #7f93a8;
+  --accent-primary: #38bdf8;
+  --accent-secondary: #3dd6a6;
+  --accent-tertiary: #8c9bff;
+  --accent-soft: rgb(56 189 248 / 12%);
+  --focus-ring: rgb(56 189 248 / 62%);
+  --edge-light: rgb(255 255 255 / 13%);
+  --ambient-ice: rgb(56 189 248 / 13%);
+  --ambient-mint: rgb(61 214 166 / 8%);
+  --radius-xs: 0.35rem;
+  --radius-sm: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-surface: var(--radius-2xl);
+  --radius-control: var(--radius-lg);
+  --radius-pill: 999px;
+  --radius-control-inner: calc(var(--radius-control) - 0.18rem);
+  --shadow-float: 0 16px 40px -24px rgb(0 0 0 / 72%);
+  --shadow-edge: inset 0 1px 0 rgb(255 255 255 / 8%);
+  --glass-border-hairline: var(--border-subtle);
+  --glass-card-border: color-mix(in srgb, var(--glass-border-hairline) 72%, transparent);
+  --glass-highlight: color-mix(in srgb, var(--edge-light) 52%, transparent);
+  --glass-card-highlight: color-mix(in srgb, var(--edge-light) 30%, transparent);
+  --glass-refraction-fill: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--edge-light) 7%, transparent),
+    transparent 42%,
+    color-mix(in srgb, var(--accent-soft) 12%, transparent)
+  );
+  --glass-card-fill: rgb(12 24 41 / 72%);
+  --glass-card-sheen: linear-gradient(
+    125deg,
+    color-mix(in srgb, var(--edge-light) 10%, transparent),
+    transparent 30%,
+    transparent 68%,
+    color-mix(in srgb, var(--accent-soft) 10%, transparent)
+  );
+  --glass-card-filter: blur(22px) saturate(145%) brightness(106%);
+  --glass-shadow: 0 1rem 2.8rem -1.6rem rgb(0 0 0 / 62%);
+  --glass-shadow-hover: 0 1.25rem 3rem -1.7rem rgb(0 0 0 / 72%);
+  --glass-surface-shadow: inset 0 1px 0 var(--glass-card-highlight), var(--glass-shadow);
+  --glass-surface-shadow-hover: inset 0 1px 0 var(--glass-card-highlight), var(--glass-shadow-hover);
+  --skeleton-fill: color-mix(in srgb, var(--text-secondary) 28%, var(--background-secondary));
+  --skeleton-highlight: color-mix(in srgb, var(--text-primary) 28%, transparent);
+  --skeleton-edge: inset 0 1px 0 color-mix(in srgb, var(--text-primary) 12%, transparent);
+  --aurora-fill: linear-gradient(145deg, rgb(181 197 213 / 13%), rgb(127 147 168 / 7%));
+  --aurora-fill-hover: linear-gradient(145deg, rgb(181 197 213 / 17%), rgb(127 147 168 / 10%));
+  --aurora-active-fill: linear-gradient(145deg, rgb(61 214 166 / 13%), rgb(56 189 248 / 7%));
+  --aurora-active-highlight: inset 0 1px 0 rgb(255 255 255 / 8%);
+  --aurora-hover-fill: rgb(56 189 248 / 10%);
+  --aurora-filter-chrome: blur(12px) saturate(128%) brightness(104%);
+  --aurora-filter-control: blur(36px) saturate(165%) brightness(108%);
+  --icon-size-sm: 1.05rem;
+  --icon-size-md: 1.08rem;
+  --icon-stroke-width: 1.7;
+  --transition-control:
+    color var(--motion-fast) var(--motion-ease-standard), background var(--motion-fast) var(--motion-ease-standard);
+  --dock-glass-fill: rgb(152 186 220 / 4%);
+  --dock-glass-shadow: rgb(0 0 0 / 48%);
+  --dock-control-hover-fill: var(--aurora-hover-fill);
+  --motion-fast: 180ms;
+  --motion-standard: 360ms;
+  --motion-expressive: 760ms;
+  --motion-orbit-background: 24s;
+  --motion-ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --content-max: 88rem;
+  --home-content-max: 64rem;
+  --focus-content-max: 72rem;
+  --page-gutter: clamp(1rem, 4vw, 4rem);
+  --page-inline: max(
+    var(--page-gutter),
+    env(safe-area-inset-left),
+    env(safe-area-inset-right),
+    calc((100vw - var(--content-max)) / 2)
+  );
+  --page-block-start: clamp(1.25rem, 3.5vh, 3rem);
+  --page-block-end: clamp(1.25rem, 3.5vh, 3rem);
+  --dock-control-height: 2.4rem;
+  --control-height-sm: 1.85rem;
+  --control-height-md: var(--dock-control-height);
+  --control-height-lg: 2.75rem;
+  --dock-inset: 0.55rem;
+  --dock-height: calc(var(--dock-control-height) + var(--dock-inset) + var(--dock-inset) + 2px);
+  --footer-track-height: 1.2rem;
+  --dock-footer-gap: clamp(0.8rem, 1.8dvh, 1.25rem);
+  --bottom-chrome-edge-space: calc(env(safe-area-inset-bottom, 0px) + clamp(0.7rem, 1.6dvh, 1.1rem));
+  --bottom-chrome-height: calc(
+    var(--dock-height) +
+    var(--dock-footer-gap) +
+    var(--footer-track-height) +
+    var(--bottom-chrome-edge-space)
+  );
+  --dock-safe-space: calc(var(--bottom-chrome-height) + var(--page-block-end));
+  /* 字体规范：字号阶梯（正文/标签，固定档位）*/
+  --text-2xs: 0.7rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.78rem;
+  --text-md: 0.86rem;
+  --text-base: 1rem;
+  /* 流式字号：刻意设计的响应式 clamp()，按语义角色命名 */
+  --text-display-xl: clamp(2.5rem, 5.6vw, 4.8rem);
+  --text-display-xl-narrow: clamp(2.7rem, 15vw, 4.2rem);
+  --text-display-lg: clamp(2rem, 4vw, 3rem);
+  --text-display-md: clamp(1.3rem, 1.9vw, 1.8rem);
+  --text-display-sm: clamp(1.18rem, 2vw, 1.6rem);
+  --text-subtitle: clamp(1rem, 1.55vw, 1.25rem);
+  --text-card-title: clamp(1rem, 1.35vw, 1.2rem);
+  --text-card-title-narrow: clamp(1rem, 4.5vw, 1.3rem);
+  --text-card-title-sm: clamp(1rem, 1.2vw, 1.12rem);
+  --text-card-description: clamp(0.86rem, 0.95vw, 0.96rem);
+  --text-stat: clamp(1.1rem, 1.7vw, 1.55rem);
+  --text-stat-sm: clamp(0.95rem, 1.3vw, 1.2rem);
+  /* 合并自原 clamp(0.92rem, 1.25vw, 1.1rem) 与 clamp(0.92rem, 1.12vw, 1.05rem) */
+  --text-lead: clamp(0.92rem, 1.2vw, 1.08rem);
+  --text-panel-description: clamp(0.84rem, 1vw, 0.94rem);
+  /* 字重档位：可变字体允许任意值，但设计上只使用这几档 */
+  --weight-semibold: 650;
+  --weight-bold: 750;
+  --weight-display: 800;
+}
+
+@media (max-width: 520px) {
+  :root {
+    --dock-inset: 0.45rem;
+    --dock-footer-gap: clamp(0.68rem, 1.6dvh, 0.9rem);
+    --bottom-chrome-edge-space: calc(env(safe-area-inset-bottom, 0px) + clamp(0.55rem, 1.35dvh, 0.8rem));
+  }
+}
+
+@media (max-height: 42rem) {
+  :root {
+    --dock-footer-gap: clamp(0.58rem, 1.3dvh, 0.75rem);
+    --bottom-chrome-edge-space: calc(env(safe-area-inset-bottom, 0px) + clamp(0.45rem, 1dvh, 0.65rem));
+  }
+}
+
+@theme inline {
+  --color-background: var(--background-primary);
+  --color-background-secondary: var(--background-secondary);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-tertiary: var(--accent-tertiary);
+  --color-border-subtle: var(--border-subtle);
+  --font-display: "Inter Variable", Inter, "Segoe UI", sans-serif;
+  --font-sans: "Inter Variable", Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}

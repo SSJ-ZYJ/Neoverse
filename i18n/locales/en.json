@@ -1,0 +1,162 @@
+{
+  "site": {
+    "title": "Neoverse — Shenshijun's Space",
+    "description": "Software Engineering Student | Full-Stack & Open Source | Writing Neoverse Docs | Welcome to reach out anytime!"
+  },
+  "common": {
+    "skipToContent": "Skip to content",
+    "loading": "Loading Neoverse",
+    "github": "GitHub",
+    "docs": "Docs",
+    "blog": "Blog",
+    "bilibili": "Bilibili",
+    "linuxdo": "LINUX DO",
+    "email": "Contact Me"
+  },
+  "home": {
+    "tagline": "Explore. Dream. Discover.",
+    "role": "Software Engineering · Full-Stack · Open Source",
+    "bio": "I hope that one day, I’ll sit by a high-rise window, coffee in hand, watching the city lights and AI at work, while writing down what I see and think.",
+    "currentlyBuilding": "Currently building",
+    "linksAria": "Profile links"
+  },
+  "nav": {
+    "aria": "Section navigation",
+    "goTo": "Go to {label}",
+    "home": "Home",
+    "projects": "Projects",
+    "focus": "Focus",
+    "pulse": "Pulse"
+  },
+  "language": {
+    "label": "Language",
+    "selectOption": "Select {language}",
+    "options": {
+      "english": "English",
+      "simplifiedChinese": "简体中文"
+    }
+  },
+  "projects": {
+    "title": "My Projects",
+    "description": "Open-source sites and tools I design, build, and maintain.",
+    "viewSource": "View source",
+    "preview": {
+      "label": "Current content from {title}",
+      "docsTitle": "Content guide",
+      "blogTitle": "Recent posts",
+      "afterwordTitle": "What It Means to Learn",
+      "afterwordDescription": "The afterword of the Neoverse-Docs project",
+      "unavailable": "Current content is temporarily unavailable."
+    },
+    "docs": {
+      "category": "Documentation Site",
+      "title": "Neoverse Docs",
+      "description": "An open-source documentation site for CS learners — technical references, search, diagrams, and learning paths.",
+      "tags": ["Next.js", "React", "Fumadocs", "MDX", "Mermaid", "KaTeX"]
+    },
+    "blog": {
+      "category": "Blog",
+      "title": "Shenshijun's Blog",
+      "description": "A blog sharing technology and life.",
+      "tags": ["Astro", "Fuwari", "Svelte", "Tailwind CSS"]
+    }
+  },
+  "focus": {
+    "title": "Current Focus",
+    "description": "Strengthening computer science and backend foundations, building open-source projects, and exploring agentic software workflows.",
+    "journeyCommand": "focus --journey",
+    "fileMeta": "3 directions · ongoing",
+    "stages": ["Explore", "Learn", "Build", "Apply"],
+    "mainComment": "Learning, building, documenting.",
+    "exploring": {
+      "label": "Currently Exploring",
+      "comment": "Themes getting attention right now",
+      "topics": ["Backend Engineering", "Low-level systems", "Agentic AI", "Open Source"]
+    },
+    "domains": {
+      "foundations": {
+        "label": "Foundational Skills",
+        "items": ["Go", "Java", "Computer Networks", "Operating Systems", "Databases"]
+      },
+      "open-source": {
+        "label": "Open-source Development",
+        "items": ["Architecture", "Documentation Engineering", "Open-source Collaboration"]
+      },
+      "agentic-development": {
+        "label": "Agentic Development",
+        "items": ["AI-assisted Engineering", "Agents", "Developer Tools", "Workflows"]
+      }
+    }
+  },
+  "pulse": {
+    "title": "Developer Pulse",
+    "description": "Recent public development activity data.",
+    "source": {
+      "github": "GitHub data",
+      "unavailable": "Unavailable"
+    },
+    "updated": "Updated {date}",
+    "notUpdated": "No update available",
+    "error": "GitHub data is temporarily unavailable. No simulated activity is shown.",
+    "retry": "Retry",
+    "landscape": {
+      "title": "Contribution Activity",
+      "gridAria": "GitHub contribution activity",
+      "dayLabel": "{count} contributions on {date}",
+      "less": "Less",
+      "more": "More",
+      "empty": "No verifiable contribution data is currently available.",
+      "scope": {
+        "year": "Last 12 months",
+        "recent": "Recent public events",
+        "unavailable": "Scope unavailable"
+      }
+    },
+    "stats": {
+      "contributions": "Contributions",
+      "streak": "Longest streak",
+      "days": "{count} days",
+      "range": "Data range"
+    },
+    "projects": {
+      "commitsTitle": "Recent Commits",
+      "emptyCommits": "No public commits are available in the current data window.",
+      "viewCommit": "View {message} on GitHub"
+    },
+    "repositoryPulse": {
+      "title": "Repository Pulse",
+      "scope": "Last 30 days",
+      "activeRepositories": "Active repositories",
+      "commitContributions": "Commit contributions",
+      "mostActive": "Most Active",
+      "other": "Other",
+      "empty": "No public commit contributions were recorded in this period.",
+      "unavailable": "30-day repository activity is currently unavailable."
+    }
+  },
+  "footer": {
+    "aria": "Site footer"
+  },
+  "design": {
+    "title": "Aurora Glass",
+    "description": "Project-specific UI standard extracted from the dock and quick links.",
+    "buttons": {
+      "title": "UiGlassButton",
+      "hint": "variant: glass / ghost · size: sm / md / lg",
+      "overview": "Overview",
+      "docs": "Docs",
+      "contact": "Contact Me"
+    },
+    "segmented": {
+      "title": "UiSegmentedControl",
+      "hint": "Sliding indicator and aria-pressed contract built in.",
+      "ariaLabel": "Demo segmented control",
+      "preview": "Preview",
+      "code": "Code"
+    },
+    "tokens": {
+      "title": "Core Tokens",
+      "hint": "Accent, surface, and Aurora Glass fills from tokens.css."
+    }
+  }
+}

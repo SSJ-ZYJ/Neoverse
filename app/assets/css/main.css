@@ -1,0 +1,363 @@
+@import "@fontsource-variable/inter";
+@import "tailwindcss";
+@import "./tokens.css";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--background-primary);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+  scroll-padding-top: 1rem;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(70rem 42rem at 8% -4%, var(--ambient-ice), transparent 65%),
+    radial-gradient(64rem 42rem at 94% 82%, var(--ambient-mint), transparent 68%),
+    radial-gradient(50rem 26rem at 50% 118%, rgb(61 214 166 / 11%), transparent 72%), var(--background-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.55;
+}
+
+/* The document scrollbar is replaced by the immersive CustomScrollbar overlay
+   (see app/components/CustomScrollbar.vue). Keep only the root scrollbar hidden
+   so nested scroll regions can retain their own native affordance. */
+html,
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge/IE */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* WebKit / Blink */
+  width: 0;
+  height: 0;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent-primary) 24%, transparent);
+}
+a {
+  color: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+button {
+  font: inherit;
+}
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 200;
+  top: 1rem;
+  left: 1rem;
+  transform: translateY(-180%);
+  border: 1px solid var(--border-interactive);
+  border-radius: var(--radius-control);
+  padding: 0.65rem 0.9rem;
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-float);
+  transition: transform var(--motion-fast) var(--motion-ease-standard);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+.neoverse-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-view-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.app-view-stage--orbit {
+  background-color: var(--surface-elevated);
+}
+
+/* Orbit 背景固定到视口：pulse 等页面内容高于一屏时，absolute 会让背景随
+   文档滚动而移位/换裁切；fixed 使背景始终锁定在视口，滚动只移动内容层。 */
+.app-view-stage--orbit::before,
+.app-view-stage--orbit::after {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.app-view-stage--orbit::before {
+  inset: -5%;
+  background: var(--section-orbit-image) center / cover no-repeat;
+  transform: translate3d(-1.25%, 0, 0) scale(1.055);
+  animation: section-orbit-drift var(--motion-orbit-background) linear infinite;
+  will-change: transform;
+}
+
+/* 回到主页时背板淡出而非硬切：主页是裸渐变背景，硬切会产生明显跳变。 */
+.app-view-stage--orbit::before,
+.app-view-stage--orbit::after {
+  transition: opacity 300ms var(--motion-ease-standard);
+}
+
+.app-view-stage--orbit-fade::before,
+.app-view-stage--orbit-fade::after {
+  opacity: 0;
+}
+
+.app-view-stage--orbit::after {
+  background: var(--section-orbit-overlay);
+}
+
+.app-view-stage > * {
+  position: relative;
+  z-index: 1;
+}
+
+.site-main {
+  display: grid;
+  width: 100%;
+  min-height: 100svh;
+  margin-inline: auto;
+  padding: 0;
+}
+
+.view-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
+
+.dashboard-panel {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  padding: var(--page-block-start) var(--page-inline) var(--dock-safe-space);
+  background: radial-gradient(54rem 30rem at 84% 12%, rgb(56 189 248 / 5%), transparent 68%), var(--surface-elevated);
+  box-shadow: none;
+  scroll-margin-top: var(--page-block-start);
+}
+
+:is(.project-panel, .focus-panel, .pulse-panel) {
+  background: transparent;
+}
+
+@keyframes section-orbit-drift {
+  0%,
+  100% {
+    transform: translate3d(-1.25%, 0, 0) scale(1.055);
+  }
+  25% {
+    transform: translate3d(0, -0.45%, 0) scale(1.065);
+  }
+  50% {
+    transform: translate3d(1.25%, 0, 0) scale(1.055);
+  }
+  75% {
+    transform: translate3d(0, 0.45%, 0) scale(1.065);
+  }
+}
+
+/* Shared dark glass primitive: every content card uses the same surface,
+   refraction, hairline, highlight, and ambient shadow. Keep the effect here
+   instead of allowing page components to invent competing glass treatments. */
+.glass-card,
+.glass-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid var(--glass-card-border);
+  background: var(--glass-refraction-fill), var(--surface-glass);
+  box-shadow: var(--glass-surface-shadow);
+}
+
+/* Cards use a slightly lighter translucent surface than compact controls so
+   the orbit and ambient gradients can refract through them instead of reading
+   as flat navy rectangles. */
+.glass-card {
+  border-radius: var(--radius-surface);
+  background: var(--glass-card-sheen), var(--glass-refraction-fill), var(--glass-card-fill);
+  -webkit-backdrop-filter: var(--glass-card-filter);
+  backdrop-filter: var(--glass-card-filter);
+}
+
+.glass-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.glass-surface {
+  border-radius: var(--radius-control);
+}
+
+/* 紧凑两行页头：标题 + 右侧元信息一行，精简描述一行。
+   眉题序号已移除（无信息量），三页共用此骨架。 */
+.panel-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 1.2rem;
+  align-items: center;
+  margin-bottom: clamp(0.85rem, 1.8vw, 1.4rem);
+}
+.panel-title {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--text-display-md);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+}
+.panel-header__side {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  align-items: center;
+  gap: 0.6rem;
+}
+.panel-description {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  max-width: 56rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-panel-description);
+  line-height: 1.45;
+}
+
+.panel-action {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-control);
+  padding: 0.55rem 0.8rem;
+  color: var(--accent-primary);
+  font-size: var(--text-md);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+  transition:
+    color var(--motion-fast) var(--motion-ease-standard),
+    background-color var(--motion-fast) var(--motion-ease-standard);
+}
+.panel-action:hover {
+  background: var(--accent-soft);
+}
+
+.tech-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-control-inner);
+  padding: 0.32rem 0.62rem;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  background: var(--aurora-fill);
+  box-shadow: var(--shadow-edge);
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  padding: 0.32rem 0.62rem;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1.3;
+  background: var(--surface-subtle);
+}
+.status-chip {
+  border-color: color-mix(in srgb, var(--accent-secondary) 24%, var(--border-subtle));
+  color: color-mix(in srgb, var(--accent-secondary) 76%, var(--text-primary));
+  background: color-mix(in srgb, var(--accent-secondary) 9%, var(--surface-subtle));
+}
+
+.skeleton-surface {
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton-fill);
+  box-shadow: var(--skeleton-edge);
+}
+.skeleton-surface::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(100deg, transparent 24%, var(--skeleton-highlight) 50%, transparent 76%);
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.25s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 700px) {
+  .site-main {
+    padding: 0;
+  }
+  .panel-header {
+    gap: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-standard: 0ms;
+    --motion-expressive: 0ms;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+  .skeleton-surface::after {
+    animation: none;
+  }
+  .app-view-stage--orbit::before {
+    animation: none;
+    transform: scale(1.055);
+  }
+}
+
+@media print {
+  .skip-link {
+    display: none;
+  }
+  .site-main {
+    width: 100%;
+    padding: 0;
+  }
+  .view-shell > .dashboard-panel {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+}

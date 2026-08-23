@@ -1,0 +1,162 @@
+{
+  "site": {
+    "title": "Neoverse — Shenshijun 的个人空间",
+    "description": "软件工程专业学生 | 全栈 & 开源 | 正在编写 Neoverse Docs | 欢迎随时和我交流！"
+  },
+  "common": {
+    "skipToContent": "跳至主要内容",
+    "loading": "正在加载 Neoverse",
+    "github": "GitHub",
+    "docs": "文档",
+    "blog": "博客",
+    "bilibili": "哔哩哔哩",
+    "linuxdo": "LINUX DO",
+    "email": "联系我"
+  },
+  "home": {
+    "tagline": "去探索 · 去梦想 · 去发现",
+    "role": "软件工程 · 全栈 · 开源",
+    "bio": "幻想着有一天，能坐在高楼窗边，俯瞰城市灯火，喝一杯咖啡，看着 AI，写下所见所想。",
+    "currentlyBuilding": "正在开发",
+    "linksAria": "个人链接"
+  },
+  "nav": {
+    "aria": "页面区域导航",
+    "goTo": "前往{label}",
+    "home": "首页",
+    "projects": "项目",
+    "focus": "关注",
+    "pulse": "动态"
+  },
+  "language": {
+    "label": "语言",
+    "selectOption": "选择{language}",
+    "options": {
+      "english": "English",
+      "simplifiedChinese": "简体中文"
+    }
+  },
+  "projects": {
+    "title": "我的项目",
+    "description": "设计、开发并长期维护的开源站点与工具。",
+    "viewSource": "查看源码",
+    "preview": {
+      "label": "{title} 的当前内容",
+      "docsTitle": "内容导览",
+      "blogTitle": "最近发布",
+      "afterwordTitle": "后记",
+      "afterwordDescription": "何以为学——Neoverse-Docs 项目的后记",
+      "unavailable": "当前内容暂时无法获取。"
+    },
+    "docs": {
+      "category": "文档站",
+      "title": "Neoverse Docs",
+      "description": "面向计算机学习者的开源文档站：技术参考、全文搜索、图解与学习路径。",
+      "tags": ["Next.js", "React", "Fumadocs", "MDX", "Mermaid", "KaTeX"]
+    },
+    "blog": {
+      "category": "博客",
+      "title": "Shenshijun's Blog",
+      "description": "一个分享技术与生活的博客。",
+      "tags": ["Astro", "Fuwari", "Svelte", "Tailwind CSS"]
+    }
+  },
+  "focus": {
+    "title": "近期方向",
+    "description": "系统补充计算机与后端开发基础，持续建设开源项目，并探索智能体与软件工程工作流的结合。",
+    "journeyCommand": "focus --journey",
+    "fileMeta": "3 个方向 · 持续进行",
+    "stages": ["探索", "学习", "开发", "应用"],
+    "mainComment": "Learning, building, documenting.",
+    "exploring": {
+      "label": "正在探索",
+      "comment": "当前投入关注的主题",
+      "topics": ["后端工程", "系统底层", "智能体开发", "开源"]
+    },
+    "domains": {
+      "foundations": {
+        "label": "基础能力",
+        "items": ["Go", "Java", "计算机网络", "操作系统", "数据库"]
+      },
+      "open-source": {
+        "label": "开源建设",
+        "items": ["架构", "文档工程", "开源协作"]
+      },
+      "agentic-development": {
+        "label": "智能体开发",
+        "items": ["AI 辅助工程", "智能体", "开发者工具", "工作流"]
+      }
+    }
+  },
+  "pulse": {
+    "title": "开发动态",
+    "description": "近期公开开发活动数据。",
+    "source": {
+      "github": "GitHub 数据",
+      "unavailable": "暂不可用"
+    },
+    "updated": "更新于 {date}",
+    "notUpdated": "暂无更新时间",
+    "error": "GitHub 数据暂时不可用，页面不会使用模拟活动代替。",
+    "retry": "重试",
+    "landscape": {
+      "title": "贡献活动",
+      "gridAria": "GitHub 贡献活动图",
+      "dayLabel": "{date} 有 {count} 次贡献",
+      "less": "较少",
+      "more": "较多",
+      "empty": "当前没有可验证的贡献数据。",
+      "scope": {
+        "year": "过去 12 个月",
+        "recent": "近期公开事件",
+        "unavailable": "范围不可用"
+      }
+    },
+    "stats": {
+      "contributions": "贡献次数",
+      "streak": "最长连续贡献",
+      "days": "{count} 天",
+      "range": "数据范围"
+    },
+    "projects": {
+      "commitsTitle": "最近提交",
+      "emptyCommits": "当前数据窗口内没有可用的公开提交。",
+      "viewCommit": "在 GitHub 查看提交：{message}"
+    },
+    "repositoryPulse": {
+      "title": "仓库动态",
+      "scope": "最近 30 天",
+      "activeRepositories": "活跃仓库",
+      "commitContributions": "提交贡献",
+      "mostActive": "最活跃仓库",
+      "other": "其他",
+      "empty": "此期间没有记录到公开提交贡献。",
+      "unavailable": "最近 30 天的仓库活动当前不可用。"
+    }
+  },
+  "footer": {
+    "aria": "网站页脚"
+  },
+  "design": {
+    "title": "极光玻璃",
+    "description": "从 Dock 与快捷链接提炼的项目专属 UI 标准。",
+    "buttons": {
+      "title": "UiGlassButton",
+      "hint": "variant：glass / ghost · size：sm / md / lg",
+      "overview": "总览",
+      "docs": "文档",
+      "contact": "联系我"
+    },
+    "segmented": {
+      "title": "UiSegmentedControl",
+      "hint": "内置滑动指示器与 aria-pressed 无障碍契约。",
+      "ariaLabel": "分段控件演示",
+      "preview": "预览",
+      "code": "代码"
+    },
+    "tokens": {
+      "title": "核心 Token",
+      "hint": "来自 tokens.css 的强调色、表面与极光玻璃填充。"
+    }
+  }
+}
