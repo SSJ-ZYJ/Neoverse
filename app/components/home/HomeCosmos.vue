@@ -266,7 +266,7 @@ onMounted(() => {
   const image = new Image();
   backdrop = image;
   image.decoding = 'async';
-  image.src = '/images/home-city.png';
+  image.src = '/images/home-city.webp';
   image.addEventListener('load', () => draw(performance.now()), { once: true });
   observer = new ResizeObserver(([entry]) => {
     resize(entry?.contentRect);

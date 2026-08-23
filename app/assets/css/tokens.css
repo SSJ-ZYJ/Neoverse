@@ -7,7 +7,7 @@
   --surface-glass: rgb(12 24 41 / 82%);
   --surface-primary: var(--surface-elevated);
   --surface-secondary: var(--surface-glass);
-  --section-orbit-image: url("/images/home-orbit.png");
+  --section-orbit-image: url("/images/home-orbit.webp");
   --section-orbit-overlay: linear-gradient(180deg, rgb(2 8 18 / 46%), rgb(2 8 18 / 76%));
   --section-orbit-background: var(--section-orbit-overlay), var(--section-orbit-image);
   --border-subtle: rgb(219 234 254 / 13%);

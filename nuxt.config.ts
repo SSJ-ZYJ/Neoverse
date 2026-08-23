@@ -73,6 +73,11 @@ export default defineNuxtConfig({
       siteUrl: 'https://shenshijun.space',
     },
   },
+  routeRules: {
+    '/images/**': {
+      headers: { 'cache-control': 'public, max-age=604800, stale-while-revalidate=2592000' },
+    },
+  },
   app: {
     head: {
       htmlAttrs: { 'data-theme': 'dark' },
@@ -81,7 +86,11 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#050b14' },
         { name: 'color-scheme', content: 'dark' },
       ],
-      link: [{ rel: 'icon', href: 'https://assets.shenshijun.space/avatar.png', type: 'image/png' }],
+      link: [
+        { rel: 'icon', href: 'https://assets.shenshijun.space/avatar.png', type: 'image/png' },
+        { rel: 'preload', href: '/images/home-city.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
+        { rel: 'preload', href: '/images/home-orbit.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
+      ],
       style: [{ id: 'neoverse-critical-shell', textContent: criticalShellStyles }],
     },
   },

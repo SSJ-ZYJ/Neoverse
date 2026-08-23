@@ -13,7 +13,7 @@ useSeoMeta({
   ogDescription: seoDescription,
   ogUrl: SITE.origin,
   ogType: 'website',
-  ogImage: `${SITE.origin}/images/home-city.png`,
+  ogImage: `${SITE.origin}/images/home-city.webp`,
   twitterCard: 'summary_large_image',
 });
 </script>
