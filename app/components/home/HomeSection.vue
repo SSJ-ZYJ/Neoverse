@@ -108,8 +108,8 @@ onMounted(() => {
     </header>
 
     <div class="home-panel__content">
-      <div class="home-avatar">
-        <BaseSkeleton v-if="!avatarLoaded" variant="rect" width="100%" height="100%" radius="20%" />
+      <div class="home-avatar" :class="{ 'is-loading': !avatarLoaded }">
+        <span class="home-avatar__skeleton" :class="{ 'is-hidden': avatarLoaded }" aria-hidden="true" />
         <img
           ref="avatarImg"
           :src="SITE.avatar"
@@ -253,6 +253,7 @@ onMounted(() => {
 }
 .home-avatar {
   position: relative;
+  display: grid;
   overflow: hidden;
   grid-area: avatar;
   /* 显式锁定宽高：部分加载（动画 paused、头像未返回）时百分比高度子元素
@@ -270,9 +271,53 @@ onMounted(() => {
     0 0 1.5rem -0.45rem rgb(56 189 248 / 28%),
     0 0 2.5rem -1.1rem rgb(61 214 166 / 16%),
     0 20px 40px -24px #000;
+  transition:
+    border-color var(--motion-standard) var(--motion-ease-standard),
+    background var(--motion-standard) var(--motion-ease-standard),
+    box-shadow var(--motion-standard) var(--motion-ease-standard);
 }
+.home-avatar.is-loading {
+  border-color: color-mix(in srgb, var(--text-secondary) 32%, transparent);
+  background: color-mix(in srgb, var(--surface-glass) 58%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-primary) 16%, transparent),
+    var(--shadow-float);
+}
+.home-avatar__skeleton,
+.home-avatar img { grid-area: 1 / 1; }
+.home-avatar__skeleton {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 20%;
+  background:
+    radial-gradient(circle at 32% 24%, color-mix(in srgb, var(--ambient-ice) 42%, transparent), transparent 48%),
+    linear-gradient(145deg, color-mix(in srgb, var(--surface-glass) 84%, var(--background-secondary)), var(--background-secondary));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--edge-light) 34%, transparent);
+  opacity: 1;
+  transition: opacity var(--motion-standard) var(--motion-ease-standard);
+}
+.home-avatar__skeleton::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(
+    105deg,
+    transparent 34%,
+    color-mix(in srgb, var(--text-secondary) 9%, transparent) 50%,
+    transparent 66%
+  );
+  transform: translateX(-110%);
+  animation: home-avatar-skeleton-shimmer calc(var(--motion-expressive) + var(--motion-expressive)) var(--motion-ease-standard) infinite;
+}
+.home-avatar__skeleton.is-hidden { opacity: 0; }
 .home-avatar img { display: block; width: 100%; height: 100%; opacity: 0; border-radius: 20%; object-fit: cover; transition: opacity var(--motion-standard) var(--motion-ease-standard); }
 .home-avatar img.is-loaded { opacity: 1; }
+@keyframes home-avatar-skeleton-shimmer {
+  to { transform: translateX(110%); }
+}
 .home-panel__copy { grid-area: identity; min-width: 0; align-self: center; }
 .home-panel__kicker { margin: 0 0 0.6rem; color: #35dbb5; font-size: var(--text-lead); font-weight: var(--weight-bold); letter-spacing: 0.01em; }
 .home-panel h1 { margin: 0; color: #fff; font-size: var(--text-display-xl); font-weight: var(--weight-display); letter-spacing: -0.065em; line-height: 0.96; text-shadow: 0 8px 28px rgb(0 0 0 / 28%); }
@@ -329,5 +374,6 @@ onMounted(() => {
     will-change: auto;
   }
   .home-panel__status i::after { animation: none; opacity: 0; }
+  .home-avatar__skeleton::after { animation: none; }
 }
 </style>
