@@ -324,8 +324,10 @@ const emptyPulse = createEmptyPulse();
   overflow: hidden;
   border: 1px solid var(--glass-border-hairline);
   border-radius: var(--radius-surface);
-  background: color-mix(in srgb, var(--surface-glass) 78%, transparent);
+  background: var(--glass-card-background);
   box-shadow: var(--glass-surface-shadow);
+  -webkit-backdrop-filter: var(--glass-card-filter);
+  backdrop-filter: var(--glass-card-filter);
 }
 
 .dashboard-loading__project-preview {
@@ -334,7 +336,7 @@ const emptyPulse = createEmptyPulse();
   place-items: stretch;
   border-bottom: 1px solid var(--glass-border-hairline);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--glass-refraction-fill), var(--glass-card-fill);
+  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 78%, transparent);
 }
 
 .dashboard-loading__project-preview-frame {
@@ -343,7 +345,7 @@ const emptyPulse = createEmptyPulse();
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: color-mix(in srgb, var(--background-secondary) 86%, transparent);
+  background: var(--glass-card-inset-fill);
   box-shadow: inset 0 0 0 1px var(--glass-border-hairline), inset 0 1px 0 var(--glass-highlight);
 }
 
@@ -451,8 +453,10 @@ const emptyPulse = createEmptyPulse();
 .dashboard-loading__focus-interests {
   border: 1px solid var(--glass-border-hairline);
   border-radius: var(--radius-surface);
-  background: color-mix(in srgb, var(--surface-glass) 78%, transparent);
+  background: var(--glass-card-background);
   box-shadow: var(--glass-surface-shadow);
+  -webkit-backdrop-filter: var(--glass-card-filter);
+  backdrop-filter: var(--glass-card-filter);
 }
 
 .dashboard-loading__focus-journey {

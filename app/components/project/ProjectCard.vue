@@ -163,7 +163,7 @@ const formatArticleDate = (value: string | null) => {
   transition: border-color var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-standard) var(--motion-ease-standard), transform var(--motion-standard) var(--motion-ease-emphasized);
 }
 .project-card:hover,
-.project-card:has(.project-card__repo:hover) { border-color: color-mix(in srgb, var(--border-interactive) 38%, var(--glass-border-hairline)); box-shadow: var(--glass-surface-shadow-hover); transform: translateY(-2px); }
+.project-card:has(.project-card__repo:hover) { border-color: color-mix(in srgb, var(--border-interactive) 38%, var(--glass-border-hairline)); background: var(--glass-card-background-hover); box-shadow: var(--glass-surface-shadow-hover); transform: translateY(-2px); }
 .project-card__main {
   display: flex;
   min-width: 0;
@@ -180,7 +180,7 @@ const formatArticleDate = (value: string | null) => {
   place-items: center;
   border-bottom: 1px solid var(--glass-border-hairline);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--glass-refraction-fill), var(--glass-card-fill);
+  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 78%, transparent);
 }
 .project-card__preview-frame {
   position: relative;
@@ -191,7 +191,7 @@ const formatArticleDate = (value: string | null) => {
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: color-mix(in srgb, var(--background-secondary) 86%, transparent);
+  background: var(--glass-card-inset-fill);
   box-shadow: inset 0 0 0 1px var(--glass-border-hairline), inset 0 1px 0 var(--glass-highlight);
 }
 .project-card__preview-head {

@@ -184,9 +184,9 @@ button {
   }
 }
 
-/* Shared dark glass primitive: every content card uses the same surface,
-   refraction, hairline, highlight, and ambient shadow. Keep the effect here
-   instead of allowing page components to invent competing glass treatments. */
+/* Shared glass primitive: content cards scale the Home shortcut-button
+   material up to a larger surface while retaining the card hairline,
+   highlight, and ambient shadow. Keep the effect centralized here. */
 .glass-card,
 .glass-surface {
   position: relative;
@@ -197,12 +197,11 @@ button {
   box-shadow: var(--glass-surface-shadow);
 }
 
-/* Cards use a slightly lighter translucent surface than compact controls so
-   the orbit and ambient gradients can refract through them instead of reading
-   as flat navy rectangles. */
+/* The card background is a restrained large-surface variant of aurora-fill;
+   page components may add hover feedback without inventing a new material. */
 .glass-card {
   border-radius: var(--radius-surface);
-  background: var(--glass-card-sheen), var(--glass-refraction-fill), var(--glass-card-fill);
+  background: var(--glass-card-background);
   -webkit-backdrop-filter: var(--glass-card-filter);
   backdrop-filter: var(--glass-card-filter);
 }
