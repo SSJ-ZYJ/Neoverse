@@ -76,7 +76,7 @@
     "domains": {
       "foundations": {
         "label": "基础能力",
-        "items": ["Go", "Java", "计算机网络", "操作系统", "数据库"]
+        "items": ["Go", "Rust", "计算机网络", "操作系统", "数据库"]
       },
       "open-source": {
         "label": "开源建设",

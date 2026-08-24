@@ -1,4 +1,6 @@
 const dashboardSource = await Bun.file('app/components/DashboardSkeleton.vue').text();
+const appSource = await Bun.file('app/app.vue').text();
+const backdropSource = await Bun.file('app/components/CityBackdrop.vue').text();
 const mainStyles = await Bun.file('app/assets/css/main.css').text();
 const failures: string[] = [];
 
@@ -19,9 +21,12 @@ if (orbitRule.includes('--section-orbit-background')) {
   failures.push('Projects boot skeleton still duplicates the live orbit image and can use a different crop or scale.');
 }
 if (
-  !mainStyles.includes('.app-view-stage--orbit::before') ||
-  !mainStyles.includes('scale(1.055)') ||
-  !mainStyles.includes('animation: section-orbit-drift')
+  !appSource.includes('<CityBackdrop') ||
+  !appSource.includes(':active="stageOrbitActive"') ||
+  !appSource.includes('class="app-view-content"') ||
+  !backdropSource.includes('city-backdrop--active') ||
+  !mainStyles.includes('.city-backdrop__camera') ||
+  !mainStyles.includes('background: var(--section-orbit-image) center / cover no-repeat')
 ) {
   failures.push('The shared live orbit backdrop contract is missing.');
 }

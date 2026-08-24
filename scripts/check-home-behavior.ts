@@ -1,12 +1,32 @@
 import { getHomeLinkEntryDelay, getHomeStatusEntryDelay, HOME_LINK_MOTION, HOME_LINKS } from '../shared/constants';
 
 const homeSource = await Bun.file('app/components/home/HomeSection.vue').text();
+const cosmosSource = await Bun.file('app/components/home/HomeCosmos.vue').text();
+const cityClockSource = await Bun.file('app/composables/useCityMotionClock.ts').text();
 const skeletonSource = await Bun.file('app/components/DashboardSkeleton.vue').text();
 const constantsSource = await Bun.file('shared/constants.ts').text();
 const tokenSource = await Bun.file('app/assets/css/tokens.css').text();
 const nuxtConfigSource = await Bun.file('nuxt.config.ts').text();
 
 const failures: string[] = [];
+
+if (!cityClockSource.includes('export const CITY_MOTION_DURATION = 24_000;')) {
+  failures.push('Home and child-page city motion do not share one canonical 24-second timeline.');
+}
+if (!cityClockSource.includes('const CITY_MOTION_SEGMENTS = 64;')) {
+  failures.push('The shared city trajectory is not sampled finely enough for a seamless compositor handoff.');
+}
+if (!cosmosSource.includes('getCityMotionElapsed(time)')) {
+  failures.push('Home city motion is not reading the shared route-spanning city clock.');
+}
+if (!cosmosSource.includes('getCityMotionFrame(loopTime)')) {
+  failures.push('Home does not render from the same canonical motion frames as the child-page backdrop.');
+}
+if (cosmosSource.includes('animationStartedAt')) {
+  failures.push(
+    'Home city motion still resets to a mount-local phase instead of continuing the child-page trajectory.',
+  );
+}
 
 if (!constantsSource.includes('export const HOME_LINKS')) {
   failures.push('Home links are not defined as shared canonical data.');

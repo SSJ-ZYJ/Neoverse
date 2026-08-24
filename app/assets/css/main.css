@@ -96,46 +96,137 @@ button {
 }
 
 .app-view-stage--orbit {
+  /* Camera-only values: the outer 1.05x track supplies the remaining scale
+     and translation shared with HomeCosmos. The camera scale also needs enough
+     overscan to cover the viewport after the positive vertical shift.
+     Fallback for no-JS; the live value is computed in CityBackdrop via
+     getCityWindowTransform() and set as an inline var on the backdrop so the
+     push-in final frame lands on the persistent Home Canvas. */
+  --city-window-scale: 1.311;
+  --city-window-shift-x: 1.796%;
+  --city-window-shift-y: 20.45%;
   background-color: var(--surface-elevated);
 }
 
-/* Orbit 背景固定到视口：pulse 等页面内容高于一屏时，absolute 会让背景随
-   文档滚动而移位/换裁切；fixed 使背景始终锁定在视口，滚动只移动内容层。 */
-.app-view-stage--orbit::before,
-.app-view-stage--orbit::after {
+/* Keep the real Home Canvas mounted outside NuxtPage's opacity transition. It
+   is the single handoff surface for both the normal Home view and the return
+   from a child page, so the last child frame never swaps to a second image. */
+.app-view-background {
   position: fixed;
   z-index: 0;
   inset: 0;
-  content: "";
+  overflow: hidden;
   pointer-events: none;
 }
 
-.app-view-stage--orbit::before {
-  inset: -5%;
-  background: var(--section-orbit-image) center / cover no-repeat;
-  transform: translate3d(-1.25%, 0, 0) scale(1.055);
-  animation: section-orbit-drift var(--motion-orbit-background) linear infinite;
+/* Keep zoom and drift on separate nested layers. The track never restarts
+   when the route direction changes, so a return to Home continues from the
+   exact child-page frame instead of snapping to a fixed keyframe first. */
+.city-backdrop {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.city-backdrop--active {
+  visibility: visible;
+  opacity: 1;
+}
+
+.city-backdrop__track,
+.city-backdrop__camera,
+.city-backdrop__overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.city-backdrop__track {
+  transform: scale(var(--city-motion-initial-scale));
+  transform-origin: center;
   will-change: transform;
 }
 
-/* 回到主页时背板淡出而非硬切：主页是裸渐变背景，硬切会产生明显跳变。 */
-.app-view-stage--orbit::before,
-.app-view-stage--orbit::after {
-  transition: opacity 300ms var(--motion-ease-standard);
+.city-backdrop__camera {
+  background: var(--section-orbit-image) center / cover no-repeat;
+  will-change: transform;
 }
 
-.app-view-stage--orbit-fade::before,
-.app-view-stage--orbit-fade::after {
-  opacity: 0;
+/* `other-city` contains the Home skyline inside its central window. Start the
+   shared stage zoomed into that window, then pull the camera back to reveal the
+   room. Only the fixed backdrop moves; route content keeps its own opacity
+   choreography and never shrinks into the frame. */
+.app-view-stage--orbit.app-view-stage--city-from-home .city-backdrop__camera {
+  animation: section-city-pull-back var(--motion-city-handoff) var(--motion-ease-emphasized) both;
 }
 
-.app-view-stage--orbit::after {
+.app-view-stage--orbit.app-view-stage--city-to-home .city-backdrop__camera {
+  /* Keep the spatial push-in while the persistent Home Canvas is revealed
+     underneath the fading child camera. */
+  animation:
+    section-city-push-in var(--motion-city-return) var(--motion-ease-emphasized) both,
+    section-city-room-out var(--motion-city-home-match-duration) var(--motion-ease-emphasized)
+    var(--motion-city-home-match-delay) both;
+}
+
+.app-view-stage--city-to-home .city-backdrop__overlay {
+  animation: section-city-brighten var(--motion-city-return) linear both;
+}
+
+.city-backdrop__overlay {
   background: var(--section-orbit-overlay);
+  will-change: opacity;
 }
 
-.app-view-stage > * {
+.app-view-stage > :where(:not(.city-backdrop, .app-view-background)) {
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+/* Returning Home needs its own reveal: replaying the first-visit keyframes
+   would translate the content upward, while disabling animation entirely makes
+   everything pop in at once. Fade and deblur the settled elements instead. */
+.app-view-stage.app-view-stage--home-restored {
+  --home-return-stagger: 0ms;
+}
+
+.app-view-stage.app-view-stage--home-restored
+  :is(.home-panel__header, .home-avatar, .home-panel__copy, .home-socials a, .home-panel__status) {
+  animation: home-route-content-enter var(--motion-home-return-content) linear
+    calc(var(--motion-city-return-content-delay) + var(--home-return-stagger, 0ms)) both;
+  transform: none;
+  will-change: auto;
+}
+
+.app-view-stage.app-view-stage--home-restored .home-avatar {
+  --home-return-stagger: 60ms;
+}
+
+.app-view-stage.app-view-stage--home-restored .home-panel__copy {
+  --home-return-stagger: 110ms;
+}
+
+.app-view-stage.app-view-stage--home-restored .home-socials a {
+  --home-return-stagger: 170ms;
+}
+
+.app-view-stage.app-view-stage--home-restored .home-panel__status {
+  --home-return-stagger: 240ms;
+}
+
+@keyframes home-route-content-enter {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 .site-main {
@@ -168,19 +259,39 @@ button {
   background: transparent;
 }
 
-@keyframes section-orbit-drift {
-  0%,
-  100% {
-    transform: translate3d(-1.25%, 0, 0) scale(1.055);
+@keyframes section-city-pull-back {
+  from {
+    transform: translate3d(var(--city-window-shift-x), var(--city-window-shift-y), 0) scale(var(--city-window-scale));
   }
-  25% {
-    transform: translate3d(0, -0.45%, 0) scale(1.065);
+  to {
+    transform: translate3d(0, 0, 0) scale(1);
   }
-  50% {
-    transform: translate3d(1.25%, 0, 0) scale(1.055);
+}
+
+@keyframes section-city-push-in {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
   }
-  75% {
-    transform: translate3d(0, 0.45%, 0) scale(1.065);
+  to {
+    transform: translate3d(var(--city-window-shift-x), var(--city-window-shift-y), 0) scale(var(--city-window-scale));
+  }
+}
+
+@keyframes section-city-room-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes section-city-brighten {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
   }
 }
 
@@ -329,6 +440,19 @@ button {
   }
 }
 
+/* In tall viewports `cover` already removes the room's left and right edges.
+   A stronger zoom keeps the window skyline filling the screen at the handoff.
+   Live tall value is overwritten by CityBackdrop's runtime calculation; these
+   remain as a no-JS fallback. */
+@media (max-aspect-ratio: 4 / 3) {
+  .app-view-stage--orbit {
+    /* Tall cover crops need their own window-to-Home calibration. */
+    --city-window-scale: 1.474;
+    --city-window-shift-x: 5.827%;
+    --city-window-shift-y: 17.24%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-fast: 0ms;
@@ -341,9 +465,21 @@ button {
   .skeleton-surface::after {
     animation: none;
   }
-  .app-view-stage--orbit::before {
+  .city-backdrop__track {
     animation: none;
-    transform: scale(1.055);
+    transform: scale(var(--city-motion-initial-scale));
+  }
+  .app-view-stage--city-from-home .city-backdrop__camera,
+  .app-view-stage--city-to-home .city-backdrop__camera,
+  .app-view-stage--city-to-home .city-backdrop__overlay {
+    animation: none;
+  }
+  .app-view-stage.app-view-stage--home-restored
+    :is(.home-panel__header, .home-avatar, .home-panel__copy, .home-socials a, .home-panel__status) {
+    opacity: 1;
+    animation: none;
+    filter: none;
+    transform: none;
   }
 }
 

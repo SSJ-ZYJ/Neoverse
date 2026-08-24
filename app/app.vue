@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { NAV_ITEMS } from '#shared/constants';
+import { resetCityMotionClock } from '~/composables/useCityMotionClock';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -16,6 +17,7 @@ const pageTransition = computed(() => ({
   onBeforeLeave: (el: Element) => {
     (el as HTMLElement).style.setProperty('--route-leave-shift', `${-leaveScrollOffset}px`);
   },
+  onAfterEnter: settleStageAfterEnter,
 }));
 const skeletonView = computed(() => {
   if (route.path === '/projects') return 'projects';
@@ -24,36 +26,75 @@ const skeletonView = computed(() => {
   if (route.path === '/design') return 'design';
   return 'home';
 });
+const isSectionPath = (path: string) => NAV_ITEMS.some((item) => item.path === path && item.path !== '/');
 
 let scrollLockTimer: number | undefined;
 // Captured before the scroll resets to 0 so the outgoing page can stay glued
 // to what the visitor was looking at while it slides away.
 let leaveScrollOffset = 0;
 
-const lockScrollForTransition = () => {
+const lockScrollForTransition = (timeout = 620) => {
   document.documentElement.classList.add('route-transition-scroll-lock');
   window.clearTimeout(scrollLockTimer);
-  // Renewed on every navigation (no nav lock, see below); also cleared by
-  // page:transition:finish for interrupted transitions.
+  // Renewed on every navigation (no nav lock, see below); also cleared once
+  // the entering page has finished its transition.
   scrollLockTimer = window.setTimeout(() => {
     document.documentElement.classList.remove('route-transition-scroll-lock');
-  }, 620);
+  }, timeout);
 };
 
-// Keep the orbit backdrop painted until the leave transition ends. Dropping it
+// Keep the child-page backdrop painted until the leave transition ends. Dropping it
 // at route-change time pulls the rug out from under the transparent
 // projects/focus/pulse panels mid-slide and exposes a bare-background seam at
 // the left edge once the leave transform shifts the page right.
-const stageOrbitActive = ref(skeletonView.value !== 'home');
+const stageOrbitActive = ref(isSectionPath(route.path));
 // `useRoute()` can still expose the old route while Nuxt is finishing the page
 // transition. Keep the intended destination separately so a fast home-to-page
 // transition cannot be mistaken for a transition that is returning home.
-const orbitTargetPath = ref(route.path);
-// Arriving home, the orbit backdrop fades out instead of vanishing instantly:
-// home sits on a different (bare-gradient) background, and a hard cut there is
-// exactly the seam these home-specific transitions exist to avoid.
-const stageOrbitFading = ref(false);
-let orbitFadeTimer: number | undefined;
+const stageTargetPath = ref(route.path);
+const cityTransitionDirection = ref<'from-home' | 'to-home' | null>(null);
+const homeContentSettled = ref(false);
+
+function completeCityTransition(direction: 'from-home' | 'to-home') {
+  if (cityTransitionDirection.value !== direction) return;
+
+  if (direction === 'to-home') {
+    if (stageTargetPath.value !== '/') return;
+    // The Home handoff owns the last background frame. Keep the shared stage
+    // mounted until CityBackdrop's camera fade has actually ended.
+    stageOrbitActive.value = false;
+    isRouteTransitioning.value = false;
+    document.documentElement.classList.remove('route-transition-scroll-lock');
+    window.clearTimeout(scrollLockTimer);
+  } else if (!isSectionPath(stageTargetPath.value)) {
+    return;
+  }
+
+  cityTransitionDirection.value = null;
+}
+
+function settleStageAfterEnter() {
+  const isReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isNormalHomeReturn =
+    stageTargetPath.value === '/' && cityTransitionDirection.value === 'to-home' && !isReducedMotion;
+  if (!isNormalHomeReturn) isRouteTransitioning.value = false;
+  document.documentElement.classList.remove('route-transition-scroll-lock');
+  window.clearTimeout(scrollLockTimer);
+
+  if (stageTargetPath.value === '/') {
+    // Vue can finish the page enter before the shared city animation reaches
+    // its final frame. Reduced motion has no animation event; normal motion
+    // is finalized by CityBackdrop when the camera fade ends.
+    if (!cityTransitionDirection.value || isReducedMotion) {
+      stageOrbitActive.value = false;
+      cityTransitionDirection.value = null;
+    }
+  } else if (!isSectionPath(stageTargetPath.value)) {
+    stageOrbitActive.value = false;
+    cityTransitionDirection.value = null;
+  }
+  if (stageTargetPath.value !== '/') homeContentSettled.value = false;
+}
 
 // 过渡相关状态必须在导航起点同步就绪：实测 route.path 的 pre-flush watcher
 // 会晚于过渡开始才触发，导致本次过渡用到上一次的过渡名（方向错乱）。因此
@@ -62,45 +103,32 @@ if (import.meta.client) {
   useRouter().beforeEach((to, from) => {
     if (!from || to.path === from.path) return;
     isRouteTransitioning.value = true;
-    // 主页背景不同：涉及主页的过渡不走刚性横滑，改用手机桌面"打开/收起
-    // 应用"的缩放淡变语义；只有 dock 内的非主页之间才整屏平移。
+    // 主页与三个正式子页共享同一段城市构图：涉及主页时由背景完成
+    // 推近/拉远，子页内容只做轻微位移；只有 dock 内的非主页之间才整屏平移。
     if (to.path === '/') {
       pageTransitionName.value = 'route-to-home';
+      cityTransitionDirection.value = isSectionPath(from.path) ? 'to-home' : null;
+      homeContentSettled.value = isSectionPath(from.path);
+      if (isSectionPath(from.path)) resetCityMotionClock();
     } else if (from.path === '/') {
       pageTransitionName.value = 'route-from-home';
+      cityTransitionDirection.value = isSectionPath(to.path) ? 'from-home' : null;
     } else {
       pageTransitionName.value = viewIndex(to.path) >= viewIndex(from.path) ? 'route-forward' : 'route-back';
     }
-    orbitTargetPath.value = to.path;
-    window.clearTimeout(orbitFadeTimer);
-    if (to.path !== '/') {
+    stageTargetPath.value = to.path;
+    if (isSectionPath(to.path)) {
       stageOrbitActive.value = true;
-      stageOrbitFading.value = false;
+    } else if (to.path !== '/') {
+      cityTransitionDirection.value = null;
     }
     // Captured before the scroll resets to 0 so the outgoing page can stay
     // glued to what the visitor was looking at while it slides away.
     leaveScrollOffset = window.scrollY;
-    lockScrollForTransition();
+    lockScrollForTransition(to.path === '/' || from.path === '/' ? 920 : 620);
     window.scrollTo({ top: 0, behavior: 'instant' });
   });
 }
-
-useNuxtApp().hooks.hook('page:transition:finish', () => {
-  isRouteTransitioning.value = false;
-  document.documentElement.classList.remove('route-transition-scroll-lock');
-  window.clearTimeout(scrollLockTimer);
-  if (orbitTargetPath.value === '/') {
-    if (stageOrbitActive.value && !stageOrbitFading.value) {
-      stageOrbitFading.value = true;
-      orbitFadeTimer = window.setTimeout(() => {
-        if (orbitTargetPath.value !== '/') return;
-        stageOrbitFading.value = false;
-        stageOrbitActive.value = false;
-      }, 320);
-    }
-  }
-  // 非主页路径不做任何事：目标路径由 beforeEach 捕获，此处绝不能关闭背板。
-});
 
 useHead({
   htmlAttrs: { lang: computed(() => (locale.value === 'zh-CN' ? 'zh-CN' : 'en')) },
@@ -126,13 +154,27 @@ onMounted(async () => {
     class="app-view-stage"
     :class="{
       'app-view-stage--orbit': stageOrbitActive,
-      'app-view-stage--orbit-fade': stageOrbitFading,
+      'app-view-stage--city-from-home': cityTransitionDirection === 'from-home',
+      'app-view-stage--city-to-home': cityTransitionDirection === 'to-home',
+      'app-view-stage--home-restored': homeContentSettled,
     }"
-    :aria-hidden="isBooting"
-    :inert="isBooting"
-    :style="{ '--home-entry-animation-play-state': isBooting ? 'paused' : 'running' }"
   >
-    <NuxtPage :transition="pageTransition" />
+    <div class="app-view-background" aria-hidden="true">
+      <HomeCosmos />
+    </div>
+    <CityBackdrop
+      :active="stageOrbitActive"
+      :direction="cityTransitionDirection"
+      @transition-end="completeCityTransition"
+    />
+    <div
+      class="app-view-content"
+      :aria-hidden="isBooting"
+      :inert="isBooting"
+      :style="{ '--home-entry-animation-play-state': isBooting ? 'paused' : 'running' }"
+    >
+      <NuxtPage :transition="pageTransition" />
+    </div>
   </div>
   <div class="bottom-chrome" :aria-hidden="isBooting" :inert="isBooting">
     <NavigationBottomDock />
@@ -182,26 +224,51 @@ onMounted(async () => {
 .route-forward-leave-to { transform: translate3d(-100%, var(--route-leave-shift, 0px), 0); }
 .route-back-enter-from { transform: translate3d(-100%, 0, 0); }
 .route-back-leave-to { transform: translate3d(100%, var(--route-leave-shift, 0px), 0); }
-/* 涉及主页的过渡（背景不同，不做刚性平移）：手机桌面"打开/收起应用"语义。
-   回主页 = 收起应用：旧页在上层缩小淡出，主页在下层浮现；
-   离开主页 = 打开应用：新页在上层放大淡入，主页在下层微微放大退场。 */
-.route-to-home-enter-active,
+/* Home and the child pages share one skyline. The fixed city backdrop performs
+   the spatial pull-back/push-in while child content enters without placing its
+   glass cards inside an opacity-composited ancestor. */
+.route-to-home-enter-active {
+  transition: opacity var(--motion-city-content) var(--motion-ease-standard)
+    var(--motion-city-return-content-delay);
+}
+.route-from-home-enter-active {
+  animation: route-child-content-reveal var(--motion-city-handoff) linear both;
+}
+.route-from-home-enter-active .glass-card {
+  animation: route-child-card-enter var(--motion-card-entry-duration) var(--motion-ease-emphasized)
+    var(--motion-city-content-delay) both;
+}
 .route-to-home-leave-active,
-.route-from-home-enter-active,
 .route-from-home-leave-active {
-  transition:
-    opacity 280ms var(--motion-ease-standard),
-    transform 340ms var(--motion-ease-emphasized);
-  will-change: opacity, transform;
+  transition: opacity var(--motion-fast) var(--motion-ease-standard);
+  will-change: opacity;
 }
 .route-to-home-enter-active { position: relative; z-index: 1; }
-.route-to-home-leave-active { position: absolute; z-index: 2; top: 0; left: 0; right: 0; pointer-events: none; }
-.route-to-home-enter-from { opacity: 0; transform: scale(0.99); }
-.route-to-home-leave-to { opacity: 0; transform: translate3d(0, var(--route-leave-shift, 0px), 0) scale(0.94); }
+.route-to-home-leave-active { position: absolute; z-index: 2; top: var(--route-leave-shift, 0px); left: 0; right: 0; pointer-events: none; }
+.route-to-home-enter-from,
+.route-to-home-leave-to,
+.route-from-home-leave-to { opacity: 0; }
 .route-from-home-enter-active { position: relative; z-index: 2; }
-.route-from-home-leave-active { position: absolute; z-index: 1; top: 0; left: 0; right: 0; pointer-events: none; }
-.route-from-home-enter-from { opacity: 0; transform: scale(0.96); }
-.route-from-home-leave-to { opacity: 0; transform: translate3d(0, var(--route-leave-shift, 0px), 0) scale(1.04); }
+.route-from-home-leave-active { position: absolute; z-index: 1; top: var(--route-leave-shift, 0px); left: 0; right: 0; pointer-events: none; }
+.route-from-home-enter-from { transform: none; }
+@keyframes route-child-content-reveal {
+  0%,
+  46% { visibility: hidden; }
+  47%,
+  100% { visibility: visible; }
+}
+@keyframes route-child-card-enter {
+  from {
+    opacity: 0;
+    filter: blur(var(--motion-card-entry-blur));
+    transform: translate3d(0, var(--motion-card-entry-distance), 0) scale(var(--motion-card-entry-scale));
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
 html.route-transition-scroll-lock { overflow: hidden !important; }
 @media (prefers-reduced-motion: reduce) { .boot-fade-leave-active { transition: none; } }
 @media (prefers-reduced-motion: reduce) {
@@ -221,18 +288,24 @@ html.route-transition-scroll-lock { overflow: hidden !important; }
   }
   .route-to-home-enter-active,
   .route-to-home-leave-active,
-  .route-from-home-enter-active,
   .route-from-home-leave-active {
-    transition: opacity 240ms var(--motion-ease-standard);
+    transition: opacity var(--motion-reduced-feedback) var(--motion-ease-standard);
     will-change: opacity;
+  }
+  .route-from-home-enter-active {
+    animation: none;
+    transition: none;
+    will-change: auto;
+  }
+  .route-from-home-enter-active .glass-card {
+    animation: none;
   }
   .route-to-home-enter-from,
   .route-to-home-leave-to,
-  .route-from-home-enter-from,
   .route-from-home-leave-to {
-    transform: translate3d(0, var(--route-leave-shift, 0px), 0);
     opacity: 0;
   }
+  .route-from-home-enter-from { transform: none; }
 }
 @media print { .bottom-chrome { display: none; } }
 </style>

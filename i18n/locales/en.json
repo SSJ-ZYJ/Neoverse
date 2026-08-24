@@ -76,7 +76,7 @@
     "domains": {
       "foundations": {
         "label": "Foundational Skills",
-        "items": ["Go", "Java", "Computer Networks", "Operating Systems", "Databases"]
+        "items": ["Go", "Rust", "Computer Networks", "Operating Systems", "Databases"]
       },
       "open-source": {
         "label": "Open-source Development",

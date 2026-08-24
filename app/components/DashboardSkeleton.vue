@@ -195,9 +195,7 @@ const emptyPulse = createEmptyPulse();
   scrollbar-width: none;
 }
 
-.dashboard-loading--orbit {
-  background: transparent;
-}
+.dashboard-loading--orbit { background: transparent; }
 
 .dashboard-loading::-webkit-scrollbar { display: none; width: 0; height: 0; }
 

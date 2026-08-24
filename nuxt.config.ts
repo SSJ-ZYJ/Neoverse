@@ -23,12 +23,62 @@ body {
 #__nuxt [inert] {
   display: none;
 }
+.app-view-background {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.app-view-background .home-cosmos {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.city-backdrop {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+.city-backdrop--active {
+  visibility: visible;
+  opacity: 1;
+}
+.city-backdrop__track,
+.city-backdrop__camera,
+.city-backdrop__overlay {
+  position: absolute;
+  inset: 0;
+}
+.city-backdrop__track {
+  transform: scale(var(--city-motion-initial-scale, 1.05));
+  transform-origin: center;
+}
+.city-backdrop__camera {
+  background: var(--section-orbit-image, url('/images/other-city.webp')) center / cover no-repeat;
+}
+.city-backdrop__overlay {
+  background: var(
+    --section-orbit-overlay,
+    linear-gradient(180deg, rgb(2 8 18 / 46%), rgb(2 8 18 / 76%))
+  );
+}
 .dashboard-loading {
   position: fixed;
   z-index: 120;
   inset: 0;
   overflow: hidden;
   background: #050b14;
+}
+.dashboard-loading--orbit {
+  background: transparent;
 }
 .dashboard-loading__label {
   position: absolute;
@@ -89,7 +139,7 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', href: 'https://assets.shenshijun.space/avatar.png', type: 'image/png' },
         { rel: 'preload', href: '/images/home-city.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
-        { rel: 'preload', href: '/images/home-orbit.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
+        { rel: 'preload', href: '/images/other-city.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
       ],
       style: [{ id: 'neoverse-critical-shell', textContent: criticalShellStyles }],
     },

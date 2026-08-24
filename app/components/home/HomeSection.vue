@@ -43,7 +43,6 @@ onMounted(() => {
     :aria-labelledby="skeleton ? undefined : 'home-title'"
     :aria-hidden="skeleton || undefined"
   >
-    <HomeCosmos v-if="!skeleton" />
     <div class="home-panel__shade" aria-hidden="true" />
 
     <header class="home-panel__header">
@@ -196,10 +195,20 @@ onMounted(() => {
 }
 
 .home-panel--skeleton {
+  background: #020812;
+}
+.home-panel:not(.home-panel--skeleton) {
+  background: transparent;
+}
+.home-panel--skeleton::before {
+  position: absolute;
+  z-index: 0;
+  inset: -2.5%;
+  content: '';
   background:
     linear-gradient(90deg, rgb(2 8 18 / 82%), rgb(2 8 18 / 24%)),
-    url('/images/home-city.webp') center / cover no-repeat,
-    #020812;
+    url('/images/home-city.webp') center / cover no-repeat;
+  pointer-events: none;
 }
 
 .home-panel__shade { position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg, rgb(2 8 18 / 48%), transparent 66%), linear-gradient(0deg, rgb(2 8 18 / 32%), transparent 48%); pointer-events: none; }

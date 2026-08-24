@@ -1,7 +1,11 @@
 <script setup lang="ts">
-const canvas = ref<HTMLCanvasElement | null>(null);
+import type { CityMotionFrame } from '~/composables/useCityMotionClock';
+import { CITY_MOTION_DURATION, getCityMotionElapsed, getCityMotionFrame } from '~/composables/useCityMotionClock';
 
-const LOOP_DURATION = 24_000;
+const canvas = ref<HTMLCanvasElement | null>(null);
+const route = useRoute();
+const { isRouteTransitioning } = useRouteTransitionState();
+
 const FRAME_INTERVAL = 1000 / 30;
 const GLASS_BLUR_RADIUS = 10;
 const TAU = Math.PI * 2;
@@ -58,23 +62,17 @@ const resize = (layoutSize?: Pick<DOMRectReadOnly, 'width' | 'height'>) => {
   glassRegionContext ??= glassRegion.getContext('2d');
 };
 
-const drawBackdrop = (context: CanvasRenderingContext2D, phase: number) => {
+const drawBackdrop = (context: CanvasRenderingContext2D, motion: CityMotionFrame) => {
   context.fillStyle = '#020812';
   context.fillRect(0, 0, width, height);
   if (!backdrop?.complete || !backdrop.naturalWidth) return;
 
   const baseScale = Math.max(width / backdrop.naturalWidth, height / backdrop.naturalHeight);
-  // Ease the camera forward and back over one complete flight cycle. Using a
-  // cosine envelope makes the first and last frames share both position and
-  // velocity, so the loop has no visible jump at its seam.
-  const flightProgress = (1 - Math.cos(phase * TAU)) / 2;
-  const scale = baseScale * (1.05 + flightProgress * 0.07);
+  const scale = baseScale * motion.scale;
   const imageWidth = backdrop.naturalWidth * scale;
   const imageHeight = backdrop.naturalHeight * scale;
-  const droneCorrectionX = Math.sin(phase * TAU) * width * 0.006;
-  const droneTravelY = flightProgress * height * 0.035;
-  const driftX = droneCorrectionX + pointerX * 10;
-  const driftY = droneTravelY + pointerY * 7;
+  const driftX = width * (motion.x / 100) + pointerX * 10;
+  const driftY = height * (motion.y / 100) + pointerY * 7;
   context.drawImage(
     backdrop,
     (width - imageWidth) / 2 + driftX,
@@ -176,14 +174,25 @@ const draw = (time = 0) => {
   if (!context) return;
 
   const isReduced = reducedMotion?.matches ?? false;
-  const loopTime = isReduced ? 0 : time % LOOP_DURATION;
-  const phase = loopTime / LOOP_DURATION;
+  const isReturningHome = route.path === '/' && isRouteTransitioning.value;
+  if (isReturningHome) {
+    // The persistent Canvas is the return handoff surface. Ignore pointer
+    // parallax from the child page so its first visible frame is the exact
+    // centered Home camera used by the route transition.
+    pointerX = 0;
+    pointerY = 0;
+    pointerTargetX = 0;
+    pointerTargetY = 0;
+  }
+  const loopTime = isReduced || isReturningHome ? 0 : getCityMotionElapsed(time) % CITY_MOTION_DURATION;
+  const phase = loopTime / CITY_MOTION_DURATION;
+  const cityMotion = getCityMotionFrame(loopTime);
   pointerX += (pointerTargetX - pointerX) * 0.045;
   pointerY += (pointerTargetY - pointerY) * 0.045;
 
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   context.clearRect(0, 0, width, height);
-  drawBackdrop(context, phase);
+  drawBackdrop(context, cityMotion);
 
   const readability = context.createLinearGradient(0, 0, width, 0);
   readability.addColorStop(0, 'rgba(2, 8, 18, .82)');
@@ -262,12 +271,25 @@ const resetPointer = () => {
 };
 
 onMounted(() => {
+  lastFrame = 0;
+  pointerX = 0;
+  pointerY = 0;
+  pointerTargetX = 0;
+  pointerTargetY = 0;
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const image = new Image();
   backdrop = image;
   image.decoding = 'async';
+  image.addEventListener(
+    'load',
+    () => {
+      const now = performance.now();
+      lastFrame = now;
+      draw(now);
+    },
+    { once: true },
+  );
   image.src = '/images/home-city.webp';
-  image.addEventListener('load', () => draw(performance.now()), { once: true });
   observer = new ResizeObserver(([entry]) => {
     resize(entry?.contentRect);
     draw(performance.now());

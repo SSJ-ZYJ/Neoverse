@@ -22,7 +22,7 @@ const repositoryDistribution = computed(() => {
   const total = props.repositoryPulse.totalContributions ?? 0;
   if (props.repositoryPulse.scope === 'unavailable' || total === 0) return [];
 
-  const topRepositories = props.repositoryPulse.repositories.slice(0, 3).map((repository) => ({
+  const topRepositories = props.repositoryPulse.repositories.slice(0, 2).map((repository) => ({
     key: repository.repositoryUrl,
     label: repository.repository,
     url: repository.repositoryUrl,
@@ -56,7 +56,7 @@ const formatPercentage = (ratio: number) =>
     <section class="activity-column glass-card" aria-labelledby="recent-commits-title">
       <h3 id="recent-commits-title">{{ t('pulse.projects.commitsTitle') }}</h3>
       <div v-if="loading" class="activity-list" aria-hidden="true">
-        <div v-for="row in 4" :key="row" class="activity-row activity-row--skeleton">
+        <div v-for="row in 3" :key="row" class="activity-row activity-row--skeleton">
           <span class="skeleton-surface activity-row__dot" />
           <span class="activity-row__copy">
             <BaseSkeleton variant="text" width="85%" />
@@ -65,7 +65,7 @@ const formatPercentage = (ratio: number) =>
         </div>
       </div>
       <ul v-else-if="commits.length" class="activity-list">
-        <li v-for="commit in commits.slice(0, 4)" :key="commit.id">
+        <li v-for="commit in commits.slice(0, 3)" :key="commit.id">
           <a
             class="activity-row"
             :href="commit.url"
@@ -109,10 +109,10 @@ const formatPercentage = (ratio: number) =>
         <div class="repository-distribution" aria-hidden="true">
           <h4>{{ t('pulse.repositoryPulse.mostActive') }}</h4>
           <ul>
-            <li v-for="(row, index) in 4" :key="index">
-              <BaseSkeleton variant="text" :width="`${[58, 34, 44, 26][index]}%`" />
+            <li v-for="(row, index) in 3" :key="index">
+              <BaseSkeleton variant="text" :width="`${[58, 34, 44][index]}%`" />
               <span class="repository-distribution__track repository-distribution__track--skeleton">
-                <i :style="{ width: `${String([88, 62, 74, 42][index])}%` }" />
+                <i :style="{ width: `${String([88, 62, 74][index])}%` }" />
               </span>
             </li>
           </ul>

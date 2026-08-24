@@ -4,12 +4,47 @@ import type { GithubPulse } from '#shared/types/github';
 const props = defineProps<{ contributions: GithubPulse['contributions']; loading: boolean }>();
 const { t, locale } = useI18n();
 type ContributionDay = GithubPulse['contributions']['days'][number];
+type ChartPointerAxis = 'pending' | 'horizontal' | 'vertical';
+type ChartPointerSession = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  lastX: number;
+  lastTimestamp: number;
+  startScrollLeft: number;
+  velocity: number;
+  axis: ChartPointerAxis;
+  dragged: boolean;
+};
+
+const CHART_DRAG_THRESHOLD = 6;
+const CHART_MIN_INERTIA_VELOCITY = 0.02;
+const CHART_EDGE_OFFSET_EPSILON = 0.2;
+const CHART_SPRING_VELOCITY_EPSILON = 0.02;
+const CHART_MOTION_DEFAULTS = {
+  edgeResistance: 0.28,
+  edgeMax: 52,
+  inertiaFriction: 0.92,
+  springStiffness: 0.00042,
+  springDamping: 0.6,
+};
 
 const cardElement = ref<HTMLElement | null>(null);
 const chartScroller = ref<HTMLElement | null>(null);
 const activeDay = ref<ContributionDay | null>(null);
 const tooltipPlacement = ref<'center' | 'start' | 'end'>('center');
 const tooltipStyle = ref({ left: '0px', top: '0px' });
+const chartEdgeOffset = ref(0);
+const chartScrollerStyle = computed(() => ({
+  '--contribution-edge-offset': `${String(chartEdgeOffset.value)}px`,
+}));
+let chartPointerSession: ChartPointerSession | null = null;
+let chartMotionFrame: number | undefined;
+let latestAlignmentFrame: number | undefined;
+let suppressChartClickUntil = 0;
+let chartInteractionStarted = false;
+let chartContentObserver: MutationObserver | undefined;
+let chartLayoutObserver: ResizeObserver | undefined;
 
 const firstDayOffset = computed(() => {
   const firstDay = props.contributions.days[0]?.date;
@@ -71,15 +106,290 @@ function clearDayTooltip() {
   if (activeDay.value) activeDay.value = null;
 }
 
-async function scrollToLatestContributions() {
-  await nextTick();
-  const scroller = chartScroller.value;
-  if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return;
-  scroller.scrollLeft = scroller.scrollWidth;
+function getChartMaxScroll(scroller: HTMLElement) {
+  return Math.max(0, scroller.scrollWidth - scroller.clientWidth);
 }
 
-onMounted(scrollToLatestContributions);
-watch(() => props.contributions.days.at(-1)?.date, scrollToLatestContributions);
+function readChartMotionToken(name: string, fallback: number) {
+  const scroller = chartScroller.value;
+  if (!scroller) return fallback;
+  const value = Number.parseFloat(getComputedStyle(scroller).getPropertyValue(name));
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function getChartMotionConfig() {
+  return {
+    edgeResistance: readChartMotionToken('--pulse-heatmap-edge-resistance', CHART_MOTION_DEFAULTS.edgeResistance),
+    edgeMax: readChartMotionToken('--pulse-heatmap-edge-max-px', CHART_MOTION_DEFAULTS.edgeMax),
+    inertiaFriction: readChartMotionToken('--pulse-heatmap-inertia-friction', CHART_MOTION_DEFAULTS.inertiaFriction),
+    springStiffness: readChartMotionToken('--pulse-heatmap-spring-stiffness', CHART_MOTION_DEFAULTS.springStiffness),
+    springDamping: readChartMotionToken('--pulse-heatmap-spring-damping', CHART_MOTION_DEFAULTS.springDamping),
+  };
+}
+
+function setChartEdgeOffset(offset: number, maxOffset = getChartMotionConfig().edgeMax) {
+  chartEdgeOffset.value = Math.min(maxOffset, Math.max(-maxOffset, offset));
+}
+
+function cancelChartMotion() {
+  if (chartMotionFrame === undefined) return;
+  cancelAnimationFrame(chartMotionFrame);
+  chartMotionFrame = undefined;
+}
+
+function cancelLatestAlignment() {
+  if (latestAlignmentFrame === undefined) return;
+  cancelAnimationFrame(latestAlignmentFrame);
+  latestAlignmentFrame = undefined;
+}
+
+function startChartEdgeSpring(initialOffset: number, initialVelocity = 0) {
+  const scroller = chartScroller.value;
+  if (!scroller) return;
+
+  const motion = getChartMotionConfig();
+  cancelChartMotion();
+  let position = initialOffset;
+  let velocity = initialVelocity;
+  let lastTimestamp = performance.now();
+
+  const step = (timestamp: number) => {
+    const elapsed = Math.min(32, Math.max(1, timestamp - lastTimestamp));
+    lastTimestamp = timestamp;
+    velocity += -position * motion.springStiffness * elapsed;
+    velocity *= motion.springDamping ** (elapsed / 16);
+    position += velocity * elapsed;
+    setChartEdgeOffset(position, motion.edgeMax);
+
+    if (Math.abs(position) <= CHART_EDGE_OFFSET_EPSILON && Math.abs(velocity) <= CHART_SPRING_VELOCITY_EPSILON) {
+      setChartEdgeOffset(0, motion.edgeMax);
+      chartMotionFrame = undefined;
+      return;
+    }
+    chartMotionFrame = requestAnimationFrame(step);
+  };
+
+  setChartEdgeOffset(position, motion.edgeMax);
+  chartMotionFrame = requestAnimationFrame(step);
+}
+
+function startChartInertia(initialVelocity: number) {
+  const scroller = chartScroller.value;
+  if (!scroller || Math.abs(initialVelocity) < CHART_MIN_INERTIA_VELOCITY) {
+    setChartEdgeOffset(0);
+    return;
+  }
+
+  const motion = getChartMotionConfig();
+  cancelChartMotion();
+  let velocity = initialVelocity;
+  let lastTimestamp = performance.now();
+
+  const step = (timestamp: number) => {
+    const elapsed = Math.min(32, Math.max(1, timestamp - lastTimestamp));
+    lastTimestamp = timestamp;
+    velocity *= motion.inertiaFriction ** (elapsed / 16);
+    const maxScroll = getChartMaxScroll(scroller);
+    const nextScrollLeft = scroller.scrollLeft + velocity * elapsed;
+
+    if (nextScrollLeft < 0) {
+      scroller.scrollLeft = 0;
+      startChartEdgeSpring(
+        Math.min(motion.edgeMax, -nextScrollLeft * motion.edgeResistance),
+        velocity * motion.edgeResistance,
+      );
+      return;
+    }
+    if (nextScrollLeft > maxScroll) {
+      scroller.scrollLeft = maxScroll;
+      startChartEdgeSpring(
+        -Math.min(motion.edgeMax, (nextScrollLeft - maxScroll) * motion.edgeResistance),
+        velocity * motion.edgeResistance,
+      );
+      return;
+    }
+
+    scroller.scrollLeft = nextScrollLeft;
+    if (Math.abs(velocity) < CHART_MIN_INERTIA_VELOCITY) {
+      chartMotionFrame = undefined;
+      return;
+    }
+    chartMotionFrame = requestAnimationFrame(step);
+  };
+
+  chartMotionFrame = requestAnimationFrame(step);
+}
+
+function setChartDragPosition(rawScrollLeft: number) {
+  const scroller = chartScroller.value;
+  if (!scroller) return;
+
+  const maxScroll = getChartMaxScroll(scroller);
+  const motion = getChartMotionConfig();
+  if (rawScrollLeft < 0) {
+    scroller.scrollLeft = 0;
+    setChartEdgeOffset(Math.min(motion.edgeMax, -rawScrollLeft * motion.edgeResistance), motion.edgeMax);
+    return;
+  }
+  if (rawScrollLeft > maxScroll) {
+    scroller.scrollLeft = maxScroll;
+    setChartEdgeOffset(-Math.min(motion.edgeMax, (rawScrollLeft - maxScroll) * motion.edgeResistance), motion.edgeMax);
+    return;
+  }
+
+  scroller.scrollLeft = rawScrollLeft;
+  setChartEdgeOffset(0, motion.edgeMax);
+}
+
+function releaseChartPointer(event: PointerEvent) {
+  const scroller = chartScroller.value;
+  if (scroller?.hasPointerCapture(event.pointerId)) scroller.releasePointerCapture(event.pointerId);
+}
+
+function onChartPointerDown(event: PointerEvent) {
+  const scroller = chartScroller.value;
+  if (!scroller || getChartMaxScroll(scroller) <= 0 || (event.pointerType === 'mouse' && event.button !== 0)) return;
+
+  chartInteractionStarted = true;
+  cancelLatestAlignment();
+  cancelChartMotion();
+  chartPointerSession = {
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    lastX: event.clientX,
+    lastTimestamp: performance.now(),
+    startScrollLeft: scroller.scrollLeft,
+    velocity: 0,
+    axis: 'pending',
+    dragged: false,
+  };
+  scroller.setPointerCapture(event.pointerId);
+}
+
+function onChartPointerMove(event: PointerEvent) {
+  const scroller = chartScroller.value;
+  const session = chartPointerSession;
+  if (!scroller || !session || event.pointerId !== session.pointerId) return;
+
+  const deltaX = event.clientX - session.startX;
+  const deltaY = event.clientY - session.startY;
+  if (session.axis === 'pending') {
+    if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < CHART_DRAG_THRESHOLD) return;
+    if (Math.abs(deltaY) > Math.abs(deltaX) * 1.15) {
+      session.axis = 'vertical';
+      releaseChartPointer(event);
+      chartPointerSession = null;
+      return;
+    }
+    session.axis = 'horizontal';
+  }
+  if (session.axis !== 'horizontal') return;
+
+  event.preventDefault();
+  const timestamp = performance.now();
+  const elapsed = Math.min(64, Math.max(1, timestamp - session.lastTimestamp));
+  const scrollDelta = -(event.clientX - session.lastX);
+  const instantVelocity = scrollDelta / elapsed;
+  session.velocity = session.velocity * 0.7 + instantVelocity * 0.3;
+  session.lastX = event.clientX;
+  session.lastTimestamp = timestamp;
+  session.dragged = true;
+  setChartDragPosition(session.startScrollLeft - deltaX);
+}
+
+function finishChartPointer(event: PointerEvent, cancelled = false) {
+  const session = chartPointerSession;
+  if (!session || event.pointerId !== session.pointerId) return;
+
+  releaseChartPointer(event);
+  chartPointerSession = null;
+  if (session.axis !== 'horizontal') {
+    setChartEdgeOffset(0);
+    return;
+  }
+
+  if (session.dragged) suppressChartClickUntil = performance.now() + 180;
+  const edgeOffset = chartEdgeOffset.value;
+  const motion = getChartMotionConfig();
+  if (Math.abs(edgeOffset) > CHART_EDGE_OFFSET_EPSILON) {
+    startChartEdgeSpring(edgeOffset, cancelled ? 0 : session.velocity * motion.edgeResistance);
+    return;
+  }
+  if (cancelled) {
+    setChartEdgeOffset(0);
+    return;
+  }
+  startChartInertia(session.velocity);
+}
+
+function onChartPointerUp(event: PointerEvent) {
+  finishChartPointer(event);
+}
+
+function onChartPointerCancel(event: PointerEvent) {
+  finishChartPointer(event, true);
+}
+
+function onChartClick(event: MouseEvent) {
+  if (performance.now() >= suppressChartClickUntil) return;
+  suppressChartClickUntil = 0;
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function observeChartLayout() {
+  const scroller = chartScroller.value;
+  if (!scroller) return;
+
+  chartLayoutObserver?.disconnect();
+  chartLayoutObserver = new ResizeObserver(() => {
+    if (!props.loading && !chartInteractionStarted) void scrollToLatestContributions();
+  });
+  chartLayoutObserver.observe(scroller);
+  for (const child of scroller.children) chartLayoutObserver.observe(child);
+}
+
+async function scrollToLatestContributions() {
+  await nextTick();
+  cancelLatestAlignment();
+  latestAlignmentFrame = requestAnimationFrame(() => {
+    latestAlignmentFrame = requestAnimationFrame(() => {
+      latestAlignmentFrame = undefined;
+      const scroller = chartScroller.value;
+      if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return;
+      scroller.scrollLeft = scroller.scrollWidth;
+    });
+  });
+}
+
+onMounted(() => {
+  void scrollToLatestContributions();
+  const scroller = chartScroller.value;
+  if (!scroller) return;
+  observeChartLayout();
+  chartContentObserver = new MutationObserver(() => {
+    observeChartLayout();
+    if (!props.loading && !chartInteractionStarted) void scrollToLatestContributions();
+  });
+  chartContentObserver.observe(scroller, { childList: true, subtree: true });
+});
+watch(
+  [
+    () => props.loading,
+    () => props.contributions.days.length,
+    () => props.contributions.days.at(-1)?.date,
+    () => columnCount.value,
+  ],
+  ([loading]) => {
+    if (loading) chartInteractionStarted = false;
+    void scrollToLatestContributions();
+  },
+  { flush: 'post' },
+);
+onUpdated(() => {
+  if (!props.loading && !chartInteractionStarted) void scrollToLatestContributions();
+});
 
 let scrollRaf = 0;
 function onChartScroll() {
@@ -92,6 +402,10 @@ function onChartScroll() {
 }
 
 onBeforeUnmount(() => {
+  cancelChartMotion();
+  cancelLatestAlignment();
+  chartContentObserver?.disconnect();
+  chartLayoutObserver?.disconnect();
   if (scrollRaf) cancelAnimationFrame(scrollRaf);
 });
 
@@ -116,7 +430,17 @@ function hideDayTooltip(day: ContributionDay) {
     </div>
 
     <div class="contribution-card__body">
-      <div ref="chartScroller" class="contribution-card__chart" @scroll.passive="onChartScroll">
+      <div
+        ref="chartScroller"
+        class="contribution-card__chart"
+        :style="chartScrollerStyle"
+        @click="onChartClick"
+        @pointerdown="onChartPointerDown"
+        @pointermove="onChartPointerMove"
+        @pointerup="onChartPointerUp"
+        @pointercancel="onChartPointerCancel"
+        @scroll.passive="onChartScroll"
+      >
         <template v-if="loading">
           <div class="contribution-card__loading-chart" aria-hidden="true">
             <div class="contribution-card__skeleton-grid">
@@ -220,7 +544,8 @@ function hideDayTooltip(day: ContributionDay) {
 .level-3 { background: color-mix(in srgb, var(--accent-secondary) 66%, var(--accent-primary)); }
 .level-4 { background: color-mix(in srgb, var(--accent-primary) 78%, var(--accent-secondary)); }
 .contribution-card__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(0.7rem, 1.4vw, 1.1rem); margin-top: clamp(0.7rem, 1.4vw, 1.05rem); }
-.contribution-card__chart { display: grid; min-width: 0; align-content: center; overflow-x: auto; overflow-y: hidden; padding: 0.2rem 0 0.4rem; scrollbar-color: color-mix(in srgb, var(--text-secondary) 55%, transparent) transparent; scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; contain: paint; }
+.contribution-card__chart { display: grid; min-width: 0; align-content: center; overflow-x: auto; overflow-y: hidden; padding: 0.2rem 0 0.4rem; scrollbar-color: color-mix(in srgb, var(--text-secondary) 55%, transparent) transparent; scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-y; user-select: none; contain: paint; }
+.contribution-card__chart > * { transform: translate3d(var(--contribution-edge-offset, 0px), 0, 0); }
 .contribution-card__chart::-webkit-scrollbar { height: 6px; -webkit-appearance: none; appearance: none; }
 .contribution-card__chart::-webkit-scrollbar-track { background: transparent; }
 .contribution-card__chart::-webkit-scrollbar-thumb { border-radius: 999px; background: color-mix(in srgb, var(--text-secondary) 55%, transparent); }

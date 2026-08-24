@@ -20,6 +20,13 @@ if (!homeSource.includes('defineProps<{ skeleton?: boolean }>()')) {
 if (!homeSource.includes("'skeleton-surface home-socials__skeleton-button': skeleton")) {
   failures.push('Home skeleton buttons do not reuse the live social-button geometry.');
 }
+if (
+  tokenSource.includes('--skeleton-content-') ||
+  dashboardSource.includes('--skeleton-content-') ||
+  homeSource.includes('--skeleton-content-')
+) {
+  failures.push('Skeleton colors still maintain a duplicate content-specific token scheme.');
+}
 if (!homeSource.includes('-webkit-box-decoration-break: clone;')) {
   failures.push('Wrapped Home skeleton text does not preserve separate line fragments.');
 }
