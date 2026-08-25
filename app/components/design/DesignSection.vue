@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getHomeLinkEntryDelay, getHomeStatusEntryDelay, HOME_LINKS } from '#shared/constants';
 import IconLucideFolderOpen from '~icons/lucide/folder-open';
 import IconLucideMail from '~icons/lucide/mail';
 import IconLucideTerminal from '~icons/lucide/terminal';
@@ -18,6 +19,22 @@ const TOKEN_SWATCHES = [
   '--aurora-active-fill',
   '--surface-glass',
 ] as const;
+
+const motionRows = computed(() => {
+  const statusDelay = getHomeStatusEntryDelay(HOME_LINKS.length);
+  const rows = [
+    { id: 'header', label: t('design.motion.rows.header'), delay: 0 },
+    { id: 'avatar', label: t('design.motion.rows.avatar'), delay: 140 },
+    { id: 'copy', label: t('design.motion.rows.copy'), delay: 300 },
+    { id: 'links', label: t('design.motion.rows.links'), delay: getHomeLinkEntryDelay(0) },
+    { id: 'status', label: t('design.motion.rows.status'), delay: statusDelay },
+  ];
+
+  return rows.map((row) => ({
+    ...row,
+    progress: statusDelay > 0 ? Math.max(3, (row.delay / statusDelay) * 100) : 3,
+  }));
+});
 </script>
 
 <template>
@@ -73,6 +90,27 @@ const TOKEN_SWATCHES = [
             <code>{{ token }}</code>
           </li>
         </ul>
+      </section>
+
+      <section class="design-block" aria-labelledby="design-motion-title">
+        <h2 id="design-motion-title">{{ t('design.motion.title') }}</h2>
+        <p class="design-block__hint">{{ t('design.motion.hint') }}</p>
+        <ol class="design-motion">
+          <li v-for="row in motionRows" :key="row.id" class="design-motion__row">
+            <div class="design-motion__meta">
+              <span class="design-motion__label">{{ row.label }}</span>
+              <code>{{ t('design.motion.delay', { value: row.delay }) }}</code>
+            </div>
+            <div class="design-motion__rail" aria-hidden="true">
+              <span
+                class="design-motion__progress"
+                :class="{ 'design-motion__progress--status': row.id === 'status' }"
+                :style="{ width: `${row.progress}%` }"
+              />
+            </div>
+          </li>
+        </ol>
+        <p class="design-motion__note">{{ t('design.motion.note') }}</p>
       </section>
     </div>
   </section>
@@ -171,5 +209,69 @@ const TOKEN_SWATCHES = [
   color: var(--text-secondary);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
+}
+
+.design-motion {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.1rem 0 0;
+  padding: 1rem;
+  border: 1px solid var(--glass-card-border);
+  border-radius: var(--radius-surface);
+  background: var(--glass-card-background);
+  box-shadow: var(--glass-surface-shadow);
+  list-style: none;
+}
+
+.design-motion__row {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.design-motion__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.design-motion__label {
+  color: var(--text-primary);
+  font-size: var(--text-md);
+}
+
+.design-motion__meta code {
+  color: var(--accent-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.design-motion__rail {
+  position: relative;
+  height: 0.35rem;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--surface-glass) 72%, transparent);
+}
+
+.design-motion__progress {
+  display: block;
+  height: 100%;
+  min-width: 0.35rem;
+  border-radius: inherit;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-primary) 28%, transparent), var(--accent-primary));
+}
+
+.design-motion__progress--status {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-secondary) 28%, transparent), var(--accent-secondary));
+}
+
+.design-motion__note {
+  max-width: 42rem;
+  margin: 0.8rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.6;
 }
 </style>

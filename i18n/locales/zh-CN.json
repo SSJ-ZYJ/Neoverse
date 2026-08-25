@@ -157,6 +157,19 @@
     "tokens": {
       "title": "核心 Token",
       "hint": "来自 tokens.css 的强调色、表面与极光玻璃填充。"
+    },
+    "motion": {
+      "title": "首页进入动效",
+      "hint": "按内容层级分阶段进入，让页面易读，同时避免最后的状态行产生迟滞感。",
+      "delay": "{value} ms",
+      "rows": {
+        "header": "Hero 标题",
+        "avatar": "头像",
+        "copy": "介绍文字",
+        "links": "快捷链接",
+        "status": "Currently Building"
+      },
+      "note": "状态行在最后一个快捷链接开始进入时同步播放，并保持标准的 360 ms 淡入。"
     }
   }
 }

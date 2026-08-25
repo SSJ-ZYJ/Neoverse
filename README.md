@@ -15,7 +15,7 @@
 
 ## Overview
 
-Neoverse is a public personal site for **software engineering, open source, and agentic development**. It presents identity, selected work, current areas of focus, and verifiable developer activity across four Dock-navigated pages. Every page mounts only its own content — a persistent bottom dock switches between real routes, and missing data is never replaced with simulated activity.
+Neoverse is a public personal site for **software engineering, open source, and agentic development**. It presents identity, selected work, current areas of focus, and verifiable developer activity across four Dock-navigated pages, with a hidden `/design` reference route for the shared visual language. Every page mounts only its own content — a persistent bottom dock switches between real routes, and missing data is never replaced with simulated activity.
 
 ## Views
 
@@ -25,11 +25,18 @@ Neoverse is a public personal site for **software engineering, open source, and 
 | `/projects` | **Projects** | Curated, product-first previews of real projects |
 | `/focus` | **Focus** | The engineering domains currently being explored |
 | `/pulse` | **Pulse** | A truthful, source-bounded view of GitHub activity |
-| `/design` | **Design** | Design-system showcase (hidden, `noindex`) |
+| `/design` | **Design** | Production design-system reference (hidden, `noindex`) |
 
 The **Pulse** view renders a contribution calendar (with year total and longest streak), recent commits, and a traceable activity timeline — all served by a cached, server-only integration. When the source is unavailable or incomplete, that state stays explicit.
 
-The `/design` route (not dock-navigated, `noindex`) showcases the design system itself — token swatches, glass/ghost buttons, and the segmented control in preview and code modes.
+The `/design` route (not dock-navigated, `noindex`) showcases the production design system itself — Aurora Glass controls, token swatches, the segmented control, and the Home entry-motion choreography. Its quick-link and status-line timing is derived from the same shared constants used by the live Home view.
+
+### Design contract
+
+- Surfaces use translucent glass fills, subtle hairline borders, shared rounded radii, and the existing navy/ice/mint palette.
+- Home content enters in readable layers: header, avatar, introduction, quick links, then the `Currently Building` status line.
+- Quick links begin at `560ms`, stagger by `120ms`, and use a `900ms` entry animation. The status line begins at the final link's entry slot (`1160ms`) and keeps the standard `360ms` fade, so it does not appear to wait for the last link.
+- `prefers-reduced-motion` collapses the choreography to the accessible static state.
 
 ## Tech Stack
 
@@ -81,7 +88,7 @@ The homepage works without any credentials. Set `NUXT_GITHUB_TOKEN` to let the N
 | `bun run format:check` | Verify formatting without writing |
 | `bun run check` | Biome lint+format with autofixes, then type check (full gate) |
 | `bun run test:fouc` | Verify critical shell styles in SSR HTML (needs dev server on `http://localhost:3000/`) |
-| `bun run test:home-behavior` | Verify home link animations stay data-driven |
+| `bun run test:home-behavior` | Verify data-driven Home link and status-line animation timing |
 | `bun run test:route-background` | Verify route transition background invariants |
 | `bun run test:pulse-transition` | Verify Pulse route-transition gating and shared loading shimmer |
 | `bun run test:skeleton-alignment` | Verify boot skeletons mirror live view geometry |
@@ -116,7 +123,7 @@ server/
   api/projects/previews.get.ts # Cached live project previews (docs chapters, blog RSS articles)
   utils/project-previews.ts  # Docs sitemap & blog feed parsers for the previews endpoint
 shared/
-  constants.ts            # SITE, HOME_LINKS, NAV_ITEMS, FOCUS_DOMAINS, PROJECTS, createEmptyPulse, createEmptyProjectPreviews
+  constants.ts            # SITE, HOME_LINKS, HOME_LINK_MOTION, NAV_ITEMS, FOCUS_DOMAINS, PROJECTS, createEmptyPulse, createEmptyProjectPreviews
   types/github.ts         # Shared GitHub API types
   types/projects.ts       # Shared project preview types
 scripts/

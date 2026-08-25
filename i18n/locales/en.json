@@ -157,6 +157,19 @@
     "tokens": {
       "title": "Core Tokens",
       "hint": "Accent, surface, and Aurora Glass fills from tokens.css."
+    },
+    "motion": {
+      "title": "Home Entry Motion",
+      "hint": "A staged entry reveals the page hierarchy without making the final status line feel delayed.",
+      "delay": "{value} ms",
+      "rows": {
+        "header": "Hero header",
+        "avatar": "Avatar",
+        "copy": "Introduction",
+        "links": "Quick links",
+        "status": "Currently Building"
+      },
+      "note": "Currently Building starts with the final quick link's entry slot and keeps the standard 360 ms fade."
     }
   }
 }
