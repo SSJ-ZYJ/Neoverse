@@ -78,7 +78,7 @@ export const HOME_LINK_MOTION = {
   initialDelayMs: 560,
   staggerMs: 120,
   entryDurationMs: 900,
-  statusGapMs: 60,
+  statusLeadMs: 900,
   maxStaggeredLinks: 8,
 } as const;
 
@@ -90,7 +90,7 @@ export function getHomeLinkEntryDelay(index: number) {
 
 export function getHomeStatusEntryDelay(linkCount: number) {
   if (linkCount <= 0) return HOME_LINK_MOTION.initialDelayMs;
-  return getHomeLinkEntryDelay(linkCount - 1) + HOME_LINK_MOTION.entryDurationMs + HOME_LINK_MOTION.statusGapMs;
+  return getHomeLinkEntryDelay(linkCount - 1) + HOME_LINK_MOTION.entryDurationMs - HOME_LINK_MOTION.statusLeadMs;
 }
 
 export type ViewId = 'home' | 'projects' | 'focus' | 'pulse';

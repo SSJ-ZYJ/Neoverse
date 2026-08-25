@@ -11,7 +11,10 @@ const emptyPulse = createEmptyPulse();
 <template>
   <div
     class="dashboard-loading"
-    :class="{ 'dashboard-loading--orbit': view === 'projects' || view === 'focus' || view === 'pulse' }"
+    :class="{
+      'dashboard-loading--orbit': view === 'projects' || view === 'focus' || view === 'pulse',
+      'dashboard-loading--home': view === 'home',
+    }"
     role="status"
     aria-live="polite"
     :aria-label="t('common.loading')"
@@ -196,6 +199,7 @@ const emptyPulse = createEmptyPulse();
 }
 
 .dashboard-loading--orbit { background: transparent; }
+.dashboard-loading--home { background: transparent; }
 
 .dashboard-loading::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
@@ -334,7 +338,7 @@ const emptyPulse = createEmptyPulse();
   place-items: stretch;
   border-bottom: 1px solid var(--glass-border-hairline);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 78%, transparent);
+  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
 
 .dashboard-loading__project-preview-frame {
@@ -343,8 +347,10 @@ const emptyPulse = createEmptyPulse();
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--glass-card-inset-fill);
+  background: var(--glass-card-sheen), var(--glass-card-inset-fill);
   box-shadow: inset 0 0 0 1px var(--glass-border-hairline), inset 0 1px 0 var(--glass-highlight);
+  -webkit-backdrop-filter: var(--aurora-filter-chrome);
+  backdrop-filter: var(--aurora-filter-chrome);
 }
 
 .dashboard-loading__project-preview-head {

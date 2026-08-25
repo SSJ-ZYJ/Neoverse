@@ -29,11 +29,11 @@ if (
 ) {
   failures.push('The return handoff still swaps through a static Home image instead of the persistent Home Canvas.');
 }
-if (!homeSource.includes('.home-panel--skeleton::before')) {
-  failures.push('Home skeleton background is not rendered with the live Canvas overscan geometry.');
-}
-if (!homeSource.includes('inset: -2.5%;')) {
-  failures.push('Home skeleton background does not reserve the live 1.05x initial camera scale.');
+if (
+  !homeSource.includes('.home-panel--skeleton {\n  background: transparent;') ||
+  !homeSource.includes('.home-panel--skeleton::before {\n  display: none;')
+) {
+  failures.push('Home skeleton does not reveal the canonical shared Canvas background.');
 }
 if (!dashboardSource.includes('background: transparent;')) {
   failures.push('Child-page skeleton is not transparent over the shared live backdrop.');
@@ -41,32 +41,22 @@ if (!dashboardSource.includes('background: transparent;')) {
 if (!mainStyles.includes('.city-backdrop__track {\n  transform: scale(var(--city-motion-initial-scale));')) {
   failures.push('The shared city track has no CSS initial transform while the child skeleton is visible.');
 }
-const alignmentMatch = cityClockSource.match(/export const CITY_WINDOW_CONTENT_ALIGNMENT_X = ([0-9.]+);/);
-const alignmentX = Number(alignmentMatch?.[1]);
-const scaleMatch = cityClockSource.match(/export const CITY_WINDOW_CONTENT_SCALE = ([0-9.]+);/);
-const contentScale = Number(scaleMatch?.[1]);
 if (
-  !Number.isFinite(alignmentX) ||
-  alignmentX <= 0 ||
-  alignmentX >= 64 ||
-  !Number.isFinite(contentScale) ||
-  contentScale <= 0.9 ||
-  contentScale >= 1 ||
   !cityClockSource.includes(
-    'const alignmentShiftX = (CITY_WINDOW_CONTENT_ALIGNMENT_X * sOther * scale) / CITY_WINDOW_CONTENT_SCALE;',
+    'export const HOME_CITY_SIZE = { w: CITY_WINDOW_RECT.w, h: CITY_WINDOW_RECT.h } as const;',
   ) ||
-  !cityClockSource.includes('const mTotal = (sHome / (kCover * sOther)) * CITY_WINDOW_CONTENT_SCALE;') ||
-  !cityClockSource.includes('const tx = alignmentShiftX -') ||
-  !mainStyles.includes('--city-window-scale: 1.311;') ||
-  !mainStyles.includes('--city-window-scale: 1.474;') ||
-  !mainStyles.includes('--city-window-shift-x: 1.796%;') ||
-  !mainStyles.includes('--city-window-shift-x: 5.827%;')
+  cityClockSource.includes('CITY_WINDOW_CONTENT_ALIGNMENT_X') ||
+  cityClockSource.includes('CITY_WINDOW_CONTENT_SCALE') ||
+  !mainStyles.includes('--city-window-scale: 1.366;') ||
+  !mainStyles.includes('--city-window-shift-x: -0.094%;') ||
+  !mainStyles.includes('--city-window-shift-y: 21.30%;')
 ) {
-  failures.push('The return camera has no measured positive horizontal asset-alignment correction.');
+  failures.push('The return camera is not calibrated against the canonical window crop.');
 }
 if (
   !nuxtConfigSource.includes('.dashboard-loading--orbit {') ||
   !nuxtConfigSource.includes('background: transparent;') ||
+  !nuxtConfigSource.includes('.dashboard-loading--home {') ||
   !nuxtConfigSource.includes('.app-view-background .home-cosmos') ||
   !nuxtConfigSource.includes('.city-backdrop__track {') ||
   !nuxtConfigSource.includes('transform: scale(var(--city-motion-initial-scale, 1.05));')

@@ -46,8 +46,11 @@ if (!dashboardSource.includes('.dashboard-loading__panel {\n  min-height: 0;')) 
 if (!dashboardSource.includes('@media (max-width: 760px)')) {
   failures.push('Focus skeleton does not mirror the live 760px compact-spacing breakpoint.');
 }
-if (!homeSource.includes("url('/images/home-city.webp') center / cover no-repeat")) {
-  failures.push('Home boot skeleton does not reuse the live Home backdrop on narrow screens.');
+if (
+  !homeSource.includes('.home-panel--skeleton {\n  background: transparent;') ||
+  !appSource.includes('<div class="app-view-background"')
+) {
+  failures.push('Home boot skeleton does not reuse the canonical shared Home backdrop.');
 }
 if (!homeSource.includes('border-radius: 24%;')) {
   failures.push('Home boot skeleton avatar does not match the live avatar geometry.');

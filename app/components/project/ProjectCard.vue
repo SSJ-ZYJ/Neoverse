@@ -180,7 +180,7 @@ const formatArticleDate = (value: string | null) => {
   place-items: center;
   border-bottom: 1px solid var(--glass-border-hairline);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 78%, transparent);
+  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
 .project-card__preview-frame {
   position: relative;
@@ -191,8 +191,10 @@ const formatArticleDate = (value: string | null) => {
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--glass-card-inset-fill);
+  background: var(--glass-card-sheen), var(--glass-card-inset-fill);
   box-shadow: inset 0 0 0 1px var(--glass-border-hairline), inset 0 1px 0 var(--glass-highlight);
+  -webkit-backdrop-filter: var(--aurora-filter-chrome);
+  backdrop-filter: var(--aurora-filter-chrome);
 }
 .project-card__preview-head {
   display: flex;
@@ -241,29 +243,28 @@ const formatArticleDate = (value: string | null) => {
   color: inherit;
   text-decoration: none;
 }
-.project-card__docs-list a { gap: 0.24rem; padding: 0.45rem 0; }
+.project-card__docs-list a { gap: 0.24rem; padding: 0.45rem 0.7rem; }
 .project-card__docs-list li:last-child { border-bottom: 0; }
 .project-card__docs-list li.is-featured {
-  position: relative;
-  margin-top: 0.12rem;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-primary) 7%, transparent), transparent 72%);
+  margin: 0.18rem 0 0.22rem;
+  border-bottom: 0;
+  border-radius: var(--radius-control-inner);
+  background:
+    var(--glass-card-sheen),
+    linear-gradient(112deg, color-mix(in srgb, var(--accent-secondary) 18%, transparent), color-mix(in srgb, var(--accent-primary) 10%, transparent) 64%, transparent),
+    var(--glass-card-inset-fill);
+  box-shadow: var(--aurora-active-highlight);
+  transition: background var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard);
 }
 .project-card__docs-list li.is-featured:has(a:hover),
 .project-card__docs-list li.is-featured:has(a:focus-visible) {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-primary) 14%, transparent), transparent 78%);
+  background:
+    var(--glass-card-sheen),
+    linear-gradient(112deg, color-mix(in srgb, var(--accent-secondary) 24%, transparent), color-mix(in srgb, var(--accent-primary) 15%, transparent) 68%, transparent),
+    var(--glass-card-inset-fill);
+  box-shadow: var(--aurora-active-highlight), 0 0.65rem 1.4rem -1.2rem color-mix(in srgb, var(--accent-secondary) 36%, transparent);
 }
-.project-card__docs-list li.is-featured a { padding-right: 0.5rem; padding-left: 0.7rem; }
-.project-card__docs-list li.is-featured::before {
-  position: absolute;
-  top: 0.45rem;
-  bottom: 0.45rem;
-  left: 0;
-  width: 2px;
-  border-radius: var(--radius-pill);
-  content: '';
-  background: var(--accent-primary);
-  opacity: 0.72;
-}
+.project-card__docs-list li.is-featured a { padding: 0.62rem 0.7rem; }
 .project-card__docs-list strong,
 .project-card__docs-list span {
   display: -webkit-box;
@@ -277,13 +278,8 @@ const formatArticleDate = (value: string | null) => {
   font-weight: var(--weight-semibold);
   -webkit-line-clamp: 1;
 }
-.project-card__docs-list li.is-featured strong { color: var(--accent-primary); }
-.project-card__docs-list li.is-featured a:hover strong,
-.project-card__docs-list li.is-featured a:focus-visible strong {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.18em;
-}
+.project-card__docs-list li.is-featured strong { color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-bold); }
+.project-card__docs-list li.is-featured span { color: var(--text-secondary); }
 .project-card__docs-list span {
   color: var(--text-muted);
   font-size: var(--text-xs);

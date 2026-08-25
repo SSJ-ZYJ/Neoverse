@@ -9,10 +9,7 @@ const normalizedMainStyles = mainStyles.replace(/\s+/g, ' ');
 const homeReturnAnimationSource = mainStyles.match(/@keyframes home-route-content-enter\s*\{([\s\S]*?)\n\}/)?.[1] ?? '';
 const failures: string[] = [];
 
-const backgroundAssets = [
-  { path: '/images/home-city.webp', file: 'public/images/home-city.webp' },
-  { path: '/images/other-city.webp', file: 'public/images/other-city.webp' },
-] as const;
+const backgroundAssets = [{ path: '/images/other-city.webp', file: 'public/images/other-city.webp' }] as const;
 
 for (const asset of backgroundAssets) {
   const file = Bun.file(asset.file);
@@ -32,8 +29,8 @@ if (await Bun.file('public/images/other-city.png').exists()) {
   failures.push('The heavyweight other-city PNG still duplicates the production WebP.');
 }
 
-if (!cosmosSource.includes("image.src = '/images/home-city.webp';")) {
-  failures.push('The home canvas still discovers a non-WebP background after hydration.');
+if (!cosmosSource.includes("image.src = '/images/other-city.webp';")) {
+  failures.push('The Home canvas is not using the canonical room-and-city WebP after hydration.');
 }
 if (!tokensSource.includes('--section-orbit-image: url("/images/other-city.webp");')) {
   failures.push('Subpages do not use the optimized room-and-city background.');
@@ -84,6 +81,18 @@ if (
   homeReturnAnimationSource.includes('transform:')
 ) {
   failures.push('Home return content does not enter progressively without replaying a translation.');
+}
+if (
+  !mainStyles.includes('.app-view-stage.app-view-stage--home-restored .home-panel__shade') ||
+  !normalizedMainStyles.includes(
+    'animation: home-route-shade-enter var(--motion-city-return) linear calc(var(--motion-city-return-content-delay) - var(--motion-city-content)) both',
+  ) ||
+  !mainStyles.includes('@keyframes home-route-shade-enter') ||
+  !mainStyles.includes(
+    '@keyframes home-route-shade-enter {\n  from {\n    opacity: 0;\n  }\n  to {\n    opacity: 1;\n  }\n}',
+  )
+) {
+  failures.push('The Home left-side shade still appears abruptly during the return handoff.');
 }
 if (
   !mainStyles.includes('@keyframes section-city-push-in') ||

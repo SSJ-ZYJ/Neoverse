@@ -80,6 +80,9 @@ body {
 .dashboard-loading--orbit {
   background: transparent;
 }
+.dashboard-loading--home {
+  background: transparent;
+}
 .dashboard-loading__label {
   position: absolute;
   top: 50%;
@@ -138,7 +141,6 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', href: 'https://assets.shenshijun.space/avatar.png', type: 'image/png' },
-        { rel: 'preload', href: '/images/home-city.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
         { rel: 'preload', href: '/images/other-city.webp', as: 'image', type: 'image/webp', fetchpriority: 'high' },
       ],
       style: [{ id: 'neoverse-critical-shell', textContent: criticalShellStyles }],

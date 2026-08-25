@@ -14,6 +14,7 @@
     "test:projects-mobile": "bun scripts/check-projects-mobile.ts",
     "test:route-background": "bun scripts/check-route-background.ts",
     "test:city-background": "bun scripts/check-city-background.ts",
+    "test:city-pixel-source": "bun scripts/check-city-pixel-source.ts",
     "test:projects-skeleton": "bun scripts/check-projects-skeleton.ts",
     "test:card-transition": "bun scripts/check-card-transition.ts",
     "test:pulse-mobile-heatmap": "bun scripts/check-pulse-mobile-heatmap.ts",

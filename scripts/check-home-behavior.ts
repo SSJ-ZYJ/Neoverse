@@ -49,8 +49,9 @@ if (!homeSource.includes("'--home-link-entry-delay'")) {
 
 const currentFinalLinkDelay = getHomeLinkEntryDelay(HOME_LINKS.length - 1);
 const currentStatusDelay = getHomeStatusEntryDelay(HOME_LINKS.length);
-if (currentStatusDelay <= currentFinalLinkDelay + HOME_LINK_MOTION.entryDurationMs) {
-  failures.push('Currently Building starts before the final link completes its entry animation.');
+const expectedStatusDelay = currentFinalLinkDelay;
+if (currentStatusDelay !== expectedStatusDelay) {
+  failures.push('Currently Building must begin its fade when the final link starts entering.');
 }
 const finalStaggerSlot = HOME_LINK_MOTION.maxStaggeredLinks - 1;
 if (getHomeLinkEntryDelay(99) !== getHomeLinkEntryDelay(finalStaggerSlot)) {
@@ -78,6 +79,9 @@ if (/@media \(min-width:\s*1200px\)[\s\S]*?\.home-panel__content/.test(homeSourc
 const statusRule = homeSource.match(/^\.home-panel__status\s*\{([^}]*)\}/m)?.[1] ?? '';
 if (!statusRule.includes('animation: home-status-enter')) {
   failures.push('Currently Building does not have an independent fade animation.');
+}
+if (!statusRule.includes('animation: home-status-enter var(--motion-standard)')) {
+  failures.push('Currently Building must retain the standard fade duration while starting earlier.');
 }
 if (!statusRule.includes('var(--home-status-entry-delay)')) {
   failures.push('Currently Building does not wait for the data-driven final link delay.');

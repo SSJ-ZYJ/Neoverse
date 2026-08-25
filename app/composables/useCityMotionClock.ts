@@ -24,41 +24,28 @@ export const CITY_MOTION_KEYFRAMES: readonly CityMotionFrame[] = Array.from(
   },
 );
 
-/** Natural pixel size of the production WebP assets. */
+/** Natural pixel size of the production room-and-city WebP asset. */
 export const OTHER_CITY_SIZE = { w: 1448, h: 1086 } as const;
-export const HOME_CITY_SIZE = { w: 1535, h: 1024 } as const;
 
 /**
- * Inner glass rect of `other-city.webp` in natural pixels.
+ * Canonical Home city rect inside `other-city.webp`, in natural pixels.
  * Measured via WIC decode + brightness edge scan at clean positions:
  * left/right at y=150 (sky, avoids plant/lamp), top/bottom at x=600
  * (centre, avoids desk reflection). Frame ≈ 0-2 vs glass ≈ 9-19.
  * Top ≈79, bottom ≈753, left ≈195, right ≈1255.
  */
 export const CITY_WINDOW_RECT = { x: 195, y: 79, w: 1060, h: 674 } as const;
-
-/**
- * The skyline in `home-city.webp` is shifted right relative to the window
- * crop in `other-city.webp`. Measured by registering the central tower/spire
- * in the two production assets, in natural window pixels.
- */
-export const CITY_WINDOW_CONTENT_ALIGNMENT_X = 20;
-
-/**
- * The production assets use slightly different skyline framing scales. The
- * registered window-to-Home mapping is 96% of the dimension-only cover math.
- */
-export const CITY_WINDOW_CONTENT_SCALE = 0.96;
+/** HomeCosmos renders this exact crop from the same decoded source image. */
+export const HOME_CITY_SIZE = { w: CITY_WINDOW_RECT.w, h: CITY_WINDOW_RECT.h } as const;
 
 /** Duration of the shared city handoff (`--motion-city-return` = `--motion-expressive` = 760ms). */
 export const CITY_WINDOW_HANDOFF_DURATION = 760;
 
 /**
  * Compute the camera end/start transform that makes the window rect of `other-city`
- * (cover-fitted) coincide with `home-city` rendered as `center/cover` at
- * `CITY_MOTION_INITIAL_SCALE`. Compensates the live track drift/scale and the
- * measured asset-registration offset so the push-in final frame lands on the
- * same skyline as the persistent Home Canvas.
+ * (cover-fitted) coincide with the canonical window crop rendered as
+ * `center/cover` at `CITY_MOTION_INITIAL_SCALE`. Compensates only the live
+ * track drift/scale because both sides now use the same decoded pixels.
  */
 export function getCityWindowTransform(
   viewW: number,
@@ -68,7 +55,7 @@ export function getCityWindowTransform(
   const sOther = Math.max(viewW / OTHER_CITY_SIZE.w, viewH / OTHER_CITY_SIZE.h);
   const kCover = Math.max(CITY_WINDOW_RECT.w / HOME_CITY_SIZE.w, CITY_WINDOW_RECT.h / HOME_CITY_SIZE.h);
   const sHome = Math.max(viewW / HOME_CITY_SIZE.w, viewH / HOME_CITY_SIZE.h) * CITY_MOTION_INITIAL_SCALE;
-  const mTotal = (sHome / (kCover * sOther)) * CITY_WINDOW_CONTENT_SCALE;
+  const mTotal = sHome / (kCover * sOther);
   const scale = mTotal / trackFrame.scale;
 
   const ox = (viewW - OTHER_CITY_SIZE.w * sOther) / 2;
@@ -79,7 +66,6 @@ export function getCityWindowTransform(
   const vcY = viewH / 2;
   const driftX = (viewW * trackFrame.x) / 100;
   const driftY = (viewH * trackFrame.y) / 100;
-  const alignmentShiftX = (CITY_WINDOW_CONTENT_ALIGNMENT_X * sOther * scale) / CITY_WINDOW_CONTENT_SCALE;
 
   // CSS `transform: translate(...) scale(...)` applies scale first (about center)
   // then translate outside. Track has the same order:
@@ -88,7 +74,7 @@ export function getCityWindowTransform(
   // => qs = vc + (ql - vc)*cs*ts + Cc*ts + Tc
   // Requirement qs(windowCenter)=homeCenter(=vc):
   //   Cc = (hc - vc - Tc)/ts - (windowCenter - vc)*cs
-  const tx = alignmentShiftX - driftX / trackFrame.scale - (windowCenterX - vcX) * scale;
+  const tx = -driftX / trackFrame.scale - (windowCenterX - vcX) * scale;
   const ty = -(driftY / trackFrame.scale) - (windowCenterY - vcY) * scale;
 
   return {

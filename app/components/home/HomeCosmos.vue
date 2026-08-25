@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { CityMotionFrame } from '~/composables/useCityMotionClock';
-import { CITY_MOTION_DURATION, getCityMotionElapsed, getCityMotionFrame } from '~/composables/useCityMotionClock';
+import {
+  CITY_MOTION_DURATION,
+  CITY_WINDOW_RECT,
+  getCityMotionElapsed,
+  getCityMotionFrame,
+  HOME_CITY_SIZE,
+} from '~/composables/useCityMotionClock';
 
 const canvas = ref<HTMLCanvasElement | null>(null);
 const route = useRoute();
@@ -67,14 +73,18 @@ const drawBackdrop = (context: CanvasRenderingContext2D, motion: CityMotionFrame
   context.fillRect(0, 0, width, height);
   if (!backdrop?.complete || !backdrop.naturalWidth) return;
 
-  const baseScale = Math.max(width / backdrop.naturalWidth, height / backdrop.naturalHeight);
+  const baseScale = Math.max(width / HOME_CITY_SIZE.w, height / HOME_CITY_SIZE.h);
   const scale = baseScale * motion.scale;
-  const imageWidth = backdrop.naturalWidth * scale;
-  const imageHeight = backdrop.naturalHeight * scale;
+  const imageWidth = HOME_CITY_SIZE.w * scale;
+  const imageHeight = HOME_CITY_SIZE.h * scale;
   const driftX = width * (motion.x / 100) + pointerX * 10;
   const driftY = height * (motion.y / 100) + pointerY * 7;
   context.drawImage(
     backdrop,
+    CITY_WINDOW_RECT.x,
+    CITY_WINDOW_RECT.y,
+    CITY_WINDOW_RECT.w,
+    CITY_WINDOW_RECT.h,
     (width - imageWidth) / 2 + driftX,
     (height - imageHeight) / 2 + driftY,
     imageWidth,
@@ -289,7 +299,7 @@ onMounted(() => {
     },
     { once: true },
   );
-  image.src = '/images/home-city.webp';
+  image.src = '/images/other-city.webp';
   observer = new ResizeObserver(([entry]) => {
     resize(entry?.contentRect);
     draw(performance.now());

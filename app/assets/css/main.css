@@ -102,9 +102,9 @@ button {
      Fallback for no-JS; the live value is computed in CityBackdrop via
      getCityWindowTransform() and set as an inline var on the backdrop so the
      push-in final frame lands on the persistent Home Canvas. */
-  --city-window-scale: 1.311;
-  --city-window-shift-x: 1.796%;
-  --city-window-shift-y: 20.45%;
+  --city-window-scale: 1.366;
+  --city-window-shift-x: -0.094%;
+  --city-window-shift-y: 21.30%;
   background-color: var(--surface-elevated);
 }
 
@@ -202,6 +202,12 @@ button {
   will-change: auto;
 }
 
+.app-view-stage.app-view-stage--home-restored .home-panel__shade {
+  animation: home-route-shade-enter var(--motion-city-return) linear
+    calc(var(--motion-city-return-content-delay) - var(--motion-city-content)) both;
+  will-change: opacity;
+}
+
 .app-view-stage.app-view-stage--home-restored .home-avatar {
   --home-return-stagger: 60ms;
 }
@@ -226,6 +232,15 @@ button {
   to {
     opacity: 1;
     filter: blur(0);
+  }
+}
+
+@keyframes home-route-shade-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -447,9 +462,9 @@ button {
 @media (max-aspect-ratio: 4 / 3) {
   .app-view-stage--orbit {
     /* Tall cover crops need their own window-to-Home calibration. */
-    --city-window-scale: 1.474;
-    --city-window-shift-x: 5.827%;
-    --city-window-shift-y: 17.24%;
+    --city-window-scale: 1.536;
+    --city-window-shift-x: -0.306%;
+    --city-window-shift-y: 17.96%;
   }
 }
 
@@ -480,6 +495,11 @@ button {
     animation: none;
     filter: none;
     transform: none;
+  }
+  .app-view-stage.app-view-stage--home-restored .home-panel__shade {
+    opacity: 1;
+    animation: none;
+    will-change: auto;
   }
 }
 
