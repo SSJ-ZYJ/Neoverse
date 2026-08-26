@@ -6,7 +6,6 @@ import {
   getCityMotionElapsed,
   getCityMotionFrame,
   getCityWindowTransform,
-  resetCityMotionClock,
 } from '~/composables/useCityMotionClock';
 
 type CityTransitionDirection = 'from-home' | 'to-home';
@@ -18,7 +17,7 @@ const backdrop = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
 let trackAnimation: Animation | undefined;
 
-function applyWindowVars(direction: CityTransitionDirection | null) {
+function applyWindowVars(direction: CityTransitionDirection | null, elapsed = getCityMotionElapsed(performance.now())) {
   const element = backdrop.value;
   if (!element || !import.meta.client) return;
   if (direction !== 'from-home' && direction !== 'to-home') {
@@ -30,7 +29,6 @@ function applyWindowVars(direction: CityTransitionDirection | null) {
   const viewW = window.innerWidth;
   const viewH = window.innerHeight;
   if (!viewW || !viewH) return;
-  const elapsed = getCityMotionElapsed(performance.now());
   const targetElapsed = direction === 'to-home' ? elapsed + CITY_WINDOW_HANDOFF_DURATION : elapsed;
   const trackFrame = getCityMotionFrame(targetElapsed);
   const t = getCityWindowTransform(viewW, viewH, trackFrame);
@@ -45,10 +43,9 @@ const handleAnimationEnd = (event: AnimationEvent) => {
   }
   if (props.direction === 'to-home' && event.animationName === 'section-city-push-in') {
     // Release the persistent Home Canvas and the child track from the exact
-    // same initial frame. Resetting before the emit prevents HomeCosmos from
-    // jumping from the frozen handoff frame to the already elapsed return phase.
+    // same route-spanning frame. Keep the clock continuous so returning Home
+    // never jumps back to the first frame.
     const handoffTimestamp = performance.now();
-    resetCityMotionClock(handoffTimestamp);
     if (trackAnimation) trackAnimation.currentTime = getCityMotionElapsed(handoffTimestamp);
     emit('transition-end', 'to-home');
   }
@@ -81,9 +78,11 @@ onMounted(() => {
 watch(
   () => props.direction,
   (direction) => {
-    applyWindowVars(direction);
-    if (direction === 'from-home' && trackAnimation) {
-      trackAnimation.currentTime = getCityMotionElapsed();
+    const timestamp = performance.now();
+    const elapsed = getCityMotionElapsed(timestamp);
+    applyWindowVars(direction, elapsed);
+    if ((direction === 'from-home' || direction === 'to-home') && trackAnimation) {
+      trackAnimation.currentTime = elapsed;
     }
   },
 );

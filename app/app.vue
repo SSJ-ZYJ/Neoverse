@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { NAV_ITEMS } from '#shared/constants';
-import { resetCityMotionClock } from '~/composables/useCityMotionClock';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -109,7 +108,6 @@ if (import.meta.client) {
       pageTransitionName.value = 'route-to-home';
       cityTransitionDirection.value = isSectionPath(from.path) ? 'to-home' : null;
       homeContentSettled.value = isSectionPath(from.path);
-      if (isSectionPath(from.path)) resetCityMotionClock();
     } else if (from.path === '/') {
       pageTransitionName.value = 'route-from-home';
       cityTransitionDirection.value = isSectionPath(to.path) ? 'from-home' : null;

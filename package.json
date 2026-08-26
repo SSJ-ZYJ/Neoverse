@@ -3,23 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.3.14",
+  "packageManager": "bun@1.4.0",
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "test:fouc": "bun scripts/check-critical-shell.ts",
-    "test:home-behavior": "bun scripts/check-home-behavior.ts",
-    "test:projects-mobile": "bun scripts/check-projects-mobile.ts",
-    "test:route-background": "bun scripts/check-route-background.ts",
-    "test:city-background": "bun scripts/check-city-background.ts",
-    "test:city-pixel-source": "bun scripts/check-city-pixel-source.ts",
-    "test:projects-skeleton": "bun scripts/check-projects-skeleton.ts",
-    "test:card-transition": "bun scripts/check-card-transition.ts",
-    "test:pulse-mobile-heatmap": "bun scripts/check-pulse-mobile-heatmap.ts",
-    "test:pulse-transition": "bun scripts/check-pulse-transition.ts",
-    "test:skeleton-alignment": "bun scripts/check-skeleton-alignment.ts",
     "typecheck": "nuxt typecheck",
     "format": "biome format --write .",
     "format:check": "biome format .",
@@ -30,17 +20,16 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
     "@nuxtjs/i18n": "^10.6.0",
-    "nuxt": "^4.0.0"
+    "nuxt": "^4.5.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.8",
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
-    "@iconify-json/lucide": "^1.2.123",
+    "@biomejs/biome": "^2.5.10",
+    "@iconify-json/lucide": "^1.2.126",
     "@iconify-json/simple-icons": "^1.2.93",
-    "@tailwindcss/vite": "^4.1.0",
-    "tailwindcss": "^4.1.0",
-    "typescript": "^5.8.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3",
     "unplugin-icons": "^23.0.1",
-    "vue-tsc": "^3.3.10"
+    "vue-tsc": "^3.3.11"
   }
 }

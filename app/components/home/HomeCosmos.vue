@@ -9,7 +9,6 @@ import {
 } from '~/composables/useCityMotionClock';
 
 const canvas = ref<HTMLCanvasElement | null>(null);
-const route = useRoute();
 const { isRouteTransitioning } = useRouteTransitionState();
 
 const FRAME_INTERVAL = 1000 / 30;
@@ -184,17 +183,16 @@ const draw = (time = 0) => {
   if (!context) return;
 
   const isReduced = reducedMotion?.matches ?? false;
-  const isReturningHome = route.path === '/' && isRouteTransitioning.value;
-  if (isReturningHome) {
-    // The persistent Canvas is the return handoff surface. Ignore pointer
-    // parallax from the child page so its first visible frame is the exact
-    // centered Home camera used by the route transition.
+  if (isRouteTransitioning.value) {
+    // The child-page camera has no pointer parallax. Keep the persistent Home
+    // Canvas on the same centered camera while either route transition reveals
+    // it, without changing the shared city-motion frame.
     pointerX = 0;
     pointerY = 0;
     pointerTargetX = 0;
     pointerTargetY = 0;
   }
-  const loopTime = isReduced || isReturningHome ? 0 : getCityMotionElapsed(time) % CITY_MOTION_DURATION;
+  const loopTime = isReduced ? 0 : getCityMotionElapsed(time) % CITY_MOTION_DURATION;
   const phase = loopTime / CITY_MOTION_DURATION;
   const cityMotion = getCityMotionFrame(loopTime);
   pointerX += (pointerTargetX - pointerX) * 0.045;

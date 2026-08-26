@@ -44,8 +44,8 @@ export const CITY_WINDOW_HANDOFF_DURATION = 760;
 /**
  * Compute the camera end/start transform that makes the window rect of `other-city`
  * (cover-fitted) coincide with the canonical window crop rendered as
- * `center/cover` at `CITY_MOTION_INITIAL_SCALE`. Compensates only the live
- * track drift/scale because both sides now use the same decoded pixels.
+ * `center/cover` at the supplied motion frame. Both sides use the same source
+ * pixels, motion scale, and drift, so the seam stays aligned away from frame zero.
  */
 export function getCityWindowTransform(
   viewW: number,
@@ -54,7 +54,11 @@ export function getCityWindowTransform(
 ): { scale: number; shiftX: number; shiftY: number } {
   const sOther = Math.max(viewW / OTHER_CITY_SIZE.w, viewH / OTHER_CITY_SIZE.h);
   const kCover = Math.max(CITY_WINDOW_RECT.w / HOME_CITY_SIZE.w, CITY_WINDOW_RECT.h / HOME_CITY_SIZE.h);
-  const sHome = Math.max(viewW / HOME_CITY_SIZE.w, viewH / HOME_CITY_SIZE.h) * CITY_MOTION_INITIAL_SCALE;
+  // HomeCosmos applies the same motion scale to the crop that CityBackdrop
+  // applies to the outer track. Use the target frame's scale here so the
+  // window stays pixel-aligned throughout the shared timeline, not only at
+  // the initial frame.
+  const sHome = Math.max(viewW / HOME_CITY_SIZE.w, viewH / HOME_CITY_SIZE.h) * trackFrame.scale;
   const mTotal = sHome / (kCover * sOther);
   const scale = mTotal / trackFrame.scale;
 
@@ -64,18 +68,22 @@ export function getCityWindowTransform(
   const windowCenterY = oy + (CITY_WINDOW_RECT.y + CITY_WINDOW_RECT.h / 2) * sOther;
   const vcX = viewW / 2;
   const vcY = viewH / 2;
-  const driftX = (viewW * trackFrame.x) / 100;
-  const driftY = (viewH * trackFrame.y) / 100;
+  const trackDriftX = (viewW * trackFrame.x) / 100;
+  const trackDriftY = (viewH * trackFrame.y) / 100;
+  const homeDriftX = trackDriftX;
+  const homeDriftY = trackDriftY;
 
-  // CSS `transform: translate(...) scale(...)` applies scale first (about center)
+  // CSS `translate(...) scale(...)` applies scale first (about center)
   // then translate outside. Track has the same order:
   //   camera:  qc = vc + (ql - vc)*cs + Cc
   //   track:   qs = vc + (qc - vc)*ts + Tc
   // => qs = vc + (ql - vc)*cs*ts + Cc*ts + Tc
-  // Requirement qs(windowCenter)=homeCenter(=vc):
-  //   Cc = (hc - vc - Tc)/ts - (windowCenter - vc)*cs
-  const tx = -driftX / trackFrame.scale - (windowCenterX - vcX) * scale;
-  const ty = -(driftY / trackFrame.scale) - (windowCenterY - vcY) * scale;
+  // Requirement qs(windowCenter)=homeCenter(=vc + HomeDrift):
+  //   Cc = (homeDrift - Tc)/ts - (windowCenter - vc)*cs
+  // Home and the child track intentionally use the same drift, so those terms
+  // cancel instead of pulling the child window away from the Home Canvas.
+  const tx = (homeDriftX - trackDriftX) / trackFrame.scale - (windowCenterX - vcX) * scale;
+  const ty = (homeDriftY - trackDriftY) / trackFrame.scale - (windowCenterY - vcY) * scale;
 
   return {
     scale,
@@ -86,13 +94,11 @@ export function getCityWindowTransform(
 
 let cityMotionStartedAt: number | undefined;
 
-export function resetCityMotionClock(timestamp = import.meta.client ? performance.now() : 0) {
-  cityMotionStartedAt = timestamp;
-}
-
 /**
  * One browser-wide clock keeps the city flight at the same phase while Nuxt
- * swaps Home's canvas for the child-page backdrop (and vice versa).
+ * swaps Home's canvas for the child-page backdrop (and vice versa). It is
+ * intentionally never reset during navigation; both surfaces must keep the
+ * same frame sequence through a return handoff.
  */
 export function getCityMotionElapsed(timestamp = import.meta.client ? performance.now() : 0) {
   cityMotionStartedAt ??= timestamp;
