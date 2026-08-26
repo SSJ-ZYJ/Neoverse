@@ -10,6 +10,9 @@ useSeoMeta({
   ogTitle: seoTitle,
   ogDescription: () => t('focus.description'),
   ogUrl: `${SITE.origin}/focus`,
+  ogImage: SITE.avatar,
+  twitterCard: 'summary_large_image',
+  twitterImage: SITE.avatar,
 });
 </script>
 

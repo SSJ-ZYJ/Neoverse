@@ -13,8 +13,9 @@ useSeoMeta({
   ogDescription: seoDescription,
   ogUrl: SITE.origin,
   ogType: 'website',
-  ogImage: `${SITE.origin}/images/home-city.webp`,
+  ogImage: SITE.avatar,
   twitterCard: 'summary_large_image',
+  twitterImage: SITE.avatar,
 });
 </script>
 

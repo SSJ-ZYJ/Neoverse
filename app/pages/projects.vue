@@ -10,8 +10,9 @@ useSeoMeta({
   ogTitle: seoTitle,
   ogDescription: () => t('projects.description'),
   ogUrl: `${SITE.origin}/projects`,
-  ogImage: `${SITE.origin}/images/project-docs.png`,
+  ogImage: SITE.avatar,
   twitterCard: 'summary_large_image',
+  twitterImage: SITE.avatar,
 });
 </script>
 

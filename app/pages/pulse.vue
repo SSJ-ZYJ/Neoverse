@@ -53,6 +53,9 @@ useSeoMeta({
   ogTitle: seoTitle,
   ogDescription: () => t('pulse.description'),
   ogUrl: `${SITE.origin}/pulse`,
+  ogImage: SITE.avatar,
+  twitterCard: 'summary_large_image',
+  twitterImage: SITE.avatar,
 });
 </script>
 
