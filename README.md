@@ -18,6 +18,16 @@ Shenshijun's personal space for software engineering, open source, and agentic d
 
 Neoverse is Shenshijun's personal homepage and a small Nuxt portfolio with a persistent bottom dock, responsive glass UI, bilingual content, and a shared city background for coordinated route transitions. Missing external data is shown as unavailable; the site never fabricates activity.
 
+## Preview
+
+> Dark glass-morphism · shared city skyline · bottom dock — 全站深色主题，基于 `app/assets/css/tokens.css` 设计令牌与 `glass-card` 毛玻璃材质，城市背景在路由间协同缩放。
+
+<p align="center">
+  <img src="public/images/screenshots/home.webp" alt="Home — 城市动效与玻璃快捷入口" width="100%" />
+  <br />
+  <em>Home <code>/</code> — Cosmos 城市动效、磨砂玻璃快捷入口与底部 Dock（<code>HomeSection.vue</code> + <code>CityBackdrop.vue</code>）</em>
+</p>
+
 ## Routes
 
 | Route | Purpose |
