@@ -9,6 +9,7 @@ import {
 } from '~/composables/useCityMotionClock';
 
 const canvas = ref<HTMLCanvasElement | null>(null);
+const backdropImage = ref<HTMLImageElement | null>(null);
 const { isRouteTransitioning } = useRouteTransitionState();
 
 const FRAME_INTERVAL = 1000 / 30;
@@ -68,9 +69,10 @@ const resize = (layoutSize?: Pick<DOMRectReadOnly, 'width' | 'height'>) => {
 };
 
 const drawBackdrop = (context: CanvasRenderingContext2D, motion: CityMotionFrame) => {
+  if (!backdrop?.complete || !backdrop.naturalWidth) return false;
+
   context.fillStyle = '#020812';
   context.fillRect(0, 0, width, height);
-  if (!backdrop?.complete || !backdrop.naturalWidth) return;
 
   const baseScale = Math.max(width / HOME_CITY_SIZE.w, height / HOME_CITY_SIZE.h);
   const scale = baseScale * motion.scale;
@@ -89,6 +91,7 @@ const drawBackdrop = (context: CanvasRenderingContext2D, motion: CityMotionFrame
     imageWidth,
     imageHeight,
   );
+  return true;
 };
 
 /**
@@ -200,7 +203,7 @@ const draw = (time = 0) => {
 
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   context.clearRect(0, 0, width, height);
-  drawBackdrop(context, cityMotion);
+  if (!drawBackdrop(context, cityMotion)) return;
 
   const readability = context.createLinearGradient(0, 0, width, 0);
   readability.addColorStop(0, 'rgba(2, 8, 18, .82)');
@@ -285,25 +288,29 @@ onMounted(() => {
   pointerTargetX = 0;
   pointerTargetY = 0;
   reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const image = new Image();
-  backdrop = image;
-  image.decoding = 'async';
-  image.addEventListener(
-    'load',
-    () => {
-      const now = performance.now();
-      lastFrame = now;
-      draw(now);
-    },
-    { once: true },
-  );
-  image.src = '/images/other-city.webp';
+
+  const image = backdropImage.value;
+  let backdropPainted = false;
+  const paintBackdrop = () => {
+    if (backdropPainted) return;
+    backdropPainted = true;
+    lastFrame = performance.now();
+    resize();
+    draw(lastFrame);
+  };
+
+  if (image) {
+    backdrop = image;
+    image.addEventListener('load', paintBackdrop, { once: true });
+  }
+
   observer = new ResizeObserver(([entry]) => {
     resize(entry?.contentRect);
     draw(performance.now());
   });
   if (canvas.value) observer.observe(canvas.value);
   resize();
+  if (image?.complete && image.naturalWidth > 0) paintBackdrop();
   window.addEventListener('pointermove', handlePointer, { passive: true });
   window.addEventListener('pointerleave', resetPointer);
   frame = requestAnimationFrame(animate);
@@ -322,8 +329,56 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<template><canvas ref="canvas" class="home-cosmos" aria-hidden="true" /></template>
+<template>
+  <img
+    ref="backdropImage"
+    class="home-cosmos__fallback"
+    src="/images/other-city.webp"
+    alt=""
+    width="1448"
+    height="1086"
+    loading="eager"
+    fetchpriority="high"
+    decoding="sync"
+    aria-hidden="true"
+  />
+  <div class="home-cosmos__fallback-shade" aria-hidden="true" />
+  <canvas ref="canvas" class="home-cosmos" aria-hidden="true" />
+</template>
 
 <style scoped>
-.home-cosmos { position: absolute; z-index: 0; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+.home-cosmos__fallback {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: max(
+    calc(136.604vw * var(--city-motion-initial-scale, 1.05)),
+    calc(214.837vh * var(--city-motion-initial-scale, 1.05))
+  );
+  max-width: none;
+  height: auto;
+  background: #020812;
+  transform: translate(calc(-50% - 0.069%), calc(-50% + 11.694%));
+}
+.home-cosmos__fallback-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(circle 42vw at 82% 20%, rgb(50 170 235 / 7.5%), rgb(13 96 160 / 0%) 100%),
+    linear-gradient(90deg, rgb(2 8 18 / 82%), rgb(2 8 18 / 34%) 50%, rgb(2 8 18 / 8%)),
+    linear-gradient(0deg, rgb(1 5 12 / 48%), rgb(1 5 12 / 6%) 32%, rgb(1 5 12 / 8%));
+  pointer-events: none;
+}
+.home-cosmos {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
 </style>

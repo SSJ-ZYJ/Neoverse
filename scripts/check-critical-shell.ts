@@ -12,7 +12,7 @@ if (!criticalStyle) {
   throw new Error('SSR HTML is missing the neoverse-critical-shell inline style.');
 }
 
-for (const requiredRule of ['.skip-link', '.dashboard-loading', '[inert]']) {
+for (const requiredRule of ['.skip-link', '.dashboard-loading', '.home-cosmos__fallback', '[inert]']) {
   if (!criticalStyle.includes(requiredRule)) {
     throw new Error(`Critical shell is missing the ${requiredRule} fallback rule.`);
   }

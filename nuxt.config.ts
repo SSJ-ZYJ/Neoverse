@@ -30,9 +30,31 @@ body {
   overflow: hidden;
   pointer-events: none;
 }
-.app-view-background .home-cosmos {
+.app-view-background .home-cosmos__fallback {
   position: absolute;
   z-index: 0;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: max(calc(136.604vw * 1.05), calc(214.837vh * 1.05));
+  max-width: none;
+  height: auto;
+  background: #020812;
+  transform: translate(calc(-50% - 0.069%), calc(-50% + 11.694%));
+}
+.app-view-background .home-cosmos__fallback-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    radial-gradient(circle 42vw at 82% 20%, rgb(50 170 235 / 7.5%), rgb(13 96 160 / 0%) 100%),
+    linear-gradient(90deg, rgb(2 8 18 / 82%), rgb(2 8 18 / 34%) 50%, rgb(2 8 18 / 8%)),
+    linear-gradient(0deg, rgb(1 5 12 / 48%), rgb(1 5 12 / 6%) 32%, rgb(1 5 12 / 8%));
+  pointer-events: none;
+}
+.app-view-background .home-cosmos {
+  position: absolute;
+  z-index: 2;
   inset: 0;
   display: block;
   width: 100%;
