@@ -595,6 +595,10 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-tooltip--start::after { left: 1rem; }
 .contribution-tooltip--end { transform: translate(-100%, calc(-100% - 0.65rem)); }
 .contribution-tooltip--end::after { left: calc(100% - 1rem); }
+@media (max-width: 600px) {
+  .contribution-tooltip--start { transform: translate(-1rem, calc(-100% - 0.65rem)); }
+  .contribution-tooltip--end { transform: translate(calc(-100% + 1rem), calc(-100% - 0.65rem)); }
+}
 /* 容器够宽时：统计竖排到热力图右侧，避免下方大片留白。 */
 @container contribution-card (min-width: 56rem) {
   .contribution-card__body { grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; }

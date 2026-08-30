@@ -365,6 +365,16 @@ const formatArticleDate = (value: string | null) => {
     padding: 0.45rem;
   }
   .project-card__preview-frame { padding: 0.65rem; }
+  .project-card__preview:has(.project-card__docs-list) { aspect-ratio: auto; }
+  .project-card__preview:has(.project-card__docs-list) .project-card__preview-frame { height: auto; }
+  .project-card__docs-list { flex: none; }
+  .project-card__docs-list > li { flex: none; }
+  .project-card__docs-list strong,
+  .project-card__docs-list span {
+    display: block;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+  }
   .project-card__preview-head {
     gap: 0.5rem;
     padding-bottom: 0.5rem;
