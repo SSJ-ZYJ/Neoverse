@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiGlassSurface, UiSkeleton } from '@neoverse-ui/vue';
 import type { GithubPulse, RecentCommit } from '#shared/types/github';
 
 const props = defineProps<{
@@ -22,6 +23,7 @@ const repositoryDistribution = computed(() => {
   const total = props.repositoryPulse.totalContributions ?? 0;
   if (props.repositoryPulse.scope === 'unavailable' || total === 0) return [];
 
+  // 前 2 名仓库逐行展示，其余（含第 3 名）全部并入“其他”，保证占比总和为 100%。
   const topRepositories = props.repositoryPulse.repositories.slice(0, 2).map((repository) => ({
     key: repository.repositoryUrl,
     label: repository.repository,
@@ -30,7 +32,7 @@ const repositoryDistribution = computed(() => {
     ratio: repository.contributions / total,
   }));
   const otherContributions = props.repositoryPulse.repositories
-    .slice(3)
+    .slice(2)
     .reduce((sum, repository) => sum + repository.contributions, 0);
 
   if (otherContributions > 0) {
@@ -53,14 +55,14 @@ const formatPercentage = (ratio: number) =>
 
 <template>
   <div class="activity-grid">
-    <section class="activity-column glass-card" aria-labelledby="recent-commits-title">
+    <UiGlassSurface as="section" variant="card" class="activity-column" aria-labelledby="recent-commits-title">
       <h3 id="recent-commits-title">{{ t('pulse.projects.commitsTitle') }}</h3>
       <div v-if="loading" class="activity-list" aria-hidden="true">
         <div v-for="row in 3" :key="row" class="activity-row activity-row--skeleton">
           <span class="skeleton-surface activity-row__dot" />
           <span class="activity-row__copy">
-            <BaseSkeleton variant="text" width="85%" />
-            <BaseSkeleton variant="text" width="48%" />
+            <UiSkeleton variant="text" width="85%" />
+            <UiSkeleton variant="text" width="48%" />
           </span>
         </div>
       </div>
@@ -86,31 +88,31 @@ const formatPercentage = (ratio: number) =>
         </li>
       </ul>
       <p v-else class="activity-empty">{{ t('pulse.projects.emptyCommits') }}</p>
-    </section>
+    </UiGlassSurface>
 
-    <section class="activity-column glass-card" aria-labelledby="repository-pulse-title">
+    <UiGlassSurface as="section" variant="card" class="activity-column" aria-labelledby="repository-pulse-title">
       <header class="repository-pulse__header">
         <h3 id="repository-pulse-title">{{ t('pulse.repositoryPulse.title') }}</h3>
         <span>{{ t('pulse.repositoryPulse.scope') }}</span>
       </header>
 
-      <template v-if="loading">
+      <template v-if="loading" key="pulse-projects-loading">
         <!-- 静态文案直接展示，只为未知数值占位，避免满屏碎块。 -->
         <dl class="repository-metrics" aria-hidden="true">
           <div>
             <dt>{{ t('pulse.repositoryPulse.activeRepositories') }}</dt>
-            <dd><BaseSkeleton variant="title" width="3.5rem" /></dd>
+            <dd><UiSkeleton variant="title" width="3.5rem" /></dd>
           </div>
           <div>
             <dt>{{ t('pulse.repositoryPulse.commitContributions') }}</dt>
-            <dd><BaseSkeleton variant="title" width="3.5rem" /></dd>
+            <dd><UiSkeleton variant="title" width="3.5rem" /></dd>
           </div>
         </dl>
         <div class="repository-distribution" aria-hidden="true">
           <h4>{{ t('pulse.repositoryPulse.mostActive') }}</h4>
           <ul>
             <li v-for="(row, index) in 3" :key="index">
-              <BaseSkeleton variant="text" :width="`${[58, 34, 44][index]}%`" />
+              <UiSkeleton variant="text" :width="`${[58, 34, 44][index]}%`" />
               <span class="repository-distribution__track repository-distribution__track--skeleton">
                 <i :style="{ width: `${String([88, 62, 74][index])}%` }" />
               </span>
@@ -119,7 +121,7 @@ const formatPercentage = (ratio: number) =>
         </div>
       </template>
 
-      <template v-else-if="repositoryPulse.scope !== 'unavailable'">
+      <template v-else-if="repositoryPulse.scope !== 'unavailable'" key="pulse-projects-data">
         <dl class="repository-metrics">
           <div>
             <dt>{{ t('pulse.repositoryPulse.activeRepositories') }}</dt>
@@ -157,7 +159,7 @@ const formatPercentage = (ratio: number) =>
       <p v-else class="activity-empty repository-pulse__unavailable">
         {{ t('pulse.repositoryPulse.unavailable') }}
       </p>
-    </section>
+    </UiGlassSurface>
   </div>
 </template>
 
@@ -330,8 +332,8 @@ const formatPercentage = (ratio: number) =>
   letter-spacing: -0.05em;
   line-height: 1;
 }
-.repository-metrics dt :deep(.base-skeleton) { height: calc(var(--text-sm) * 1.55); }
-.repository-metrics dd :deep(.base-skeleton) { height: var(--text-display-sm); }
+.repository-metrics dt :deep(.ui-skeleton) { height: calc(var(--text-sm) * 1.55); }
+.repository-metrics dd :deep(.ui-skeleton) { height: var(--text-display-sm); }
 .repository-distribution {
   display: grid;
   align-content: start;
@@ -398,7 +400,7 @@ const formatPercentage = (ratio: number) =>
   font-size: var(--text-md);
   text-align: center;
 }
-.repository-distribution__track--skeleton i { width: 100%; background: var(--skeleton-fill); }
+.repository-distribution__track--skeleton i { width: 100%; background: var(--neoverse-skeleton-fill); }
 .repository-pulse__unavailable {
   min-height: 11rem;
 }

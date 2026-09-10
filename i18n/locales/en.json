@@ -141,8 +141,8 @@
     "title": "Aurora Glass",
     "description": "Project-specific UI standard extracted from the dock and quick links.",
     "buttons": {
-      "title": "UiGlassButton",
-      "hint": "variant: glass / ghost · size: sm / md / lg",
+      "title": "UiButton",
+      "hint": "variant: primary / secondary / ghost · size: sm / md / lg (Neoverse-UI command control)",
       "overview": "Overview",
       "docs": "Docs",
       "contact": "Contact Me"

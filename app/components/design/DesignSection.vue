@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiButton, UiSegmentedControl } from '@neoverse-ui/vue';
 import { getHomeLinkEntryDelay, getHomeStatusEntryDelay, HOME_LINKS } from '#shared/constants';
 import IconLucideFolderOpen from '~icons/lucide/folder-open';
 import IconLucideMail from '~icons/lucide/mail';
@@ -50,20 +51,22 @@ const motionRows = computed(() => {
         <h2 id="design-buttons-title">{{ t('design.buttons.title') }}</h2>
         <p class="design-block__hint">{{ t('design.buttons.hint') }}</p>
         <div class="design-row">
-          <UiGlassButton variant="glass" size="lg">
-            <template #icon><IconLucideMail aria-hidden="true" /></template>
+          <UiButton variant="secondary" size="lg">
+            <template #leading><IconLucideMail aria-hidden="true" /></template>
             {{ t('design.buttons.contact') }}
-          </UiGlassButton>
-          <UiGlassButton variant="glass" size="lg" filled-icon>
-            <template #icon><IconLucideTerminal aria-hidden="true" /></template>
+          </UiButton>
+          <UiButton variant="secondary" size="lg">
+            <template #leading>
+              <IconLucideTerminal class="design-button__icon--filled" aria-hidden="true" />
+            </template>
             {{ t('design.buttons.overview') }}
-          </UiGlassButton>
-          <UiGlassButton variant="ghost" size="md">
-            <template #icon><IconLucideFolderOpen aria-hidden="true" /></template>
+          </UiButton>
+          <UiButton variant="ghost" size="md">
+            <template #leading><IconLucideFolderOpen aria-hidden="true" /></template>
             {{ t('design.buttons.docs') }}
-          </UiGlassButton>
-          <UiGlassButton variant="ghost" size="md" active>{{ t('design.buttons.overview') }}</UiGlassButton>
-          <UiGlassButton variant="glass" size="sm">{{ t('design.buttons.overview') }}</UiGlassButton>
+          </UiButton>
+          <UiButton variant="primary" size="md">{{ t('design.buttons.overview') }}</UiButton>
+          <UiButton variant="secondary" size="sm">{{ t('design.buttons.overview') }}</UiButton>
         </div>
       </section>
 
@@ -71,13 +74,11 @@ const motionRows = computed(() => {
         <h2 id="design-segmented-title">{{ t('design.segmented.title') }}</h2>
         <p class="design-block__hint">{{ t('design.segmented.hint') }}</p>
         <div class="design-row">
-          <div class="design-segment-well">
-            <UiSegmentedControl
-              v-model="segmentValue"
-              :options="segmentOptions"
-              :label="t('design.segmented.ariaLabel')"
-            />
-          </div>
+          <UiSegmentedControl
+            v-model="segmentValue"
+            :options="segmentOptions"
+            :aria-label="t('design.segmented.ariaLabel')"
+          />
         </div>
       </section>
 
@@ -174,14 +175,8 @@ const motionRows = computed(() => {
   gap: 0.65rem;
   margin-top: 1.1rem;
 }
+.design-button__icon--filled { fill: currentColor; stroke: none; }
 
-.design-segment-well {
-  display: inline-flex;
-  border: 1px solid rgb(219 234 254 / 9%);
-  border-radius: var(--radius-control);
-  padding: 0.22rem;
-  background: rgb(255 255 255 / 3%);
-}
 
 .design-swatches {
   display: flex;

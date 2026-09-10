@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiGlassSurface } from '@neoverse-ui/vue';
 import type { Component } from 'vue';
 import { FOCUS_DOMAINS } from '#shared/constants';
 import IconLucideBot from '~icons/lucide/bot';
@@ -63,7 +64,7 @@ const stageAlign = (index: number) => {
 
     <!-- 成长路径图：三个方向 × 探索/学习/构建/应用。档位来自真实 status，
          当前阶段节点高亮、其余弱化；刻意不做完成度填充，避免被读成百分比。 -->
-    <div class="focus-journey glass-card">
+    <UiGlassSurface variant="card" class="focus-journey">
       <div class="focus-journey__bar">
         <span class="focus-journey__command">
           <IconLucideTerminal class="focus-journey__command-icon" aria-hidden="true" />
@@ -116,10 +117,10 @@ const stageAlign = (index: number) => {
       </div>
 
       <p class="focus-journey__footnote"># {{ t('focus.mainComment') }}</p>
-    </div>
+    </UiGlassSurface>
 
     <!-- 轻量兴趣区：补足页面下半部分的信息密度，保持克制。 -->
-    <aside class="focus-interests glass-card" :aria-label="String(t('focus.exploring.label'))">
+    <UiGlassSurface as="aside" variant="card" class="focus-interests" :aria-label="String(t('focus.exploring.label'))">
       <div class="focus-interests__head">
         <IconLucideCompass class="focus-interests__icon" aria-hidden="true" />
         <span class="focus-interests__label">{{ t('focus.exploring.label') }}</span>
@@ -128,7 +129,7 @@ const stageAlign = (index: number) => {
       <ul class="focus-interests__list">
         <li v-for="topic in topics" :key="topic">{{ topic }}</li>
       </ul>
-    </aside>
+    </UiGlassSurface>
   </section>
 </template>
 
@@ -157,6 +158,7 @@ const stageAlign = (index: number) => {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding: 0;
 }
 
 /* ── 卡片顶部终端栏 ─────────────────────────────────────────── */

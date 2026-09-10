@@ -6,13 +6,26 @@ const { data: pulse, status, error, refresh } = useGithubPulse();
 const { isRouteTransitioning } = useRouteTransitionState();
 const pulseData = computed(() => pulse.value ?? createEmptyPulse());
 const pulseRequestPending = computed(() => status.value === 'idle' || status.value === 'pending');
-const pulseContentReady = ref(true);
+const pulseContentReady = ref(false);
 let pulseRevealFrame: number | undefined;
+let pulseRevealTimer: number | undefined;
 
-const cancelPulseReveal = () => {
-  if (!import.meta.client || pulseRevealFrame === undefined) return;
-  cancelAnimationFrame(pulseRevealFrame);
+const clearPulseRevealTimers = () => {
+  if (!import.meta.client) return;
+  if (pulseRevealFrame !== undefined) {
+    cancelAnimationFrame(pulseRevealFrame);
+    pulseRevealFrame = undefined;
+  }
+  if (pulseRevealTimer !== undefined) {
+    window.clearTimeout(pulseRevealTimer);
+    pulseRevealTimer = undefined;
+  }
+};
+
+const settlePulseReveal = () => {
   pulseRevealFrame = undefined;
+  pulseRevealTimer = undefined;
+  if (!isRouteTransitioning.value && !pulseRequestPending.value) pulseContentReady.value = true;
 };
 
 const schedulePulseReveal = () => {
@@ -20,11 +33,11 @@ const schedulePulseReveal = () => {
     pulseContentReady.value = true;
     return;
   }
-  cancelPulseReveal();
-  pulseRevealFrame = requestAnimationFrame(() => {
-    pulseRevealFrame = undefined;
-    if (!isRouteTransitioning.value && !pulseRequestPending.value) pulseContentReady.value = true;
-  });
+  clearPulseRevealTimers();
+  // rAF 在后台/被遮挡的标签页会被暂停：只依赖它会让揭示永久卡在骨架屏。
+  // 用短超时兜底，正常情况下 rAF 先触发，超时仅作保险。
+  pulseRevealFrame = requestAnimationFrame(settlePulseReveal);
+  pulseRevealTimer = window.setTimeout(settlePulseReveal, 250);
 };
 
 watch(
@@ -32,7 +45,7 @@ watch(
   ([transitioning, pending]) => {
     if (transitioning || pending) {
       pulseContentReady.value = false;
-      cancelPulseReveal();
+      clearPulseRevealTimers();
       return;
     }
     schedulePulseReveal();
@@ -40,7 +53,7 @@ watch(
   { immediate: true },
 );
 
-onBeforeUnmount(cancelPulseReveal);
+onBeforeUnmount(clearPulseRevealTimers);
 
 const pulseDisplayLoading = computed(
   () => isRouteTransitioning.value || pulseRequestPending.value || !pulseContentReady.value,

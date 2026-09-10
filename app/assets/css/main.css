@@ -1,5 +1,9 @@
-@import "@fontsource-variable/inter";
 @import "tailwindcss";
+/* Shared design system: consumer bundle (theme + component css + utilities
+   pre-scanned from the DS Vue sources). */
+@import "@neoverse-ui/tailwind/index.css";
+@import "./consumer-parity.css";
+/* Neoverse project tokens keep their own Hero/City/Pulse/layout vocabulary. */
 @import "./tokens.css";
 
 *,
@@ -30,21 +34,6 @@ body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: 1.55;
-}
-
-/* The document scrollbar is replaced by the immersive CustomScrollbar overlay
-   (see app/components/CustomScrollbar.vue). Keep only the root scrollbar hidden
-   so nested scroll regions can retain their own native affordance. */
-html,
-body {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* legacy Edge/IE */
-}
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none; /* WebKit / Blink */
-  width: 0;
-  height: 0;
 }
 
 ::selection {
@@ -173,13 +162,13 @@ button {
     var(--motion-city-home-match-delay) both;
 }
 
-.app-view-stage--city-to-home .city-backdrop__overlay {
-  animation: section-city-brighten var(--motion-city-return) linear both;
-}
-
 .city-backdrop__overlay {
   background: var(--section-orbit-overlay);
   will-change: opacity;
+}
+
+.app-view-stage--city-to-home .city-backdrop__overlay {
+  animation: section-city-brighten var(--motion-city-return) linear both;
 }
 
 .app-view-stage > :where(:not(.city-backdrop, .app-view-background)) {
@@ -310,37 +299,6 @@ button {
   }
 }
 
-/* Shared glass primitive: content cards scale the Home shortcut-button
-   material up to a larger surface while retaining the card hairline,
-   highlight, and ambient shadow. Keep the effect centralized here. */
-.glass-card,
-.glass-surface {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border: 1px solid var(--glass-card-border);
-  background: var(--glass-refraction-fill), var(--surface-glass);
-  box-shadow: var(--glass-surface-shadow);
-}
-
-/* The card background is a restrained large-surface variant of aurora-fill;
-   page components may add hover feedback without inventing a new material. */
-.glass-card {
-  border-radius: var(--radius-surface);
-  background: var(--glass-card-background);
-  -webkit-backdrop-filter: var(--glass-card-filter);
-  backdrop-filter: var(--glass-card-filter);
-}
-
-.glass-card > * {
-  position: relative;
-  z-index: 1;
-}
-
-.glass-surface {
-  border-radius: var(--radius-control);
-}
-
 /* 紧凑两行页头：标题 + 右侧元信息一行，精简描述一行。
    眉题序号已移除（无信息量），三页共用此骨架。 */
 .panel-header {
@@ -377,75 +335,6 @@ button {
   line-height: 1.45;
 }
 
-.panel-action {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.35rem;
-  border-radius: var(--radius-control);
-  padding: 0.55rem 0.8rem;
-  color: var(--accent-primary);
-  font-size: var(--text-md);
-  font-weight: var(--weight-bold);
-  text-decoration: none;
-  transition:
-    color var(--motion-fast) var(--motion-ease-standard),
-    background-color var(--motion-fast) var(--motion-ease-standard);
-}
-.panel-action:hover {
-  background: var(--accent-soft);
-}
-
-.tech-chip {
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--radius-control-inner);
-  padding: 0.32rem 0.62rem;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  line-height: 1.3;
-  background: var(--aurora-fill);
-  box-shadow: var(--shadow-edge);
-}
-.status-chip {
-  display: inline-flex;
-  align-items: center;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-control);
-  padding: 0.32rem 0.62rem;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-semibold);
-  line-height: 1.3;
-  background: var(--surface-subtle);
-}
-.status-chip {
-  border-color: color-mix(in srgb, var(--accent-secondary) 24%, var(--border-subtle));
-  color: color-mix(in srgb, var(--accent-secondary) 76%, var(--text-primary));
-  background: color-mix(in srgb, var(--accent-secondary) 9%, var(--surface-subtle));
-}
-
-.skeleton-surface {
-  position: relative;
-  overflow: hidden;
-  background: var(--skeleton-fill);
-  box-shadow: var(--skeleton-edge);
-}
-.skeleton-surface::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(100deg, transparent 24%, var(--skeleton-highlight) 50%, transparent 76%);
-  transform: translateX(-100%);
-  animation: skeleton-shimmer 1.25s ease-in-out infinite;
-}
-@keyframes skeleton-shimmer {
-  to {
-    transform: translateX(100%);
-  }
-}
-
 @media (max-width: 700px) {
   .site-main {
     padding: 0;
@@ -476,9 +365,6 @@ button {
   }
   html {
     scroll-behavior: auto;
-  }
-  .skeleton-surface::after {
-    animation: none;
   }
   .city-backdrop__track {
     animation: none;

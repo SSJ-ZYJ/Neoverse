@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UiGlassSurface, UiSkeleton } from '@neoverse-ui/vue';
+import type { ComponentPublicInstance } from 'vue';
 import type { GithubPulse } from '#shared/types/github';
 
 const props = defineProps<{ contributions: GithubPulse['contributions']; loading: boolean }>();
@@ -30,6 +32,19 @@ const CHART_MOTION_DEFAULTS = {
 };
 
 const cardElement = ref<HTMLElement | null>(null);
+const setCardElement = (surface: Element | ComponentPublicInstance | null) => {
+  if (surface instanceof HTMLElement) {
+    cardElement.value = surface;
+    return;
+  }
+
+  if (surface === null || !('$el' in surface)) {
+    cardElement.value = null;
+    return;
+  }
+
+  cardElement.value = surface.$el instanceof HTMLElement ? surface.$el : null;
+};
 const chartScroller = ref<HTMLElement | null>(null);
 const activeDay = ref<ContributionDay | null>(null);
 const tooltipPlacement = ref<'center' | 'start' | 'end'>('center');
@@ -416,7 +431,7 @@ function hideDayTooltip(day: ContributionDay) {
 </script>
 
 <template>
-  <div ref="cardElement" class="contribution-card glass-card">
+  <UiGlassSurface :ref="setCardElement" variant="card" class="contribution-card">
     <div class="contribution-card__header">
       <div class="contribution-card__header-main">
         <h3>{{ t('pulse.landscape.title') }}</h3>
@@ -441,7 +456,7 @@ function hideDayTooltip(day: ContributionDay) {
         @pointercancel="onChartPointerCancel"
         @scroll.passive="onChartScroll"
       >
-        <template v-if="loading">
+        <template v-if="loading" key="pulse-landscape-loading">
           <div class="contribution-card__loading-chart" aria-hidden="true">
             <div class="contribution-card__skeleton-grid">
               <span v-for="cell in 371" :key="cell" class="contribution-card__skeleton-cell" />
@@ -453,7 +468,7 @@ function hideDayTooltip(day: ContributionDay) {
             </span>
           </div>
         </template>
-        <template v-else-if="cells.length">
+        <template v-else-if="cells.length" key="pulse-landscape-data">
           <div
             class="contribution-card__months"
             :style="{ '--contribution-columns': String(columnCount) }"
@@ -498,17 +513,17 @@ function hideDayTooltip(day: ContributionDay) {
       <dl class="contribution-stats">
         <div>
           <dt>{{ t('pulse.stats.contributions') }}</dt>
-          <dd v-if="loading"><BaseSkeleton variant="title" width="4rem" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="title" width="4rem" /></dd>
           <dd v-else>{{ contributions.scope === 'unavailable' ? '—' : contributions.total.toLocaleString(locale) }}</dd>
         </div>
         <div>
           <dt>{{ t('pulse.stats.streak') }}</dt>
-          <dd v-if="loading"><BaseSkeleton variant="title" width="3rem" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="title" width="3rem" /></dd>
           <dd v-else>{{ contributions.scope === 'unavailable' ? '—' : t('pulse.stats.days', { count: contributions.longestStreak }) }}</dd>
         </div>
         <div>
           <dt>{{ t('pulse.stats.range') }}</dt>
-          <dd v-if="loading"><BaseSkeleton variant="text" width="5rem" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="text" width="5rem" /></dd>
           <dd v-else>{{ scopeLabel }}</dd>
         </div>
       </dl>
@@ -523,7 +538,7 @@ function hideDayTooltip(day: ContributionDay) {
     >
       {{ activeDayLabel }}
     </div>
-  </div>
+  </UiGlassSurface>
 </template>
 
 <style scoped>
@@ -572,7 +587,7 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-card__loading-chart { --contribution-columns: 53; --contribution-gap: clamp(0.22rem, 0.3vw, 0.32rem); --contribution-min-cell: 0.68rem; --contribution-grid-width: calc(var(--contribution-columns) * var(--contribution-min-cell) + (var(--contribution-columns) - 1) * var(--contribution-gap)); display: grid; min-width: 0; align-content: center; gap: 0; }
 /* 容器保持透明，只显示互相分离的静态格子；避免背景填满间隙后黏成灰色整块。 */
 .contribution-card__skeleton-grid { display: grid; width: 100%; min-width: var(--contribution-grid-width); grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), minmax(var(--contribution-min-cell), 1fr)); grid-template-rows: repeat(7, auto); gap: var(--contribution-gap); opacity: 0.56; }
-.contribution-card__skeleton-cell { min-width: 0; aspect-ratio: 1; border-radius: min(var(--radius-xs), 25%); background: var(--skeleton-fill); box-shadow: var(--skeleton-edge); }
+.contribution-card__skeleton-cell { min-width: 0; aspect-ratio: 1; border-radius: min(var(--radius-xs), 25%); background: var(--neoverse-skeleton-fill); box-shadow: var(--neoverse-skeleton-edge); }
 .contribution-card__loading-chart > .contribution-card__legend--chart { margin-top: 0.5rem; }
 .contribution-day { display: block; aspect-ratio: 1; border: 0; border-radius: min(var(--radius-xs), 25%); padding: 0; cursor: pointer; transition: filter var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard), transform var(--motion-fast) var(--motion-ease-standard); }
 .contribution-day:hover { filter: brightness(1.12); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 48%, transparent); transform: translateY(-1px); }
@@ -586,8 +601,8 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-stats div:last-child { border-right: 0; }
 .contribution-stats dt { color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
 .contribution-stats dd { margin: 0.18rem 0 0; color: var(--text-primary); font-size: var(--text-stat); font-weight: var(--weight-display); letter-spacing: -0.05em; line-height: 1; }
-.contribution-stats dd :deep(.base-skeleton) { height: var(--text-stat); }
-.contribution-stats dd :deep(.base-skeleton--text) { height: calc(var(--text-sm) * 1.55); }
+.contribution-stats dd :deep(.ui-skeleton) { height: var(--text-stat); }
+.contribution-stats dd :deep(.ui-skeleton--text) { height: calc(var(--text-sm) * 1.55); }
 .contribution-stats div:last-child dd { color: var(--accent-primary); font-size: var(--text-stat-sm); letter-spacing: -0.03em; }
 .contribution-tooltip { position: absolute; z-index: 5; max-width: min(16rem, calc(100% - 1rem)); border: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle)); border-radius: var(--radius-control); padding: 0.42rem 0.62rem; color: var(--text-primary); font-size: var(--text-xs); font-weight: var(--weight-semibold); line-height: 1.35; white-space: nowrap; background: color-mix(in srgb, var(--surface-elevated) 92%, var(--accent-primary)); box-shadow: var(--shadow-float); pointer-events: none; transform: translate(-50%, calc(-100% - 0.65rem)); }
 .contribution-tooltip::after { position: absolute; bottom: -0.28rem; left: 50%; width: 0.5rem; height: 0.5rem; border-right: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle)); border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle)); background: color-mix(in srgb, var(--surface-elevated) 92%, var(--accent-primary)); content: ""; transform: translateX(-50%) rotate(45deg); }
@@ -609,7 +624,7 @@ function hideDayTooltip(day: ContributionDay) {
 @media (max-width: 600px) {
   .contribution-stats div { padding: 0.5rem 0.5rem; }
   .contribution-stats dd { font-size: var(--text-card-title-narrow); }
-  .contribution-stats dd :deep(.base-skeleton) { height: var(--text-card-title-narrow); }
-  .contribution-stats dd :deep(.base-skeleton--text) { height: calc(var(--text-sm) * 1.55); }
+  .contribution-stats dd :deep(.ui-skeleton) { height: var(--text-card-title-narrow); }
+  .contribution-stats dd :deep(.ui-skeleton--text) { height: calc(var(--text-sm) * 1.55); }
 }
 </style>

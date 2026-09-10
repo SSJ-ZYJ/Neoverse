@@ -152,6 +152,12 @@ export default defineNuxtConfig({
     '/images/**': {
       headers: { 'cache-control': 'public, max-age=604800, stale-while-revalidate=2592000' },
     },
+    // 双保险：即使 handler 的 swr 配置被改动，CDN 侧缓存策略也以此为准。
+    // 与 handler 保持一致：2 分钟内浏览器/CDN 直接用缓存，过期必须回源，
+    // 不允许 stale-while-revalidate 回旧数据体。
+    '/api/github/pulse': {
+      headers: { 'cache-control': 'public, max-age=120, must-revalidate' },
+    },
   },
   app: {
     head: {

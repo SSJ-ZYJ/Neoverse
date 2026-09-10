@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiAction, UiBadge, UiGlassSurface } from '@neoverse-ui/vue';
 import type { ProjectIcon, ProjectId, ProjectTone } from '#shared/constants';
 import type { ProjectPreview } from '#shared/types/projects';
 import IconLucideBookOpen from '~icons/lucide/book-open';
@@ -57,7 +58,7 @@ const formatArticleDate = (value: string | null) => {
 </script>
 
 <template>
-  <article class="project-card glass-card">
+  <UiGlassSurface as="article" variant="card" class="project-card">
     <div class="project-card__main">
       <div class="project-card__preview">
         <div
@@ -135,23 +136,24 @@ const formatArticleDate = (value: string | null) => {
     </div>
     <div class="project-card__footer">
       <div class="project-card__tags">
-        <span v-for="tag in copy.tags" :key="tag" class="tech-chip">{{ tag }}</span>
+        <UiBadge v-for="tag in copy.tags" :key="tag" variant="neutral" size="sm">{{ tag }}</UiBadge>
       </div>
-      <UiGlassButton
+      <UiAction
         class="project-card__repo"
-        variant="glass"
+        variant="secondary"
         size="sm"
-        filled-icon
         :href="project.repoHref"
         target="_blank"
         rel="noreferrer"
         :aria-label="t('projects.viewSource')"
         :title="t('projects.viewSource')"
       >
-        <template #icon><IconSimpleIconsGithub aria-hidden="true" /></template>
-      </UiGlassButton>
+        <template #leading>
+          <IconSimpleIconsGithub class="project-card__repo-icon--filled" aria-hidden="true" />
+        </template>
+      </UiAction>
     </div>
-  </article>
+  </UiGlassSurface>
 </template>
 
 <style scoped>
@@ -160,10 +162,19 @@ const formatArticleDate = (value: string | null) => {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  padding: 0;
   transition: border-color var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-standard) var(--motion-ease-standard), transform var(--motion-standard) var(--motion-ease-emphasized);
 }
 .project-card:hover,
 .project-card:has(.project-card__repo:hover) { border-color: color-mix(in srgb, var(--border-interactive) 38%, var(--glass-border-hairline)); background: var(--glass-card-background-hover); box-shadow: var(--glass-surface-shadow-hover); transform: translateY(-2px); }
+.project-card__repo-icon--filled { fill: currentColor; stroke: none; }
+.project-card__repo {
+  width: var(--control-height-sm);
+  min-width: var(--control-height-sm);
+  min-height: var(--control-height-sm);
+  gap: 0;
+  padding-inline: 0;
+}
 .project-card__main {
   display: flex;
   min-width: 0;

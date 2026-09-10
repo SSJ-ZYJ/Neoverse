@@ -61,6 +61,9 @@ export default defineCachedEventHandler(
   {
     getKey: () => 'project-previews-v5',
     maxAge: 900,
+    // 与 pulse.get.ts 同理：swr 必须配合有限的 staleMaxAge，
+    // 否则 CDN 会把 stale-while-revalidate 当作一年期缓存。
     swr: true,
+    staleMaxAge: 60,
   },
 );

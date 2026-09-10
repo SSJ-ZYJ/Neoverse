@@ -367,7 +367,9 @@ export default defineCachedEventHandler(
   },
   {
     getKey: () => (useRuntimeConfig().githubToken ? 'pulse-repository-v3-token' : 'pulse-repository-v3-public'),
-    maxAge: 900,
-    swr: true,
+    // 源站与浏览器统一 2 分钟新鲜期。刻意不用 swr：nitro 会输出
+    // stale-while-revalidate，浏览器会先回一年前那种过期缓存体再后台
+    // 更新（swr: true 时甚至是无限期），dock 切换拿到的永远是旧数据。
+    maxAge: 120,
   },
 );

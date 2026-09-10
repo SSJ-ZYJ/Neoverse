@@ -1,9 +1,16 @@
 <script setup lang="ts">
+import { createGlassRenderer } from '@neoverse-ui/glass-runtime';
+import { UiScrollbar } from '@neoverse-ui/vue';
 import { NAV_ITEMS } from '#shared/constants';
 
 const { t, locale } = useI18n();
 const route = useRoute();
 const { isRouteTransitioning } = useRouteTransitionState();
+const glassRenderer = import.meta.client ? createGlassRenderer() : undefined;
+
+onMounted(() => glassRenderer?.mount());
+onBeforeUnmount(() => glassRenderer?.destroy());
+
 const isBooting = ref(true);
 const pageTransitionName = ref('route-forward');
 const viewIndex = (path: string) =>
@@ -26,6 +33,18 @@ const skeletonView = computed(() => {
   return 'home';
 });
 const isSectionPath = (path: string) => NAV_ITEMS.some((item) => item.path === path && item.path !== '/');
+// transitionend 在后台/被遮挡的标签页可能永不触发，Vue Transition 没有
+// 显式 timeout 时会一直等待，isRouteTransitioning 便永远无法复位——
+// pulse 页会卡在骨架屏并显示旧数据。正常路径仍由 settleStageAfterEnter /
+// completeCityTransition 提前复位，这里只挂一个兜底计时器。
+let routeTransitionFailsafe: number | undefined;
+const armRouteTransitionFailsafe = () => {
+  window.clearTimeout(routeTransitionFailsafe);
+  routeTransitionFailsafe = window.setTimeout(() => {
+    routeTransitionFailsafe = undefined;
+    isRouteTransitioning.value = false;
+  }, 1500);
+};
 
 let scrollLockTimer: number | undefined;
 // Captured before the scroll resets to 0 so the outgoing page can stay glued
@@ -63,6 +82,8 @@ function completeCityTransition(direction: 'from-home' | 'to-home') {
     // mounted until CityBackdrop's camera fade has actually ended.
     stageOrbitActive.value = false;
     isRouteTransitioning.value = false;
+    window.clearTimeout(routeTransitionFailsafe);
+    routeTransitionFailsafe = undefined;
     document.documentElement.classList.remove('route-transition-scroll-lock');
     window.clearTimeout(scrollLockTimer);
   } else if (!isSectionPath(stageTargetPath.value)) {
@@ -77,6 +98,8 @@ function settleStageAfterEnter() {
   const isNormalHomeReturn =
     stageTargetPath.value === '/' && cityTransitionDirection.value === 'to-home' && !isReducedMotion;
   if (!isNormalHomeReturn) isRouteTransitioning.value = false;
+  window.clearTimeout(routeTransitionFailsafe);
+  routeTransitionFailsafe = undefined;
   document.documentElement.classList.remove('route-transition-scroll-lock');
   window.clearTimeout(scrollLockTimer);
 
@@ -102,6 +125,7 @@ if (import.meta.client) {
   useRouter().beforeEach((to, from) => {
     if (!from || to.path === from.path) return;
     isRouteTransitioning.value = true;
+    armRouteTransitionFailsafe();
     // 主页与三个正式子页共享同一段城市构图：涉及主页时由背景完成
     // 推近/拉远，子页内容只做轻微位移；只有 dock 内的非主页之间才整屏平移。
     if (to.path === '/') {
@@ -137,9 +161,16 @@ onMounted(async () => {
   const legacyTarget = NAV_ITEMS.find((item) => item.id === legacyView && item.path !== '/');
   if (route.path === '/' && legacyTarget) await navigateTo(legacyTarget.path, { replace: true });
   await new Promise((resolve) => window.setTimeout(resolve, 420));
-  requestAnimationFrame(() => {
+  // 与 pulse.vue 的揭示逻辑同理：后台/被遮挡标签页 rAF 会被暂停，
+  // 只依赖 rAF 会让启动骨架屏永不消散，超时兜底保证一定能进入页面。
+  let booted = false;
+  const finishBoot = () => {
+    if (booted) return;
+    booted = true;
     isBooting.value = false;
-  });
+  };
+  requestAnimationFrame(finishBoot);
+  window.setTimeout(finishBoot, 400);
 });
 </script>
 
@@ -179,7 +210,7 @@ onMounted(async () => {
     <SiteFooter />
   </div>
   <ClientOnly>
-    <CustomScrollbar />
+    <UiScrollbar :refresh-key="route.fullPath" />
   </ClientOnly>
 </template>
 
@@ -232,7 +263,7 @@ onMounted(async () => {
 .route-from-home-enter-active {
   animation: route-child-content-reveal var(--motion-city-handoff) linear both;
 }
-.route-from-home-enter-active .glass-card {
+.route-from-home-enter-active .material-glass-card {
   animation: route-child-card-enter var(--motion-card-entry-duration) var(--motion-ease-emphasized)
     var(--motion-city-content-delay) both;
 }
@@ -295,7 +326,7 @@ html.route-transition-scroll-lock { overflow: hidden !important; }
     transition: none;
     will-change: auto;
   }
-  .route-from-home-enter-active .glass-card {
+  .route-from-home-enter-active .material-glass-card {
     animation: none;
   }
   .route-to-home-enter-from,

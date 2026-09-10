@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiAction, UiStatusIndicator } from '@neoverse-ui/vue';
 import type { Component } from 'vue';
 import { getHomeLinkEntryDelay, getHomeStatusEntryDelay, HOME_LINKS, SITE } from '#shared/constants';
 import IconLucideFileText from '~icons/lucide/file-text';
@@ -149,7 +150,7 @@ onMounted(() => {
       </div>
 
       <nav class="home-socials" :aria-label="t('home.linksAria')">
-        <UiGlassButton
+        <UiAction
           v-for="(link, index) in HOME_LINKS"
           :key="link.id"
           :class="{ 'skeleton-surface home-socials__skeleton-button': skeleton }"
@@ -160,24 +161,31 @@ onMounted(() => {
           :aria-hidden="skeleton || undefined"
           :disabled="skeleton || undefined"
           :tabindex="skeleton ? -1 : undefined"
-          variant="glass"
+          variant="secondary"
           size="lg"
-          :filled-icon="link.filledIcon"
           :style="skeleton ? undefined : getHomeLinkStyle(index)"
         >
-          <template #icon>
-            <component :is="LINK_ICONS[link.icon]" aria-hidden="true" />
+          <template #leading>
+            <component
+              :is="LINK_ICONS[link.icon]"
+              :class="{ 'home-socials__icon--filled': link.filledIcon }"
+              aria-hidden="true"
+            />
           </template>
           {{ t(link.labelKey) }}
-        </UiGlassButton>
+        </UiAction>
       </nav>
 
-      <p class="home-panel__status" :style="homeStatusStyle">
-        <i :class="{ 'skeleton-surface': skeleton }" aria-hidden="true" />
+      <UiStatusIndicator
+        class="home-panel__status"
+        :style="homeStatusStyle"
+        status="success"
+        :pulse="!skeleton"
+      >
         <span :class="{ 'home-skeleton-measure': skeleton }">
           {{ t('home.currentlyBuilding') }} <strong>{{ t('projects.docs.title') }}</strong>
         </span>
-      </p>
+      </UiStatusIndicator>
     </div>
   </section>
 </template>
@@ -285,11 +293,11 @@ onMounted(() => {
   color: transparent !important;
   border-radius: var(--radius-control);
   background:
-    linear-gradient(100deg, transparent 24%, var(--skeleton-highlight) 50%, transparent 76%) 100% 0 / 200% 100%,
-    var(--skeleton-fill);
+    linear-gradient(100deg, transparent 24%, var(--neoverse-skeleton-highlight) 50%, transparent 76%) 100% 0 / 200% 100%,
+    var(--neoverse-skeleton-fill);
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
-  box-shadow: var(--skeleton-edge);
+  box-shadow: var(--neoverse-skeleton-edge);
   animation: home-inline-skeleton-shimmer 1.25s ease-in-out infinite;
 }
 .home-skeleton-measure * { color: transparent !important; }
@@ -393,31 +401,58 @@ onMounted(() => {
   grid-area: links;
   gap: 0.65rem;
 }
+.home-socials :deep(.ui-action--lg) {
+  min-height: var(--control-height-lg);
+}
 
 .home-socials a {
   animation-name: home-social-link-enter;
   will-change: auto;
 }
+.home-socials__icon--filled {
+  fill: currentColor;
+  stroke: none;
+}
 .home-panel--skeleton .home-socials__skeleton-button {
+  position: relative;
+  display: inline-flex;
+  width: auto;
   overflow: hidden;
   color: transparent;
-  background: var(--skeleton-fill);
-  box-shadow: var(--skeleton-edge);
+  background: var(--neoverse-skeleton-fill);
+  box-shadow: var(--neoverse-skeleton-edge);
   cursor: default;
+  opacity: 1;
   pointer-events: none;
 }
-.home-panel--skeleton .home-panel__status i {
-  background: var(--skeleton-fill);
-  box-shadow: var(--skeleton-edge);
+/* Shimmer on the skeleton button reuses the DS skeleton material vars. */
+.home-panel--skeleton .home-socials__skeleton-button::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background: linear-gradient(100deg, transparent 24%, var(--neoverse-skeleton-highlight) 50%, transparent 76%);
+  transform: translateX(-100%);
+  animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
+    var(--neoverse-skeleton-shimmer-easing) infinite;
 }
-.home-panel--skeleton .home-panel__status i::after { display: none; }
-.home-panel__status { display: inline-flex; grid-area: status; align-items: center; justify-self: start; gap: 0.42rem; margin: 0; opacity: 0; color: rgb(225 240 250 / 67%); font-size: var(--text-sm); line-height: 1.4; animation: home-status-enter var(--motion-standard) var(--motion-ease-standard) var(--home-status-entry-delay) both; animation-play-state: var(--home-entry-animation-play-state, running); }
-.home-panel__status i { position: relative; width: 0.42rem; height: 0.42rem; flex: 0 0 auto; border-radius: 50%; background: #36d49b; box-shadow: 0 0 0.5rem rgb(54 212 155 / 42%); }
-.home-panel__status i::after { content: ""; position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; border-radius: 50%; background: rgb(54 212 155 / 88%); box-shadow: 0 0 0.55rem rgb(54 212 155 / 38%); transform: translate(-50%, -50%) scale(1); opacity: 0.9; animation: home-status-halo 1.55s cubic-bezier(0.33, 0, 0.2, 1) infinite; pointer-events: none; will-change: transform, opacity; }
-@keyframes home-status-halo {
-  0% { transform: translate(-50%, -50%) scale(1); opacity: 0.82; }
-  45% { opacity: 0.38; }
-  100% { transform: translate(-50%, -50%) scale(2.14); opacity: 0; }
+.home-panel--skeleton .home-panel__status :deep(.ui-status-indicator__dot) {
+  background: var(--neoverse-skeleton-fill);
+  box-shadow: var(--neoverse-skeleton-edge);
+}
+.home-panel--skeleton .home-panel__status :deep(.ui-status-indicator__dot)::after {
+  display: none;
+}
+.home-panel__status {
+  grid-area: status;
+  justify-self: start;
+  margin: 0;
+  opacity: 0;
+  animation: home-status-enter var(--motion-standard) var(--motion-ease-standard) var(--home-status-entry-delay) both;
+  animation-play-state: var(--home-entry-animation-play-state, running);
+}
+@keyframes home-status-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .home-panel__status strong { color: #f5fbff; font-weight: var(--weight-semibold); }
 
@@ -449,7 +484,6 @@ onMounted(() => {
     transform: none;
     will-change: auto;
   }
-  .home-panel__status i::after { animation: none; opacity: 0; }
   .home-avatar__skeleton::after { animation: none; }
 }
 </style>

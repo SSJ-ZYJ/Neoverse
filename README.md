@@ -61,6 +61,8 @@ bun run dev
 
 Open `http://localhost:3000`.
 
+The shared UI styles come from `@neoverse-ui/tailwind/index.css`. Glass edge refraction also requires `@neoverse-ui/glass-runtime`: `app/app.vue` mounts its renderer on the client and destroys it on unmount. Keep this lifecycle integration when updating the UI library; importing CSS alone does not enable the WebGL effect.
+
 ### Optional environment
 
 Copy `.env.example` to `.env` and set `NUXT_GITHUB_TOKEN` to enable the server-side GitHub GraphQL data path. The Pulse page still works without a token using its public-data fallback.

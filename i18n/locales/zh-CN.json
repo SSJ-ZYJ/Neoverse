@@ -141,8 +141,8 @@
     "title": "极光玻璃",
     "description": "从 Dock 与快捷链接提炼的项目专属 UI 标准。",
     "buttons": {
-      "title": "UiGlassButton",
-      "hint": "variant：glass / ghost · size：sm / md / lg",
+      "title": "UiButton",
+      "hint": "variant：primary / secondary / ghost · size：sm / md / lg（Neoverse-UI 命令控件）",
       "overview": "总览",
       "docs": "文档",
       "contact": "联系我"
