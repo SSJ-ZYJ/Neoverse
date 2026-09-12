@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiGlassSurface, UiSkeleton } from '@neoverse-ui/vue';
+import { UiCard, UiSkeleton } from '@neoverse-ui/vue';
 import type { GithubPulse, RecentCommit } from '#shared/types/github';
 
 const props = defineProps<{
@@ -55,7 +55,7 @@ const formatPercentage = (ratio: number) =>
 
 <template>
   <div class="activity-grid">
-    <UiGlassSurface as="section" variant="card" class="activity-column" aria-labelledby="recent-commits-title">
+    <UiCard as="section" surface="glass-card" class="activity-column" aria-labelledby="recent-commits-title">
       <h3 id="recent-commits-title">{{ t('pulse.projects.commitsTitle') }}</h3>
       <div v-if="loading" class="activity-list" aria-hidden="true">
         <div v-for="row in 3" :key="row" class="activity-row activity-row--skeleton">
@@ -88,9 +88,9 @@ const formatPercentage = (ratio: number) =>
         </li>
       </ul>
       <p v-else class="activity-empty">{{ t('pulse.projects.emptyCommits') }}</p>
-    </UiGlassSurface>
+    </UiCard>
 
-    <UiGlassSurface as="section" variant="card" class="activity-column" aria-labelledby="repository-pulse-title">
+    <UiCard as="section" surface="glass-card" class="activity-column" aria-labelledby="repository-pulse-title">
       <header class="repository-pulse__header">
         <h3 id="repository-pulse-title">{{ t('pulse.repositoryPulse.title') }}</h3>
         <span>{{ t('pulse.repositoryPulse.scope') }}</span>
@@ -159,7 +159,7 @@ const formatPercentage = (ratio: number) =>
       <p v-else class="activity-empty repository-pulse__unavailable">
         {{ t('pulse.repositoryPulse.unavailable') }}
       </p>
-    </UiGlassSurface>
+    </UiCard>
   </div>
 </template>
 
@@ -196,7 +196,7 @@ const formatPercentage = (ratio: number) =>
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: start;
   gap: 0.72rem;
-  border-top: 1px solid var(--glass-border-hairline);
+  border-top: 1px solid var(--border-subtle);
   padding: 0.62rem 0;
   color: inherit;
   text-decoration: none;
@@ -305,15 +305,15 @@ const formatPercentage = (ratio: number) =>
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0.72rem 0 0;
-  border-top: 1px solid var(--glass-border-hairline);
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
 }
 .repository-metrics div {
   min-width: 0;
   padding: 0.72rem 0;
 }
 .repository-metrics div + div {
-  border-left: 1px solid var(--glass-border-hairline);
+  border-left: 1px solid var(--border-subtle);
   padding-left: 1rem;
 }
 .repository-metrics dt {

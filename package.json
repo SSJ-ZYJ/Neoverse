@@ -10,12 +10,13 @@
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "test:fouc": "bun scripts/check-critical-shell.ts",
+    "check:ui-boundary": "bun scripts/check-ui-boundary.ts",
     "typecheck": "nuxt typecheck",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "check": "biome check --write . && nuxt typecheck"
+    "check": "biome check --write . && bun run check:ui-boundary && nuxt typecheck"
   },
   "dependencies": {
     "@neoverse-ui/glass-runtime": "file:../Neoverse-UI/packages/glass-runtime",

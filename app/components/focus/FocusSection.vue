@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiGlassSurface } from '@neoverse-ui/vue';
+import { UiCard } from '@neoverse-ui/vue';
 import type { Component } from 'vue';
 import { FOCUS_DOMAINS } from '#shared/constants';
 import IconLucideBot from '~icons/lucide/bot';
@@ -64,7 +64,7 @@ const stageAlign = (index: number) => {
 
     <!-- 成长路径图：三个方向 × 探索/学习/构建/应用。档位来自真实 status，
          当前阶段节点高亮、其余弱化；刻意不做完成度填充，避免被读成百分比。 -->
-    <UiGlassSurface variant="card" class="focus-journey">
+    <UiCard surface="glass-card" class="focus-journey">
       <div class="focus-journey__bar">
         <span class="focus-journey__command">
           <IconLucideTerminal class="focus-journey__command-icon" aria-hidden="true" />
@@ -117,10 +117,10 @@ const stageAlign = (index: number) => {
       </div>
 
       <p class="focus-journey__footnote"># {{ t('focus.mainComment') }}</p>
-    </UiGlassSurface>
+    </UiCard>
 
     <!-- 轻量兴趣区：补足页面下半部分的信息密度，保持克制。 -->
-    <UiGlassSurface as="aside" variant="card" class="focus-interests" :aria-label="String(t('focus.exploring.label'))">
+    <UiCard as="aside" surface="glass-card" class="focus-interests" :aria-label="String(t('focus.exploring.label'))">
       <div class="focus-interests__head">
         <IconLucideCompass class="focus-interests__icon" aria-hidden="true" />
         <span class="focus-interests__label">{{ t('focus.exploring.label') }}</span>
@@ -129,7 +129,7 @@ const stageAlign = (index: number) => {
       <ul class="focus-interests__list">
         <li v-for="topic in topics" :key="topic">{{ topic }}</li>
       </ul>
-    </UiGlassSurface>
+    </UiCard>
   </section>
 </template>
 
@@ -168,7 +168,7 @@ const stageAlign = (index: number) => {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 0.72rem 1.15rem;
 }
 
@@ -239,7 +239,7 @@ const stageAlign = (index: number) => {
   grid-template-columns: var(--info-col) 1fr;
   gap: 1.4rem;
   align-items: center;
-  border-top: 1px solid var(--glass-border-hairline);
+  border-top: 1px solid var(--border-subtle);
   border-radius: 0.45rem;
   padding: 0.85rem 0.4rem;
   transition: background-color var(--motion-fast) var(--motion-ease-standard);
@@ -292,15 +292,15 @@ const stageAlign = (index: number) => {
 .track-row__stage {
   flex: 0 0 auto;
   margin-left: auto;
-  border: 1px solid color-mix(in srgb, var(--track-tone) 32%, var(--glass-border-hairline));
+  border: 1px solid color-mix(in srgb, var(--track-tone) 32%, var(--border-subtle));
   border-radius: var(--radius-pill);
   padding: 0.12rem 0.55rem;
   background:
-    var(--glass-refraction-fill),
-    color-mix(in srgb, var(--track-tone) 12%, var(--glass-card-fill));
-  -webkit-backdrop-filter: var(--aurora-filter-chrome);
-  backdrop-filter: var(--aurora-filter-chrome);
-  box-shadow: inset 0 1px 0 var(--glass-highlight);
+    var(--product-inset-refraction),
+    color-mix(in srgb, var(--track-tone) 12%, var(--product-inset-dense-fill));
+  -webkit-backdrop-filter: var(--product-inset-filter);
+  backdrop-filter: var(--product-inset-filter);
+  box-shadow: inset 0 1px 0 var(--product-inset-highlight);
   color: var(--track-tone);
   font-family: var(--font-sans);
   font-size: var(--text-2xs);
@@ -399,7 +399,7 @@ const stageAlign = (index: number) => {
 /* ── 底部注释 ──────────────────────────────────────────────── */
 .focus-journey__footnote {
   margin: 0;
-  border-top: 1px solid var(--glass-border-hairline);
+  border-top: 1px solid var(--border-subtle);
   padding: 0.65rem 1.35rem;
   color: var(--text-muted);
   font-family: var(--font-sans);
@@ -412,7 +412,7 @@ const stageAlign = (index: number) => {
   display: flex;
   align-items: baseline;
   gap: 0.55rem;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 0.72rem 1.15rem;
 }
 

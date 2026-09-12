@@ -19,28 +19,6 @@ defineOptions({ inheritAttrs: false });
 const attrs = useAttrs();
 const appLink = resolveComponent('NuxtLink');
 const { activeView } = useViewNavigation();
-const activeNavigationIndex = computed(() =>
-  Math.max(
-    0,
-    NAV_ITEMS.findIndex((item) => item.id === activeView.value),
-  ),
-);
-const hoveredNavigationId = ref<string | null>(null);
-const navigationSegmentPercentage = 100 / NAV_ITEMS.length;
-const hoverNavigationIndex = computed(() => {
-  if (hoveredNavigationId.value === null) {
-    return activeNavigationIndex.value;
-  }
-
-  const index = NAV_ITEMS.findIndex((item) => item.id === hoveredNavigationId.value);
-  return Math.max(index, 0);
-});
-const activeIndicatorStyle = computed(() => ({
-  left: `${activeNavigationIndex.value * navigationSegmentPercentage}%`,
-}));
-const hoverIndicatorStyle = computed(() => ({
-  left: `${hoverNavigationIndex.value * navigationSegmentPercentage}%`,
-}));
 const { t, locale, setLocale, locales } = useI18n();
 const compactNavigation = ref(false);
 let compactNavigationQuery: MediaQueryList | undefined;
@@ -86,38 +64,24 @@ const localeRef = computed({
   <UiControlSurface
     v-bind="attrs"
     as="nav"
-    variant="elevated"
-    class="bottom-dock consumer-parity-dock"
-    data-neoverse-glass-edge-pass="css"
+    surface="chrome"
+    hover-mode="static"
+    navigation-indicator
+    class="bottom-dock"
     :aria-label="t('nav.aria')"
   >
-    <span
-      class="consumer-parity-dock__active-indicator"
-      aria-hidden="true"
-      :style="activeIndicatorStyle"
-    />
-    <span
-      class="consumer-parity-dock__hover-indicator"
-      :class="{ 'consumer-parity-dock__hover-indicator--visible': hoveredNavigationId !== null }"
-      aria-hidden="true"
-      :style="hoverIndicatorStyle"
-    />
     <UiNavigationItem
       v-for="item in NAV_ITEMS"
       :key="item.id"
       :as="appLink"
       :to="item.path"
       :label="t(`nav.${item.id}`)"
-      class="consumer-parity-dock__item"
+      class="bottom-dock__item"
       :compact="compactNavigation"
       :active="activeView === item.id"
       draggable="false"
       :aria-label="t('nav.goTo', { label: t(`nav.${item.id}`) })"
       :aria-current="activeView === item.id ? 'page' : undefined"
-      @pointerenter="hoveredNavigationId = item.id"
-      @pointerleave="hoveredNavigationId = null"
-      @focus="hoveredNavigationId = item.id"
-      @blur="hoveredNavigationId = null"
     >
       <template #icon>
         <component :is="NAV_ICONS[item.id]" aria-hidden="true" />
@@ -128,7 +92,8 @@ const localeRef = computed({
       <UiSegmentedControl
         :options="languageOptions"
         v-model="localeRef"
-        class="consumer-parity-dock__language"
+        surface="none"
+        class="bottom-dock__language"
         :aria-label="t('language.label')"
       />
     </template>

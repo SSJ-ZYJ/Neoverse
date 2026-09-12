@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiGlassSurface, UiSkeleton } from '@neoverse-ui/vue';
+import { UiCard, UiSkeleton } from '@neoverse-ui/vue';
 import type { ComponentPublicInstance } from 'vue';
 import type { GithubPulse } from '#shared/types/github';
 
@@ -431,7 +431,7 @@ function hideDayTooltip(day: ContributionDay) {
 </script>
 
 <template>
-  <UiGlassSurface :ref="setCardElement" variant="card" class="contribution-card">
+  <UiCard :ref="setCardElement" surface="glass-card" class="contribution-card">
     <div class="contribution-card__header">
       <div class="contribution-card__header-main">
         <h3>{{ t('pulse.landscape.title') }}</h3>
@@ -538,7 +538,7 @@ function hideDayTooltip(day: ContributionDay) {
     >
       {{ activeDayLabel }}
     </div>
-  </UiGlassSurface>
+  </UiCard>
 </template>
 
 <style scoped>
@@ -596,7 +596,7 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-card__empty { display: grid; min-height: 8rem; place-items: center; margin: 0; color: var(--text-muted); font-size: var(--text-md); text-align: center; }
 /* 统计横排三列：取代原右侧纵向 16.5rem 的高柱。 */
 .contribution-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; }
-.contribution-stats div { display: grid; align-content: center; border-top: 1px solid var(--glass-border-hairline); border-right: 1px solid var(--glass-border-hairline); padding: 0.55rem 0.9rem; }
+.contribution-stats div { display: grid; align-content: center; border-top: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); padding: 0.55rem 0.9rem; }
 .contribution-stats div:first-child { border-top: 0; }
 .contribution-stats div:last-child { border-right: 0; }
 .contribution-stats dt { color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
@@ -617,9 +617,9 @@ function hideDayTooltip(day: ContributionDay) {
 /* 容器够宽时：统计竖排到热力图右侧，避免下方大片留白。 */
 @container contribution-card (min-width: 56rem) {
   .contribution-card__body { grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; }
-  .contribution-stats { display: flex; min-width: 10.5rem; flex-direction: column; justify-content: center; border-left: 1px solid var(--glass-border-hairline); }
+  .contribution-stats { display: flex; min-width: 10.5rem; flex-direction: column; justify-content: center; border-left: 1px solid var(--border-subtle); }
   .contribution-stats div { border-top: 0; border-right: 0; padding: 0.6rem 0 0.6rem 1.1rem; }
-  .contribution-stats div + div { border-top: 1px solid var(--glass-border-hairline); }
+  .contribution-stats div + div { border-top: 1px solid var(--border-subtle); }
 }
 @media (max-width: 600px) {
   .contribution-stats div { padding: 0.5rem 0.5rem; }

@@ -263,7 +263,7 @@ onMounted(async () => {
 .route-from-home-enter-active {
   animation: route-child-content-reveal var(--motion-city-handoff) linear both;
 }
-.route-from-home-enter-active .material-glass-card {
+.route-from-home-enter-active [data-surface='glass-card'] {
   animation: route-child-card-enter var(--motion-card-entry-duration) var(--motion-ease-emphasized)
     var(--motion-city-content-delay) both;
 }
@@ -326,7 +326,7 @@ html.route-transition-scroll-lock { overflow: hidden !important; }
     transition: none;
     will-change: auto;
   }
-  .route-from-home-enter-active .material-glass-card {
+  .route-from-home-enter-active [data-surface='glass-card'] {
     animation: none;
   }
   .route-to-home-enter-from,

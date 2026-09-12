@@ -33,50 +33,24 @@
   --radius-pill: var(--neoverse-radius-pill);
   --radius-control-inner: var(--neoverse-radius-control-inner);
   --shadow-float: 0 16px 40px -24px rgb(0 0 0 / 72%);
-  --glass-border-hairline: var(--border-subtle);
-  --glass-card-border: color-mix(in srgb, var(--glass-border-hairline) 72%, transparent);
-  --glass-highlight: color-mix(in srgb, var(--edge-light) 52%, transparent);
-  --glass-card-highlight: color-mix(in srgb, var(--edge-light) 30%, transparent);
-  --glass-refraction-fill: linear-gradient(
+  --product-inset-highlight: color-mix(in srgb, var(--edge-light) 52%, transparent);
+  --product-inset-refraction: linear-gradient(
     145deg,
     color-mix(in srgb, var(--edge-light) 7%, transparent),
     transparent 42%,
     color-mix(in srgb, var(--accent-soft) 12%, transparent)
   );
-  --glass-card-fill: rgb(12 24 41 / 72%);
-  --glass-card-background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--text-secondary) 9%, transparent),
-      color-mix(in srgb, var(--text-muted) 5%, transparent)
-    ),
-    color-mix(in srgb, var(--surface-glass) 44%, transparent);
-  --glass-card-background-hover:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--text-secondary) 12%, transparent),
-      color-mix(in srgb, var(--text-muted) 7%, transparent)
-    ),
-    color-mix(in srgb, var(--surface-glass) 48%, transparent);
-  --glass-card-inset-fill: color-mix(in srgb, var(--surface-glass) 18%, transparent);
-  --glass-card-sheen: linear-gradient(
+  --product-inset-dense-fill: rgb(12 24 41 / 72%);
+  --product-inset-fill: color-mix(in srgb, var(--surface-glass) 18%, transparent);
+  --product-inset-sheen: linear-gradient(
     125deg,
     color-mix(in srgb, var(--edge-light) 10%, transparent),
     transparent 30%,
     transparent 68%,
     color-mix(in srgb, var(--accent-soft) 10%, transparent)
   );
-  --glass-card-filter: blur(28px) saturate(145%) brightness(106%);
-  --glass-shadow: 0 1rem 2.8rem -1.6rem rgb(0 0 0 / 62%);
-  --glass-shadow-hover: 0 1.25rem 3rem -1.7rem rgb(0 0 0 / 72%);
-  --glass-surface-shadow: inset 0 1px 0 var(--glass-card-highlight), var(--glass-shadow);
-  --glass-surface-shadow-hover: inset 0 1px 0 var(--glass-card-highlight), var(--glass-shadow-hover);
-  --aurora-fill: linear-gradient(145deg, rgb(181 197 213 / 13%), rgb(127 147 168 / 7%));
-  --aurora-active-fill: linear-gradient(145deg, rgb(61 214 166 / 13%), rgb(56 189 248 / 7%));
-  --aurora-active-highlight: inset 0 1px 0 rgb(255 255 255 / 8%);
-  --aurora-hover-fill: rgb(56 189 248 / 10%);
-  --aurora-filter-chrome: blur(12px) saturate(128%) brightness(104%);
-  --dock-control-hover-fill: var(--aurora-hover-fill);
+  --product-state-active-highlight: inset 0 1px 0 rgb(255 255 255 / 8%);
+  --product-inset-filter: blur(12px) saturate(128%) brightness(104%);
   --motion-fast: var(--neoverse-motion-duration-fast);
   --motion-standard: var(--neoverse-motion-duration-standard);
   --motion-expressive: var(--neoverse-motion-duration-expressive);
@@ -112,11 +86,12 @@
   );
   --page-block-start: clamp(1.25rem, 3.5vh, 3rem);
   --page-block-end: clamp(1.25rem, 3.5vh, 3rem);
-  --dock-control-height: 2.4rem;
+  --dock-control-height: 1.875rem;
   --control-height-sm: 1.85rem;
   --control-height-md: var(--dock-control-height);
   --control-height-lg: 2.75rem;
-  --dock-inset: 0.55rem;
+  --dock-inset: 0.3rem;
+  --dock-divider-gap: var(--neoverse-space-2);
   --dock-height: calc(var(--dock-control-height) + var(--dock-inset) + var(--dock-inset) + 2px);
   --footer-track-height: 1.2rem;
   --dock-footer-gap: clamp(0.8rem, 1.8dvh, 1.25rem);
@@ -159,7 +134,7 @@
 
 @media (max-width: 520px) {
   :root {
-    --dock-inset: 0.45rem;
+    --dock-inset: 0.3rem;
     --dock-footer-gap: clamp(0.68rem, 1.6dvh, 0.9rem);
     --bottom-chrome-edge-space: calc(env(safe-area-inset-bottom, 0px) + clamp(0.55rem, 1.35dvh, 0.8rem));
   }

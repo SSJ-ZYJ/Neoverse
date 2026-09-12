@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiButton, UiSegmentedControl } from '@neoverse-ui/vue';
+import { UiButton, UiCard, UiSegmentedControl } from '@neoverse-ui/vue';
 import { getHomeLinkEntryDelay, getHomeStatusEntryDelay, HOME_LINKS } from '#shared/constants';
 import IconLucideFolderOpen from '~icons/lucide/folder-open';
 import IconLucideMail from '~icons/lucide/mail';
@@ -14,11 +14,11 @@ const segmentOptions = computed(() => [
 ]);
 
 const TOKEN_SWATCHES = [
-  '--accent-primary',
-  '--accent-secondary',
-  '--aurora-fill',
-  '--aurora-active-fill',
-  '--surface-glass',
+  '--neoverse-color-accent-primary',
+  '--neoverse-color-accent-secondary',
+  '--neoverse-color-surface-glass',
+  '--neoverse-color-surface-raised',
+  '--neoverse-color-border-interactive',
 ] as const;
 
 const motionRows = computed(() => {
@@ -96,7 +96,7 @@ const motionRows = computed(() => {
       <section class="design-block" aria-labelledby="design-motion-title">
         <h2 id="design-motion-title">{{ t('design.motion.title') }}</h2>
         <p class="design-block__hint">{{ t('design.motion.hint') }}</p>
-        <ol class="design-motion">
+        <UiCard as="ol" surface="glass-card" class="design-motion">
           <li v-for="row in motionRows" :key="row.id" class="design-motion__row">
             <div class="design-motion__meta">
               <span class="design-motion__label">{{ row.label }}</span>
@@ -110,7 +110,7 @@ const motionRows = computed(() => {
               />
             </div>
           </li>
-        </ol>
+        </UiCard>
         <p class="design-motion__note">{{ t('design.motion.note') }}</p>
       </section>
     </div>
@@ -210,11 +210,6 @@ const motionRows = computed(() => {
   display: grid;
   gap: 0.8rem;
   margin: 1.1rem 0 0;
-  padding: 1rem;
-  border: 1px solid var(--glass-card-border);
-  border-radius: var(--radius-surface);
-  background: var(--glass-card-background);
-  box-shadow: var(--glass-surface-shadow);
   list-style: none;
 }
 

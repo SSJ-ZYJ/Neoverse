@@ -51,7 +51,7 @@ const { t } = useI18n();
 .site-footer__filing:hover,
 .site-footer__filing:focus-visible {
   color: var(--text-secondary);
-  background: var(--dock-control-hover-fill);
+  background: var(--neoverse-control-hover-background);
 }
 
 @media (max-width: 520px) { .site-footer__filing { padding: 0.1rem 0.3rem; font-size: var(--text-md); } }

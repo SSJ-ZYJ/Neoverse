@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiCard } from '@neoverse-ui/vue';
 import { createEmptyPulse, FOCUS_DOMAINS, PROJECTS, type ViewId } from '#shared/constants';
 
 type SkeletonView = ViewId | 'design';
@@ -34,9 +35,10 @@ const emptyPulse = createEmptyPulse();
         </div>
 
         <div class="dashboard-loading__project-list">
-          <div
+          <UiCard
             v-for="project in PROJECTS"
             :key="project.id"
+            surface="glass-card"
             class="dashboard-loading__project-card"
             :class="`dashboard-loading__project-card--${project.id}`"
           >
@@ -82,7 +84,7 @@ const emptyPulse = createEmptyPulse();
               </div>
               <div class="skeleton-surface dashboard-loading__project-repo" />
             </div>
-          </div>
+          </UiCard>
         </div>
       </section>
 
@@ -97,7 +99,7 @@ const emptyPulse = createEmptyPulse();
           </div>
         </div>
 
-        <div class="dashboard-loading__focus-journey">
+        <UiCard surface="glass-card" class="dashboard-loading__focus-journey">
           <div class="dashboard-loading__focus-journey-bar">
             <div class="skeleton-surface dashboard-loading__focus-command" />
             <div class="skeleton-surface dashboard-loading__focus-meta" />
@@ -128,9 +130,9 @@ const emptyPulse = createEmptyPulse();
           <div class="dashboard-loading__focus-footnote">
             <span class="skeleton-surface" />
           </div>
-        </div>
+        </UiCard>
 
-        <div class="dashboard-loading__focus-interests">
+        <UiCard surface="glass-card" class="dashboard-loading__focus-interests">
           <div class="dashboard-loading__focus-interests-head">
             <span class="skeleton-surface dashboard-loading__focus-interests-icon" />
             <span class="skeleton-surface dashboard-loading__focus-interests-label" />
@@ -139,7 +141,7 @@ const emptyPulse = createEmptyPulse();
           <div class="dashboard-loading__focus-interests-list">
             <span v-for="topic in 4" :key="topic" class="skeleton-surface" />
           </div>
-        </div>
+        </UiCard>
       </section>
 
       <section v-else-if="view === 'pulse'" class="dashboard-loading__panel dashboard-loading__panel--pulse">
@@ -324,21 +326,16 @@ const emptyPulse = createEmptyPulse();
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--glass-border-hairline);
-  border-radius: var(--radius-surface);
-  background: var(--glass-card-background);
-  box-shadow: var(--glass-surface-shadow);
-  -webkit-backdrop-filter: var(--glass-card-filter);
-  backdrop-filter: var(--glass-card-filter);
+  padding: 0;
 }
 
 .dashboard-loading__project-preview {
   display: grid;
   aspect-ratio: 16 / 10;
   place-items: stretch;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 18%, transparent);
+  background: var(--product-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
 
 .dashboard-loading__project-preview-frame {
@@ -347,10 +344,10 @@ const emptyPulse = createEmptyPulse();
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--glass-card-sheen), var(--glass-card-inset-fill);
-  box-shadow: inset 0 0 0 1px var(--glass-border-hairline), inset 0 1px 0 var(--glass-highlight);
-  -webkit-backdrop-filter: var(--aurora-filter-chrome);
-  backdrop-filter: var(--aurora-filter-chrome);
+  background: var(--product-inset-sheen), var(--product-inset-fill);
+  box-shadow: inset 0 0 0 1px var(--border-subtle), inset 0 1px 0 var(--product-inset-highlight);
+  -webkit-backdrop-filter: var(--product-inset-filter);
+  backdrop-filter: var(--product-inset-filter);
 }
 
 .dashboard-loading__project-preview-head {
@@ -358,7 +355,7 @@ const emptyPulse = createEmptyPulse();
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 0.65rem;
 }
 
@@ -371,7 +368,7 @@ const emptyPulse = createEmptyPulse();
   flex: 1;
   align-content: center;
   gap: 0.32rem;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
 }
 .dashboard-loading__project-preview-row:last-child { border-bottom: 0; }
 .dashboard-loading__project-preview-line {
@@ -438,7 +435,7 @@ const emptyPulse = createEmptyPulse();
   justify-content: space-between;
   gap: 0.75rem;
   margin-top: auto;
-  border-top: 1px solid var(--glass-border-hairline);
+  border-top: 1px solid var(--border-subtle);
   padding: 0.65rem clamp(0.9rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.3vw, 1.15rem);
 }
 
@@ -455,12 +452,7 @@ const emptyPulse = createEmptyPulse();
 
 .dashboard-loading__focus-journey,
 .dashboard-loading__focus-interests {
-  border: 1px solid var(--glass-border-hairline);
-  border-radius: var(--radius-surface);
-  background: var(--glass-card-background);
-  box-shadow: var(--glass-surface-shadow);
-  -webkit-backdrop-filter: var(--glass-card-filter);
-  backdrop-filter: var(--glass-card-filter);
+  padding: 0;
 }
 
 .dashboard-loading__focus-journey {
@@ -476,7 +468,7 @@ const emptyPulse = createEmptyPulse();
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding: 0.72rem 1.15rem;
 }
 
@@ -514,7 +506,7 @@ const emptyPulse = createEmptyPulse();
   grid-template-columns: minmax(14rem, 21rem) 1fr;
   gap: 1.4rem;
   align-items: center;
-  border-top: 1px solid var(--glass-border-hairline);
+  border-top: 1px solid var(--border-subtle);
   border-radius: 0.45rem;
   padding: 0.85rem 0.4rem;
 }
@@ -537,11 +529,11 @@ const emptyPulse = createEmptyPulse();
 .dashboard-loading__track-node:nth-child(3) { left: 66.666%; }
 .dashboard-loading__track-node:nth-child(4) { right: 0; transform: translate(0, -50%); }
 
-.dashboard-loading__focus-footnote { min-height: 2.55rem; margin: 0; border-top: 1px solid var(--glass-border-hairline); padding: 0.65rem 1.35rem; }
+.dashboard-loading__focus-footnote { min-height: 2.55rem; margin: 0; border-top: 1px solid var(--border-subtle); padding: 0.65rem 1.35rem; }
 .dashboard-loading__focus-footnote span { display: block; width: 14rem; max-width: 72%; height: 0.62rem; border-radius: var(--radius-control); opacity: 0.34; }
 
 .dashboard-loading__focus-interests { margin-top: 1rem; }
-.dashboard-loading__focus-interests-head { display: flex; min-height: 2.85rem; align-items: baseline; gap: 0.55rem; border-bottom: 1px solid var(--glass-border-hairline); padding: 0.72rem 1.15rem; }
+.dashboard-loading__focus-interests-head { display: flex; min-height: 2.85rem; align-items: baseline; gap: 0.55rem; border-bottom: 1px solid var(--border-subtle); padding: 0.72rem 1.15rem; }
 .dashboard-loading__focus-interests-icon { align-self: center; width: 0.95rem; height: 0.95rem; flex: 0 0 auto; border-radius: 50%; opacity: 0.42; }
 .dashboard-loading__focus-interests-label { width: 7rem; height: 0.78rem; border-radius: var(--radius-control); opacity: 0.46; }
 .dashboard-loading__focus-interests-hint { width: 12rem; max-width: 42%; height: 0.62rem; border-radius: var(--radius-control); opacity: 0.28; }

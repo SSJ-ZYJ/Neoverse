@@ -2,56 +2,62 @@
 /* Shared design system: consumer bundle (theme + component css + utilities
    pre-scanned from the DS Vue sources). */
 @import "@neoverse-ui/tailwind/index.css";
-@import "./consumer-parity.css";
+@import "./bottom-dock.css";
 /* Neoverse project tokens keep their own Hero/City/Pulse/layout vocabulary. */
 @import "./tokens.css";
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html {
-  min-width: 320px;
-  background: var(--background-primary);
-  color: var(--text-primary);
-  scroll-behavior: smooth;
-  scroll-padding-top: 1rem;
-  text-rendering: optimizeLegibility;
-}
+  html {
+    min-width: 320px;
+    background: var(--background-primary);
+    color: var(--text-primary);
+    scroll-behavior: smooth;
+    scroll-padding-top: 1rem;
+    text-rendering: optimizeLegibility;
+  }
 
-body {
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-  overflow-x: hidden;
-  background:
-    radial-gradient(70rem 42rem at 8% -4%, var(--ambient-ice), transparent 65%),
-    radial-gradient(64rem 42rem at 94% 82%, var(--ambient-mint), transparent 68%),
-    radial-gradient(50rem 26rem at 50% 118%, rgb(61 214 166 / 11%), transparent 72%), var(--background-primary);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  line-height: 1.55;
-}
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+    background:
+      radial-gradient(70rem 42rem at 8% -4%, var(--ambient-ice), transparent 65%),
+      radial-gradient(64rem 42rem at 94% 82%, var(--ambient-mint), transparent 68%),
+      radial-gradient(50rem 26rem at 50% 118%, rgb(61 214 166 / 11%), transparent 72%), var(--background-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.55;
+  }
 
-::selection {
-  background: color-mix(in srgb, var(--accent-primary) 24%, transparent);
-}
-a {
-  color: inherit;
-}
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-button {
-  font: inherit;
-}
-:where(a, button, input, [tabindex]):focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 3px;
+  ::selection {
+    background: color-mix(in srgb, var(--accent-primary) 24%, transparent);
+  }
+
+  a {
+    color: inherit;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  :where(a, button, input, [tabindex]):focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px;
+  }
 }
 
 .skip-link {

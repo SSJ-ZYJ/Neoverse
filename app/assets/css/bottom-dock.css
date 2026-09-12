@@ -1,0 +1,31 @@
+/* Product-level BottomDock composition. Material and control semantics come
+   from Neoverse-UI; this file owns only dock layout and scene token values. */
+.bottom-dock {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 19.2px);
+  min-height: 0;
+  isolation: isolate;
+  border-radius: var(--neoverse-radius-control);
+
+  /* The divider is the only direct separator in this composition. Keep the
+     root flex gap at zero and let one shared symmetric token own both sides. */
+  --neoverse-control-surface-gap: var(--neoverse-space-0);
+  --neoverse-control-surface-padding: var(--dock-inset);
+  --neoverse-control-surface-group-height: var(--dock-control-height);
+  --neoverse-control-surface-divider-gap: var(--dock-divider-gap);
+  --neoverse-control-chrome-trailing-padding-inline: 0.25rem;
+}
+
+.bottom-dock .ui-control-surface__group--primary {
+  display: flex;
+  width: max-content;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0;
+}
+
+.bottom-dock__item {
+  flex: 0 0 auto;
+}

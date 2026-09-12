@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiAction, UiBadge, UiGlassSurface } from '@neoverse-ui/vue';
+import { UiAction, UiBadge, UiCard } from '@neoverse-ui/vue';
 import type { ProjectIcon, ProjectId, ProjectTone } from '#shared/constants';
 import type { ProjectPreview } from '#shared/types/projects';
 import IconLucideBookOpen from '~icons/lucide/book-open';
@@ -58,7 +58,7 @@ const formatArticleDate = (value: string | null) => {
 </script>
 
 <template>
-  <UiGlassSurface as="article" variant="card" class="project-card">
+  <UiCard as="article" surface="glass-card" class="project-card">
     <div class="project-card__main">
       <div class="project-card__preview">
         <div
@@ -153,7 +153,7 @@ const formatArticleDate = (value: string | null) => {
         </template>
       </UiAction>
     </div>
-  </UiGlassSurface>
+  </UiCard>
 </template>
 
 <style scoped>
@@ -166,7 +166,7 @@ const formatArticleDate = (value: string | null) => {
   transition: border-color var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-standard) var(--motion-ease-standard), transform var(--motion-standard) var(--motion-ease-emphasized);
 }
 .project-card:hover,
-.project-card:has(.project-card__repo:hover) { border-color: color-mix(in srgb, var(--border-interactive) 38%, var(--glass-border-hairline)); background: var(--glass-card-background-hover); box-shadow: var(--glass-surface-shadow-hover); transform: translateY(-2px); }
+.project-card:has(.project-card__repo:hover) { transform: translateY(-2px); }
 .project-card__repo-icon--filled { fill: currentColor; stroke: none; }
 .project-card__repo {
   width: var(--control-height-sm);
@@ -189,9 +189,9 @@ const formatArticleDate = (value: string | null) => {
   aspect-ratio: 16 / 10;
   overflow: hidden;
   place-items: center;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--glass-refraction-fill), color-mix(in srgb, var(--surface-glass) 18%, transparent);
+  background: var(--product-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
 .project-card__preview-frame {
   position: relative;
@@ -202,17 +202,17 @@ const formatArticleDate = (value: string | null) => {
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--glass-card-sheen), var(--glass-card-inset-fill);
-  box-shadow: inset 0 0 0 1px var(--glass-border-hairline), inset 0 1px 0 var(--glass-highlight);
-  -webkit-backdrop-filter: var(--aurora-filter-chrome);
-  backdrop-filter: var(--aurora-filter-chrome);
+  background: var(--product-inset-sheen), var(--product-inset-fill);
+  box-shadow: inset 0 0 0 1px var(--border-subtle), inset 0 1px 0 var(--product-inset-highlight);
+  -webkit-backdrop-filter: var(--product-inset-filter);
+  backdrop-filter: var(--product-inset-filter);
 }
 .project-card__preview-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 0.65rem;
   color: var(--text-secondary);
   font-size: var(--text-sm);
@@ -243,7 +243,7 @@ const formatArticleDate = (value: string | null) => {
   display: flex;
   min-height: 0;
   flex: 1;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
 }
 .project-card__docs-list a,
 .project-card__article-list a {
@@ -261,19 +261,19 @@ const formatArticleDate = (value: string | null) => {
   border-bottom: 0;
   border-radius: var(--radius-control-inner);
   background:
-    var(--glass-card-sheen),
+    var(--product-inset-sheen),
     linear-gradient(112deg, color-mix(in srgb, var(--accent-secondary) 18%, transparent), color-mix(in srgb, var(--accent-primary) 10%, transparent) 64%, transparent),
-    var(--glass-card-inset-fill);
-  box-shadow: var(--aurora-active-highlight);
+    var(--product-inset-fill);
+  box-shadow: var(--product-state-active-highlight);
   transition: background var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard);
 }
 .project-card__docs-list li.is-featured:has(a:hover),
 .project-card__docs-list li.is-featured:has(a:focus-visible) {
   background:
-    var(--glass-card-sheen),
+    var(--product-inset-sheen),
     linear-gradient(112deg, color-mix(in srgb, var(--accent-secondary) 24%, transparent), color-mix(in srgb, var(--accent-primary) 15%, transparent) 68%, transparent),
-    var(--glass-card-inset-fill);
-  box-shadow: var(--aurora-active-highlight), 0 0.65rem 1.4rem -1.2rem color-mix(in srgb, var(--accent-secondary) 36%, transparent);
+    var(--product-inset-fill);
+  box-shadow: var(--product-state-active-highlight), 0 0.65rem 1.4rem -1.2rem color-mix(in srgb, var(--accent-secondary) 36%, transparent);
 }
 .project-card__docs-list li.is-featured a { padding: 0.62rem 0.7rem; }
 .project-card__docs-list strong,
@@ -306,7 +306,7 @@ const formatArticleDate = (value: string | null) => {
   display: flex;
   min-height: 0;
   flex: 1;
-  border-bottom: 1px solid var(--glass-border-hairline);
+  border-bottom: 1px solid var(--border-subtle);
 }
 .project-card__article-list a { gap: 0.22rem; padding: 0.45rem 0; }
 .project-card__article-list li:last-child { border-bottom: 0; }
@@ -361,13 +361,13 @@ const formatArticleDate = (value: string | null) => {
 }
 .project-card__copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 0.55rem; padding: clamp(0.9rem, 1.3vw, 1.15rem); color: inherit; text-decoration: none; }
 .project-card__title-row { display: flex; align-items: center; gap: 0.55rem; }
-.project-card__icon { --project-icon-tone: var(--accent-primary); display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--project-icon-tone) 24%, var(--glass-border-hairline)); border-radius: var(--radius-control); color: var(--project-icon-tone); background: var(--glass-refraction-fill), color-mix(in srgb, var(--project-icon-tone) 8%, var(--glass-card-fill)); box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0.8rem color-mix(in srgb, var(--project-icon-tone) 10%, transparent); }
+.project-card__icon { --project-icon-tone: var(--accent-primary); display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--project-icon-tone) 24%, var(--border-subtle)); border-radius: var(--radius-control); color: var(--project-icon-tone); background: var(--product-inset-refraction), color-mix(in srgb, var(--project-icon-tone) 8%, var(--product-inset-dense-fill)); box-shadow: inset 0 1px 0 var(--product-inset-highlight), 0 0 0.8rem color-mix(in srgb, var(--project-icon-tone) 10%, transparent); }
 .project-card__icon--mint { --project-icon-tone: var(--accent-secondary); }
 .project-card__icon svg { width: 1.08rem; height: 1.08rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; filter: drop-shadow(0 0 0.3rem color-mix(in srgb, var(--project-icon-tone) 22%, transparent)); }
 .project-card__title-row h3 { margin: 0; color: var(--text-primary); font-size: var(--text-card-title-sm); font-weight: var(--weight-bold); letter-spacing: -0.02em; line-height: 1.25; }
 .project-card__category { margin: 0; color: var(--accent-primary); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
 .project-card__description { display: -webkit-box; overflow: hidden; margin: 0; color: var(--text-secondary); font-size: var(--text-card-description); line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
-.project-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.65rem clamp(0.9rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.3vw, 1.15rem); border-top: 1px solid var(--glass-border-hairline); }
+.project-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.65rem clamp(0.9rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.3vw, 1.15rem); border-top: 1px solid var(--border-subtle); }
 .project-card__tags { display: flex; min-width: 0; flex-wrap: wrap; gap: 0.3rem; }
 @media (prefers-reduced-motion: reduce) { .project-card:hover, .project-card:has(.project-card__repo:hover) { transform: none; } }
 @media (max-width: 520px) {
