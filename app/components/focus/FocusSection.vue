@@ -296,11 +296,11 @@ const stageAlign = (index: number) => {
   border-radius: var(--radius-pill);
   padding: 0.12rem 0.55rem;
   background:
-    var(--product-inset-refraction),
-    color-mix(in srgb, var(--track-tone) 12%, var(--product-inset-dense-fill));
-  -webkit-backdrop-filter: var(--product-inset-filter);
-  backdrop-filter: var(--product-inset-filter);
-  box-shadow: inset 0 1px 0 var(--product-inset-highlight);
+    var(--neoverse-surface-inset-refraction),
+    color-mix(in srgb, var(--track-tone) 12%, var(--neoverse-surface-inset-dense-fill));
+  -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
+  backdrop-filter: var(--neoverse-surface-inset-filter);
+  box-shadow: inset 0 1px 0 var(--neoverse-surface-inset-highlight);
   color: var(--track-tone);
   font-family: var(--font-sans);
   font-size: var(--text-2xs);

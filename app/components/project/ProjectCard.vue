@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiAction, UiBadge, UiCard } from '@neoverse-ui/vue';
+import { UiBadge, UiCard, UiIconButton, UiSurface } from '@neoverse-ui/vue';
 import type { ProjectIcon, ProjectId, ProjectTone } from '#shared/constants';
 import type { ProjectPreview } from '#shared/types/projects';
 import IconLucideBookOpen from '~icons/lucide/book-open';
@@ -61,7 +61,8 @@ const formatArticleDate = (value: string | null) => {
   <UiCard as="article" surface="glass-card" class="project-card">
     <div class="project-card__main">
       <div class="project-card__preview">
-        <div
+        <UiSurface
+          surface="inset"
           class="project-card__preview-frame"
           :aria-label="t('projects.preview.label', { title: copy.title })"
           :aria-busy="loading"
@@ -121,7 +122,7 @@ const formatArticleDate = (value: string | null) => {
           <p v-else class="project-card__preview-unavailable" role="status">
             {{ t('projects.preview.unavailable') }}
           </p>
-        </div>
+        </UiSurface>
       </div>
       <a class="project-card__copy" :href="project.href" target="_blank" rel="noreferrer">
           <div class="project-card__title-row">
@@ -138,20 +139,19 @@ const formatArticleDate = (value: string | null) => {
       <div class="project-card__tags">
         <UiBadge v-for="tag in copy.tags" :key="tag" variant="neutral" size="sm">{{ tag }}</UiBadge>
       </div>
-      <UiAction
+      <UiIconButton
         class="project-card__repo"
+        as="a"
         variant="secondary"
         size="sm"
+        :label="t('projects.viewSource')"
         :href="project.repoHref"
         target="_blank"
         rel="noreferrer"
-        :aria-label="t('projects.viewSource')"
         :title="t('projects.viewSource')"
       >
-        <template #leading>
-          <IconSimpleIconsGithub class="project-card__repo-icon--filled" aria-hidden="true" />
-        </template>
-      </UiAction>
+        <IconSimpleIconsGithub class="project-card__repo-icon--filled" aria-hidden="true" />
+      </UiIconButton>
     </div>
   </UiCard>
 </template>
@@ -168,13 +168,6 @@ const formatArticleDate = (value: string | null) => {
 .project-card:hover,
 .project-card:has(.project-card__repo:hover) { transform: translateY(-2px); }
 .project-card__repo-icon--filled { fill: currentColor; stroke: none; }
-.project-card__repo {
-  width: var(--control-height-sm);
-  min-width: var(--control-height-sm);
-  min-height: var(--control-height-sm);
-  gap: 0;
-  padding-inline: 0;
-}
 .project-card__main {
   display: flex;
   min-width: 0;
@@ -191,7 +184,7 @@ const formatArticleDate = (value: string | null) => {
   place-items: center;
   border-bottom: 1px solid var(--border-subtle);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--product-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
+  background: var(--neoverse-surface-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
 .project-card__preview-frame {
   position: relative;
@@ -202,10 +195,6 @@ const formatArticleDate = (value: string | null) => {
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--product-inset-sheen), var(--product-inset-fill);
-  box-shadow: inset 0 0 0 1px var(--border-subtle), inset 0 1px 0 var(--product-inset-highlight);
-  -webkit-backdrop-filter: var(--product-inset-filter);
-  backdrop-filter: var(--product-inset-filter);
 }
 .project-card__preview-head {
   display: flex;
@@ -261,19 +250,19 @@ const formatArticleDate = (value: string | null) => {
   border-bottom: 0;
   border-radius: var(--radius-control-inner);
   background:
-    var(--product-inset-sheen),
+    var(--neoverse-surface-inset-sheen),
     linear-gradient(112deg, color-mix(in srgb, var(--accent-secondary) 18%, transparent), color-mix(in srgb, var(--accent-primary) 10%, transparent) 64%, transparent),
-    var(--product-inset-fill);
-  box-shadow: var(--product-state-active-highlight);
+    var(--neoverse-surface-inset-fill);
+  box-shadow: var(--neoverse-surface-inset-active-highlight);
   transition: background var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard);
 }
 .project-card__docs-list li.is-featured:has(a:hover),
 .project-card__docs-list li.is-featured:has(a:focus-visible) {
   background:
-    var(--product-inset-sheen),
+    var(--neoverse-surface-inset-sheen),
     linear-gradient(112deg, color-mix(in srgb, var(--accent-secondary) 24%, transparent), color-mix(in srgb, var(--accent-primary) 15%, transparent) 68%, transparent),
-    var(--product-inset-fill);
-  box-shadow: var(--product-state-active-highlight), 0 0.65rem 1.4rem -1.2rem color-mix(in srgb, var(--accent-secondary) 36%, transparent);
+    var(--neoverse-surface-inset-fill);
+  box-shadow: var(--neoverse-surface-inset-active-highlight), 0 0.65rem 1.4rem -1.2rem color-mix(in srgb, var(--accent-secondary) 36%, transparent);
 }
 .project-card__docs-list li.is-featured a { padding: 0.62rem 0.7rem; }
 .project-card__docs-list strong,
@@ -361,7 +350,7 @@ const formatArticleDate = (value: string | null) => {
 }
 .project-card__copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 0.55rem; padding: clamp(0.9rem, 1.3vw, 1.15rem); color: inherit; text-decoration: none; }
 .project-card__title-row { display: flex; align-items: center; gap: 0.55rem; }
-.project-card__icon { --project-icon-tone: var(--accent-primary); display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--project-icon-tone) 24%, var(--border-subtle)); border-radius: var(--radius-control); color: var(--project-icon-tone); background: var(--product-inset-refraction), color-mix(in srgb, var(--project-icon-tone) 8%, var(--product-inset-dense-fill)); box-shadow: inset 0 1px 0 var(--product-inset-highlight), 0 0 0.8rem color-mix(in srgb, var(--project-icon-tone) 10%, transparent); }
+.project-card__icon { --project-icon-tone: var(--accent-primary); display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--project-icon-tone) 24%, var(--border-subtle)); border-radius: var(--radius-control); color: var(--project-icon-tone); background: var(--neoverse-surface-inset-refraction), color-mix(in srgb, var(--project-icon-tone) 8%, var(--neoverse-surface-inset-dense-fill)); box-shadow: inset 0 1px 0 var(--neoverse-surface-inset-highlight), 0 0 0.8rem color-mix(in srgb, var(--project-icon-tone) 10%, transparent); }
 .project-card__icon--mint { --project-icon-tone: var(--accent-secondary); }
 .project-card__icon svg { width: 1.08rem; height: 1.08rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; filter: drop-shadow(0 0 0.3rem color-mix(in srgb, var(--project-icon-tone) 22%, transparent)); }
 .project-card__title-row h3 { margin: 0; color: var(--text-primary); font-size: var(--text-card-title-sm); font-weight: var(--weight-bold); letter-spacing: -0.02em; line-height: 1.25; }

@@ -101,11 +101,11 @@ const formatPercentage = (ratio: number) =>
         <dl class="repository-metrics" aria-hidden="true">
           <div>
             <dt>{{ t('pulse.repositoryPulse.activeRepositories') }}</dt>
-            <dd><UiSkeleton variant="title" width="3.5rem" /></dd>
+            <dd><UiSkeleton variant="title" width="3.5rem" height="var(--text-display-sm)" /></dd>
           </div>
           <div>
             <dt>{{ t('pulse.repositoryPulse.commitContributions') }}</dt>
-            <dd><UiSkeleton variant="title" width="3.5rem" /></dd>
+            <dd><UiSkeleton variant="title" width="3.5rem" height="var(--text-display-sm)" /></dd>
           </div>
         </dl>
         <div class="repository-distribution" aria-hidden="true">
@@ -267,7 +267,7 @@ const formatPercentage = (ratio: number) =>
 }
 .activity-row:focus-visible {
   border-radius: var(--radius-control);
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--neoverse-color-focus-ring);
   outline-offset: 2px;
 }
 .activity-row--skeleton {
@@ -332,8 +332,6 @@ const formatPercentage = (ratio: number) =>
   letter-spacing: -0.05em;
   line-height: 1;
 }
-.repository-metrics dt :deep(.ui-skeleton) { height: calc(var(--text-sm) * 1.55); }
-.repository-metrics dd :deep(.ui-skeleton) { height: var(--text-display-sm); }
 .repository-distribution {
   display: grid;
   align-content: start;

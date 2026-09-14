@@ -55,7 +55,7 @@
   }
 
   :where(a, button, input, [tabindex]):focus-visible {
-    outline: 2px solid var(--focus-ring);
+    outline: 2px solid var(--neoverse-color-focus-ring);
     outline-offset: 3px;
   }
 }
@@ -71,7 +71,7 @@
   padding: 0.65rem 0.9rem;
   background: var(--surface-primary);
   color: var(--text-primary);
-  box-shadow: var(--shadow-float);
+  box-shadow: var(--neoverse-shadow-overlay);
   transition: transform var(--motion-fast) var(--motion-ease-standard);
 }
 

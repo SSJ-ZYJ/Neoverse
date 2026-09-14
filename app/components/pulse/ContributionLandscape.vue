@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiCard, UiSkeleton } from '@neoverse-ui/vue';
+import { UiCard, UiSkeleton, UiTooltipSurface } from '@neoverse-ui/vue';
 import type { ComponentPublicInstance } from 'vue';
 import type { GithubPulse } from '#shared/types/github';
 
@@ -447,7 +447,7 @@ function hideDayTooltip(day: ContributionDay) {
     <div class="contribution-card__body">
       <div
         ref="chartScroller"
-        class="contribution-card__chart"
+        class="contribution-card__chart scrollbar-immersive"
         :style="chartScrollerStyle"
         @click="onChartClick"
         @pointerdown="onChartPointerDown"
@@ -513,31 +513,32 @@ function hideDayTooltip(day: ContributionDay) {
       <dl class="contribution-stats">
         <div>
           <dt>{{ t('pulse.stats.contributions') }}</dt>
-          <dd v-if="loading"><UiSkeleton variant="title" width="4rem" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="title" width="4rem" height="var(--pulse-stat-skeleton-height)" /></dd>
           <dd v-else>{{ contributions.scope === 'unavailable' ? '—' : contributions.total.toLocaleString(locale) }}</dd>
         </div>
         <div>
           <dt>{{ t('pulse.stats.streak') }}</dt>
-          <dd v-if="loading"><UiSkeleton variant="title" width="3rem" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="title" width="3rem" height="var(--pulse-stat-skeleton-height)" /></dd>
           <dd v-else>{{ contributions.scope === 'unavailable' ? '—' : t('pulse.stats.days', { count: contributions.longestStreak }) }}</dd>
         </div>
         <div>
           <dt>{{ t('pulse.stats.range') }}</dt>
-          <dd v-if="loading"><UiSkeleton variant="text" width="5rem" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="text" width="5rem" height="calc(var(--text-sm) * 1.55)" /></dd>
           <dd v-else>{{ scopeLabel }}</dd>
         </div>
       </dl>
     </div>
 
-    <div
+    <UiTooltipSurface
       v-if="activeDay"
       class="contribution-tooltip"
       :class="`contribution-tooltip--${tooltipPlacement}`"
       :style="tooltipStyle"
+      variant="accent"
       aria-hidden="true"
     >
       {{ activeDayLabel }}
-    </div>
+    </UiTooltipSurface>
   </UiCard>
 </template>
 
@@ -559,18 +560,8 @@ function hideDayTooltip(day: ContributionDay) {
 .level-3 { background: color-mix(in srgb, var(--accent-secondary) 66%, var(--accent-primary)); }
 .level-4 { background: color-mix(in srgb, var(--accent-primary) 78%, var(--accent-secondary)); }
 .contribution-card__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(0.7rem, 1.4vw, 1.1rem); margin-top: clamp(0.7rem, 1.4vw, 1.05rem); }
-.contribution-card__chart { display: grid; min-width: 0; align-content: center; overflow-x: auto; overflow-y: hidden; padding: 0.2rem 0 0.4rem; scrollbar-color: color-mix(in srgb, var(--text-secondary) 55%, transparent) transparent; scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-y; user-select: none; contain: paint; }
+.contribution-card__chart { display: grid; min-width: 0; align-content: center; overflow-x: auto; overflow-y: hidden; padding: 0.2rem 0 0.4rem; scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-y; user-select: none; contain: paint; }
 .contribution-card__chart > * { transform: translate3d(var(--contribution-edge-offset, 0px), 0, 0); }
-.contribution-card__chart::-webkit-scrollbar { height: 6px; -webkit-appearance: none; appearance: none; }
-.contribution-card__chart::-webkit-scrollbar-track { background: transparent; }
-.contribution-card__chart::-webkit-scrollbar-thumb { border-radius: 999px; background: color-mix(in srgb, var(--text-secondary) 55%, transparent); }
-.contribution-card__chart::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--text-primary) 72%, transparent); }
-@supports (scrollbar-width: thin) {
-  .contribution-card__chart { scrollbar-width: thin; }
-}
-@supports selector(::-webkit-scrollbar) {
-  .contribution-card__chart { scrollbar-width: auto; scrollbar-color: auto; }
-}
 /* 流式网格：格子随容器拉伸填满左列（宽屏格子更大），aspect-ratio 保持正方；
    min-cell 兜底，过窄时交给 overflow-x 滚动；0.68rem 保证月份标签（较宽的 10月/11月）不重叠。 */
 .contribution-card__months, .contribution-grid { --contribution-gap: clamp(0.16rem, 0.22vw, 0.22rem); --contribution-min-cell: 0.68rem; }
@@ -591,25 +582,20 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-card__loading-chart > .contribution-card__legend--chart { margin-top: 0.5rem; }
 .contribution-day { display: block; aspect-ratio: 1; border: 0; border-radius: min(var(--radius-xs), 25%); padding: 0; cursor: pointer; transition: filter var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard), transform var(--motion-fast) var(--motion-ease-standard); }
 .contribution-day:hover { filter: brightness(1.12); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 48%, transparent); transform: translateY(-1px); }
-.contribution-day:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.contribution-day:focus-visible { outline: 2px solid var(--neoverse-color-focus-ring); outline-offset: 2px; }
 .contribution-day.is-blank { visibility: hidden; cursor: default; }
 .contribution-card__empty { display: grid; min-height: 8rem; place-items: center; margin: 0; color: var(--text-muted); font-size: var(--text-md); text-align: center; }
 /* 统计横排三列：取代原右侧纵向 16.5rem 的高柱。 */
-.contribution-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; }
+.contribution-stats { --pulse-stat-skeleton-height: var(--text-stat); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; }
 .contribution-stats div { display: grid; align-content: center; border-top: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); padding: 0.55rem 0.9rem; }
 .contribution-stats div:first-child { border-top: 0; }
 .contribution-stats div:last-child { border-right: 0; }
 .contribution-stats dt { color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
 .contribution-stats dd { margin: 0.18rem 0 0; color: var(--text-primary); font-size: var(--text-stat); font-weight: var(--weight-display); letter-spacing: -0.05em; line-height: 1; }
-.contribution-stats dd :deep(.ui-skeleton) { height: var(--text-stat); }
-.contribution-stats dd :deep(.ui-skeleton--text) { height: calc(var(--text-sm) * 1.55); }
 .contribution-stats div:last-child dd { color: var(--accent-primary); font-size: var(--text-stat-sm); letter-spacing: -0.03em; }
-.contribution-tooltip { position: absolute; z-index: 5; max-width: min(16rem, calc(100% - 1rem)); border: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle)); border-radius: var(--radius-control); padding: 0.42rem 0.62rem; color: var(--text-primary); font-size: var(--text-xs); font-weight: var(--weight-semibold); line-height: 1.35; white-space: nowrap; background: color-mix(in srgb, var(--surface-elevated) 92%, var(--accent-primary)); box-shadow: var(--shadow-float); pointer-events: none; transform: translate(-50%, calc(-100% - 0.65rem)); }
-.contribution-tooltip::after { position: absolute; bottom: -0.28rem; left: 50%; width: 0.5rem; height: 0.5rem; border-right: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle)); border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle)); background: color-mix(in srgb, var(--surface-elevated) 92%, var(--accent-primary)); content: ""; transform: translateX(-50%) rotate(45deg); }
-.contribution-tooltip--start { transform: translate(0, calc(-100% - 0.65rem)); }
-.contribution-tooltip--start::after { left: 1rem; }
-.contribution-tooltip--end { transform: translate(-100%, calc(-100% - 0.65rem)); }
-.contribution-tooltip--end::after { left: calc(100% - 1rem); }
+.contribution-tooltip { position: absolute; z-index: 5; max-width: min(16rem, calc(100% - 1rem)); white-space: nowrap; pointer-events: none; transform: translate(-50%, calc(-100% - 0.65rem)); }
+.contribution-tooltip--start { --ui-tooltip-arrow-left: 1rem; transform: translate(0, calc(-100% - 0.65rem)); }
+.contribution-tooltip--end { --ui-tooltip-arrow-left: calc(100% - 1rem); transform: translate(-100%, calc(-100% - 0.65rem)); }
 @media (max-width: 600px) {
   .contribution-tooltip--start { transform: translate(-1rem, calc(-100% - 0.65rem)); }
   .contribution-tooltip--end { transform: translate(calc(-100% + 1rem), calc(-100% - 0.65rem)); }
@@ -622,9 +608,8 @@ function hideDayTooltip(day: ContributionDay) {
   .contribution-stats div + div { border-top: 1px solid var(--border-subtle); }
 }
 @media (max-width: 600px) {
+  .contribution-stats { --pulse-stat-skeleton-height: var(--text-card-title-narrow); }
   .contribution-stats div { padding: 0.5rem 0.5rem; }
   .contribution-stats dd { font-size: var(--text-card-title-narrow); }
-  .contribution-stats dd :deep(.ui-skeleton) { height: var(--text-card-title-narrow); }
-  .contribution-stats dd :deep(.ui-skeleton--text) { height: calc(var(--text-sm) * 1.55); }
 }
 </style>

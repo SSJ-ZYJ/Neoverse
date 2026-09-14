@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiBadge, UiButton } from '@neoverse-ui/vue';
+import { UiBadge, UiButton, UiNotice } from '@neoverse-ui/vue';
 import type { GithubPulse } from '#shared/types/github';
 
 const props = defineProps<{ pulse: GithubPulse; loading: boolean; error?: boolean }>();
@@ -32,17 +32,24 @@ const updatedLabel = computed(() => {
       <p class="panel-description">{{ t('pulse.description') }}</p>
     </header>
 
-    <div v-if="error && !loading && pulse.source === 'unavailable'" class="pulse-panel__notice" role="status">
+    <UiNotice
+      v-if="error && !loading && pulse.source === 'unavailable'"
+      class="pulse-panel__notice"
+      variant="warning"
+      role="status"
+    >
       <span>{{ t('pulse.error') }}</span>
-      <UiButton
-        variant="ghost"
-        size="sm"
-        :loading="loading"
-        @click="$emit('retry')"
-      >
-        {{ t('pulse.retry') }}
-      </UiButton>
-    </div>
+      <template #action>
+        <UiButton
+          variant="ghost"
+          size="sm"
+          :loading="loading"
+          @click="$emit('retry')"
+        >
+          {{ t('pulse.retry') }}
+        </UiButton>
+      </template>
+    </UiNotice>
 
     <div class="pulse-panel__body">
       <PulseContributionLandscape :contributions="pulse.contributions" :loading="loading" />
@@ -64,6 +71,6 @@ const updatedLabel = computed(() => {
 .pulse-panel > .panel-header,
 .pulse-panel__body { width: 100%; max-width: var(--focus-content-max); margin-inline: auto; }
 .pulse-panel__body { display: flex; min-height: 0; flex-direction: column; gap: clamp(1rem, 2vh, 1.25rem); }
-.pulse-panel__notice { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.9rem; border: 1px solid color-mix(in srgb, #f59e0b 28%, var(--border-subtle)); border-radius: var(--radius-control); padding: 0.75rem 1rem; color: var(--text-secondary); font-size: var(--text-md); background: color-mix(in srgb, #f59e0b 7%, var(--surface-subtle)); }
+.pulse-panel__notice { margin-bottom: 0.9rem; }
 @media (max-width: 540px) { .pulse-panel__source small { display: none; } }
 </style>

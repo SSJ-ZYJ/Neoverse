@@ -182,6 +182,7 @@ onMounted(() => {
         :style="homeStatusStyle"
         status="success"
         :pulse="!skeleton"
+        :loading="skeleton"
       >
         <span :class="{ 'home-skeleton-measure': skeleton }">
           {{ t('home.currentlyBuilding') }} <strong>{{ t('projects.docs.title') }}</strong>
@@ -353,7 +354,7 @@ onMounted(() => {
   background: color-mix(in srgb, var(--surface-glass) 58%, transparent);
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--accent-primary) 16%, transparent),
-    var(--shadow-float);
+    var(--neoverse-shadow-overlay);
 }
 .home-avatar__skeleton,
 .home-avatar img { grid-area: 1 / 1; }
@@ -402,10 +403,6 @@ onMounted(() => {
   grid-area: links;
   gap: 0.65rem;
 }
-.home-socials :deep(.ui-action--lg) {
-  min-height: var(--control-height-lg);
-}
-
 .home-socials a {
   animation-name: home-social-link-enter;
   will-change: auto;
@@ -435,13 +432,6 @@ onMounted(() => {
   transform: translateX(-100%);
   animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
     var(--neoverse-skeleton-shimmer-easing) infinite;
-}
-.home-panel--skeleton .home-panel__status :deep(.ui-status-indicator__dot) {
-  background: var(--neoverse-skeleton-fill);
-  box-shadow: var(--neoverse-skeleton-edge);
-}
-.home-panel--skeleton .home-panel__status :deep(.ui-status-indicator__dot)::after {
-  display: none;
 }
 .home-panel__status {
   grid-area: status;

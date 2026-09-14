@@ -335,7 +335,7 @@ const emptyPulse = createEmptyPulse();
   place-items: stretch;
   border-bottom: 1px solid var(--border-subtle);
   padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--product-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
+  background: var(--neoverse-surface-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
 
 .dashboard-loading__project-preview-frame {
@@ -344,10 +344,10 @@ const emptyPulse = createEmptyPulse();
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--product-inset-sheen), var(--product-inset-fill);
-  box-shadow: inset 0 0 0 1px var(--border-subtle), inset 0 1px 0 var(--product-inset-highlight);
-  -webkit-backdrop-filter: var(--product-inset-filter);
-  backdrop-filter: var(--product-inset-filter);
+  background: var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
+  box-shadow: inset 0 0 0 1px var(--border-subtle), inset 0 1px 0 var(--neoverse-surface-inset-highlight);
+  -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
+  backdrop-filter: var(--neoverse-surface-inset-filter);
 }
 
 .dashboard-loading__project-preview-head {
