@@ -163,6 +163,7 @@ onMounted(() => {
           :tabindex="skeleton ? -1 : undefined"
           variant="secondary"
           size="lg"
+          scale="lg"
           :style="skeleton ? undefined : getHomeLinkStyle(index)"
         >
           <template #leading>

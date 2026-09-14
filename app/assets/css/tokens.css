@@ -86,13 +86,20 @@
   );
   --page-block-start: clamp(1.25rem, 3.5vh, 3rem);
   --page-block-end: clamp(1.25rem, 3.5vh, 3rem);
-  --dock-control-height: 1.875rem;
-  --control-height-sm: 1.85rem;
-  --control-height-md: var(--dock-control-height);
-  --control-height-lg: 2.75rem;
-  --dock-inset: 0.3rem;
-  --dock-divider-gap: var(--neoverse-space-2);
-  --dock-height: calc(var(--dock-control-height) + var(--dock-inset) + var(--dock-inset) + 2px);
+  /* Product control aliases follow Neoverse-UI geometry instead of maintaining
+     a parallel size scale. */
+  --control-height-sm: var(--neoverse-action-height-sm);
+  --control-height-md: var(--neoverse-action-height-md);
+  --control-height-lg: var(--neoverse-action-height-lg);
+  --dock-viewport-clearance: 1.2rem;
+  --dock-compact-breakpoint: 32.5rem;
+  --dock-height: calc(
+    var(--neoverse-control-surface-group-height) +
+    var(--neoverse-control-surface-padding-block) +
+    var(--neoverse-control-surface-padding-block) +
+    var(--neoverse-border-width-thin) +
+    var(--neoverse-border-width-thin)
+  );
   --footer-track-height: 1.2rem;
   --dock-footer-gap: clamp(0.8rem, 1.8dvh, 1.25rem);
   --bottom-chrome-edge-space: calc(env(safe-area-inset-bottom, 0px) + clamp(0.7rem, 1.6dvh, 1.1rem));
@@ -134,7 +141,6 @@
 
 @media (max-width: 520px) {
   :root {
-    --dock-inset: 0.3rem;
     --dock-footer-gap: clamp(0.68rem, 1.6dvh, 0.9rem);
     --bottom-chrome-edge-space: calc(env(safe-area-inset-bottom, 0px) + clamp(0.55rem, 1.35dvh, 0.8rem));
   }

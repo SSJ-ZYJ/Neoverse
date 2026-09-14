@@ -22,13 +22,19 @@ const { activeView } = useViewNavigation();
 const { t, locale, setLocale, locales } = useI18n();
 const compactNavigation = ref(false);
 let compactNavigationQuery: MediaQueryList | undefined;
+const compactBreakpointToken = '--dock-compact-breakpoint';
 
 function updateCompactNavigation(query: MediaQueryList | MediaQueryListEvent) {
   compactNavigation.value = query.matches;
 }
 
 onMounted(() => {
-  compactNavigationQuery = window.matchMedia('(max-width: 520px)');
+  const compactBreakpoint = getComputedStyle(document.documentElement).getPropertyValue(compactBreakpointToken).trim();
+  if (compactBreakpoint.length === 0) {
+    throw new Error(`Missing product token: ${compactBreakpointToken}`);
+  }
+
+  compactNavigationQuery = window.matchMedia(`(max-width: ${compactBreakpoint})`);
   updateCompactNavigation(compactNavigationQuery);
   compactNavigationQuery.addEventListener('change', updateCompactNavigation);
 });
@@ -67,7 +73,8 @@ const localeRef = computed({
     surface="chrome"
     hover-mode="static"
     navigation-indicator
-    class="bottom-dock"
+    :scale="compactNavigation ? 'md' : 'lg'"
+    :class="['bottom-dock', { 'bottom-dock--compact': compactNavigation }]"
     :aria-label="t('nav.aria')"
   >
     <UiNavigationItem
