@@ -415,6 +415,7 @@ onMounted(() => {
   position: relative;
   display: inline-flex;
   width: auto;
+  min-height: var(--control-height-lg);
   overflow: hidden;
   color: transparent;
   background: var(--neoverse-skeleton-fill);

@@ -14,6 +14,10 @@ body {
   background: #050b14;
   color: #f4f8fc;
 }
+#__nuxt {
+  min-height: 100vh;
+  background-color: #050b14;
+}
 .skip-link {
   position: fixed;
   top: 1rem;

@@ -176,9 +176,7 @@ onMounted(async () => {
 
 <template>
   <a class="skip-link" href="#main-content">{{ t('common.skipToContent') }}</a>
-  <Transition name="boot-fade">
-    <DashboardSkeleton v-if="isBooting" :view="skeletonView" />
-  </Transition>
+  <DashboardSkeleton v-show="isBooting" :view="skeletonView" />
   <div
     class="app-view-stage"
     :class="{
@@ -198,9 +196,9 @@ onMounted(async () => {
     />
     <div
       class="app-view-content"
+      :class="{ 'app-view-content--booting': isBooting }"
       :aria-hidden="isBooting"
       :inert="isBooting"
-      :style="{ '--home-entry-animation-play-state': isBooting ? 'paused' : 'running' }"
     >
       <NuxtPage :transition="pageTransition" />
     </div>
@@ -231,8 +229,22 @@ onMounted(async () => {
   isolation: isolate;
   pointer-events: none;
 }
-.boot-fade-leave-active { transition: opacity 260ms var(--motion-ease-standard); }
-.boot-fade-leave-to { opacity: 0; }
+#__nuxt .app-view-content--booting {
+  display: block;
+  visibility: hidden;
+}
+#__nuxt .bottom-chrome[inert] {
+  display: grid;
+  visibility: hidden;
+}
+.app-view-content--booting .home-panel__header,
+.app-view-content--booting .home-avatar,
+.app-view-content--booting .home-panel__copy,
+.app-view-content--booting .home-socials a,
+.app-view-content--booting .home-panel__status {
+  opacity: 0 !important;
+  animation: none !important;
+}
 /* 手机桌面式整屏横滑：两页同速平移、全程不透明。enter/leave 的 active 类
    声明完全相同的 transform 过渡，快速连点打断时浏览器对同一属性做平滑
    retarget——中途改道不跳变，中间页自然从当前位置继续滑出（飞过效果）。 */
@@ -299,7 +311,6 @@ onMounted(async () => {
   }
 }
 html.route-transition-scroll-lock { overflow: hidden !important; }
-@media (prefers-reduced-motion: reduce) { .boot-fade-leave-active { transition: none; } }
 @media (prefers-reduced-motion: reduce) {
   .route-forward-enter-active,
   .route-forward-leave-active,
