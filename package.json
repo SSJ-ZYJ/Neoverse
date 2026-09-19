@@ -19,17 +19,17 @@
     "check": "biome check --write . && bun run check:ui-boundary && nuxt typecheck"
   },
   "dependencies": {
-    "@neoverse-ui/glass-runtime": "file:../Neoverse-UI/packages/glass-runtime",
-    "@neoverse-ui/motion": "file:../Neoverse-UI/packages/motion",
-    "@neoverse-ui/tailwind": "file:../Neoverse-UI/packages/tailwind",
-    "@neoverse-ui/tokens": "file:../Neoverse-UI/packages/tokens",
-    "@neoverse-ui/vue": "file:../Neoverse-UI/packages/vue",
+    "@neoverse-ui/glass-runtime": "^0.1.0",
+    "@neoverse-ui/motion": "^0.1.0",
+    "@neoverse-ui/tailwind": "^0.1.0",
+    "@neoverse-ui/tokens": "^0.1.0",
+    "@neoverse-ui/vue": "^0.1.0",
     "@nuxtjs/i18n": "^10.6.0",
     "nuxt": "^4.5.2"
   },
   "overrides": {
-    "@neoverse-ui/tokens": "file:../Neoverse-UI/packages/tokens",
-    "@neoverse-ui/motion": "file:../Neoverse-UI/packages/motion"
+    "@neoverse-ui/tokens": "^0.1.0",
+    "@neoverse-ui/motion": "^0.1.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.10",
