@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiAction, UiStatusIndicator } from '@neoverse-ui/vue';
+import { UiAction, UiSkeleton, UiStatusIndicator } from '@neoverse-ui/vue';
 import type { Component } from 'vue';
 import { getHomeLinkEntryDelay, getHomeStatusEntryDelay, HOME_LINKS, SITE } from '#shared/constants';
 import IconLucideFileText from '~icons/lucide/file-text';
@@ -153,7 +153,8 @@ onMounted(() => {
         <UiAction
           v-for="(link, index) in HOME_LINKS"
           :key="link.id"
-          :class="{ 'skeleton-surface home-socials__skeleton-button': skeleton }"
+          :as="skeleton ? 'span' : 'a'"
+          :class="{ 'home-socials__skeleton-button': skeleton }"
           :href="skeleton ? undefined : link.href"
           :target="!skeleton && link.external ? '_blank' : undefined"
           :rel="skeleton ? undefined : 'noreferrer'"
@@ -161,7 +162,8 @@ onMounted(() => {
           :aria-hidden="skeleton || undefined"
           :disabled="skeleton || undefined"
           :tabindex="skeleton ? -1 : undefined"
-          variant="secondary"
+          :variant="skeleton ? 'ghost' : 'secondary'"
+          :surface="skeleton ? 'none' : 'glass-subtle'"
           size="lg"
           scale="lg"
           :style="skeleton ? undefined : getHomeLinkStyle(index)"
@@ -169,11 +171,14 @@ onMounted(() => {
           <template #leading>
             <component
               :is="LINK_ICONS[link.icon]"
-              :class="{ 'home-socials__icon--filled': link.filledIcon }"
+              :class="{ 'home-socials__icon--filled': link.filledIcon, 'home-socials__measure': skeleton }"
               aria-hidden="true"
             />
           </template>
-          {{ t(link.labelKey) }}
+          <span :class="{ 'home-socials__measure': skeleton }">{{ t(link.labelKey) }}</span>
+          <template v-if="skeleton" #decoration>
+            <UiSkeleton variant="rect" width="100%" height="100%" class="home-socials__skeleton-fill" />
+          </template>
         </UiAction>
       </nav>
 
@@ -413,26 +418,20 @@ onMounted(() => {
 }
 .home-panel--skeleton .home-socials__skeleton-button {
   position: relative;
-  display: inline-flex;
-  width: auto;
-  min-height: var(--control-height-lg);
-  overflow: hidden;
-  color: transparent;
-  background: var(--neoverse-skeleton-fill);
-  box-shadow: var(--neoverse-skeleton-edge);
   cursor: default;
   opacity: 1;
   pointer-events: none;
+  animation: none;
+  filter: none;
+  transform: none;
 }
-/* Shimmer on the skeleton button reuses the DS skeleton material vars. */
-.home-panel--skeleton .home-socials__skeleton-button::after {
+.home-socials__measure {
+  visibility: hidden;
+}
+.home-socials__skeleton-fill {
   position: absolute;
   inset: 0;
-  content: "";
-  background: linear-gradient(100deg, transparent 24%, var(--neoverse-skeleton-highlight) 50%, transparent 76%);
-  transform: translateX(-100%);
-  animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
-    var(--neoverse-skeleton-shimmer-easing) infinite;
+  border-radius: inherit;
 }
 .home-panel__status {
   grid-area: status;

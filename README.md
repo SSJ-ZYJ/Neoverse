@@ -20,7 +20,7 @@ Neoverse is Shenshijun's personal homepage and a small Nuxt portfolio with a per
 
 ## Preview
 
-> Dark glass-morphism · shared city skyline · bottom dock — A site-wide dark theme built on the design tokens in `app/assets/css/tokens.css` and the frosted-glass `glass-card` material, with the city backdrop scaling in sync across route transitions.
+> Dark glass-morphism · shared city skyline · bottom dock — A site-wide dark theme built on the design tokens in `app/assets/css/tokens.css` and the frosted-glass `glass-elevated` material, with the city backdrop scaling in sync across route transitions.
 
 <p align="center">
   <img src="docs/screenshots/home.webp" alt="Home — city animation and glass quick links" width="100%" />
@@ -45,6 +45,7 @@ Neoverse is Shenshijun's personal homepage and a small Nuxt portfolio with a per
 | Framework | [Nuxt](https://nuxt.com), Vue, and Nitro |
 | Language | TypeScript with strict type checking |
 | Styling | [Tailwind CSS](https://tailwindcss.com) via `@tailwindcss/vite` |
+| Design system | [Neoverse UI](https://github.com/SSJ-ZYJ/Neoverse-UI) 0.2.0 — Vue, Tokens, Motion, Tailwind, and Glass runtime |
 | Fonts | Inter Variable via `@fontsource-variable/inter` |
 | Icons | Iconify via `unplugin-icons` (Lucide and Simple Icons) |
 | Localization | [`@nuxtjs/i18n`](https://i18n.nuxtjs.org) — English and Simplified Chinese |
@@ -62,6 +63,12 @@ bun run dev
 Open `http://localhost:3000`.
 
 The shared UI styles come from `@neoverse-ui/tailwind/index.css`. Glass edge refraction also requires `@neoverse-ui/glass-runtime`: `app/app.vue` mounts its renderer on the client and destroys it on unmount. Keep this lifecycle integration when updating the UI library; importing CSS alone does not enable the WebGL effect.
+
+Upgrade all five directly consumed `@neoverse-ui/*` packages together. The 0.2.0 integration uses `UiDock` for shared navigation geometry, `UiCard` with `glass-elevated` for cards, canonical typography scales and Motion roles, and the root `data-theme="dark"` contract. City camera choreography stays product-owned: its CSS return duration must match `CITY_WINDOW_HANDOFF_DURATION` in `app/composables/useCityMotionClock.ts`.
+
+Tailwind 4 handles vendor prefixes, so Nuxt's additional Autoprefixer pass is disabled. This preserves the Disclosure `@supports` query combining `interpolate-size` and `selector(::details-content)`, which Autoprefixer fails to process. `test:ui-css` runs the published UI bundle through the resolved production PostCSS configuration to guard this integration.
+
+The 0.2.0 Glass runtime and Motion packages contain extensionless relative ESM imports. Keep them in Nuxt's `build.transpile` list so Vite resolves these imports in development SSR; loading them directly with Node causes a module-resolution error. Run `test:dev` against the running development server after upgrading packages.
 
 ### Optional environment
 
@@ -82,6 +89,8 @@ NUXT_GITHUB_TOKEN=
 | `bun run typecheck` | Run Nuxt type checking |
 | `bun run check` | Format, lint, and type-check |
 | `bun run test:fouc` | Check critical SSR shell styles; requires the dev server |
+| `bun run test:dev` | Check all routes on a running development server; accepts `NEOVERSE_TEST_URL` |
+| `bun run test:ui-css` | Check the published UI CSS against production PostCSS plugins |
 
 ## Structure
 

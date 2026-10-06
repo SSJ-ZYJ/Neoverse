@@ -38,7 +38,7 @@ const emptyPulse = createEmptyPulse();
           <UiCard
             v-for="project in PROJECTS"
             :key="project.id"
-            surface="glass-card"
+            surface="glass-elevated"
             class="dashboard-loading__project-card"
             :class="`dashboard-loading__project-card--${project.id}`"
           >
@@ -99,7 +99,7 @@ const emptyPulse = createEmptyPulse();
           </div>
         </div>
 
-        <UiCard surface="glass-card" class="dashboard-loading__focus-journey">
+        <UiCard surface="glass-elevated" class="dashboard-loading__focus-journey">
           <div class="dashboard-loading__focus-journey-bar">
             <div class="skeleton-surface dashboard-loading__focus-command" />
             <div class="skeleton-surface dashboard-loading__focus-meta" />
@@ -132,7 +132,7 @@ const emptyPulse = createEmptyPulse();
           </div>
         </UiCard>
 
-        <UiCard surface="glass-card" class="dashboard-loading__focus-interests">
+        <UiCard surface="glass-elevated" class="dashboard-loading__focus-interests">
           <div class="dashboard-loading__focus-interests-head">
             <span class="skeleton-surface dashboard-loading__focus-interests-icon" />
             <span class="skeleton-surface dashboard-loading__focus-interests-label" />

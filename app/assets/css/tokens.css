@@ -31,14 +31,16 @@
   --radius-control: var(--radius-lg);
   --radius-pill: var(--neoverse-radius-pill);
   --radius-control-inner: var(--neoverse-radius-control-inner);
-  --motion-fast: var(--neoverse-motion-duration-fast);
-  --motion-standard: var(--neoverse-motion-duration-standard);
-  --motion-expressive: var(--neoverse-motion-duration-expressive);
+  --motion-fast: var(--neoverse-motion-feedback-duration);
+  --motion-standard: var(--neoverse-motion-state-duration);
+  --motion-expressive: var(--neoverse-motion-spatial-duration);
   --motion-city-content: 260ms;
   --motion-city-content-delay: 320ms;
   --motion-card-entry-duration: 360ms;
   --motion-city-handoff: calc(var(--motion-city-content-delay) + var(--motion-card-entry-duration));
-  --motion-city-return: var(--motion-expressive);
+  /* The city camera uses the same 760ms timeline as CITY_WINDOW_HANDOFF_DURATION.
+     Keep it independent of the shared control motion scale. */
+  --motion-city-return: 760ms;
   --motion-city-return-content-delay: calc(var(--motion-city-return) - var(--motion-city-content));
   --motion-city-home-match-delay: 360ms;
   --motion-city-home-match-duration: calc(var(--motion-city-return) - var(--motion-city-home-match-delay));
@@ -47,13 +49,15 @@
   --motion-card-entry-distance: 16px;
   --motion-card-entry-scale: 0.985;
   --motion-reduced-feedback: 180ms;
-  --motion-ease-standard: var(--neoverse-motion-easing-standard);
-  --motion-ease-emphasized: var(--neoverse-motion-easing-emphasized);
+  --motion-ease-standard: var(--neoverse-motion-state-easing);
+  --motion-ease-emphasized: var(--neoverse-motion-spatial-easing);
   --pulse-heatmap-edge-resistance: 0.28;
   --pulse-heatmap-edge-max-px: 52;
   --pulse-heatmap-inertia-friction: 0.92;
   --pulse-heatmap-spring-stiffness: 0.00042;
   --pulse-heatmap-spring-damping: 0.6;
+  --pulse-heatmap-cell-size: clamp(0.68rem, 1.3cqi, 0.95rem);
+  --pulse-heatmap-cell-gap: clamp(0.16rem, 0.22cqi, 0.22rem);
   --content-max: 88rem;
   --home-content-max: 64rem;
   --focus-content-max: 72rem;
@@ -95,14 +99,14 @@
   --text-xs: var(--neoverse-font-size-xs);
   --text-sm: var(--neoverse-font-size-sm);
   --text-md: var(--neoverse-font-size-md);
-  --text-base: var(--neoverse-typography-body-size);
+  --text-base: var(--neoverse-typography-body-md-size);
   /* 流式字号：刻意设计的响应式 clamp()，按语义角色命名 */
-  --text-display-xl: clamp(2.5rem, 5.6vw, 4.8rem);
+  --text-display-xl: var(--neoverse-typography-display-lg-size);
   --text-display-xl-narrow: clamp(2.7rem, 15vw, 4.2rem);
-  --text-display-lg: clamp(2rem, 4vw, 3rem);
+  --text-display-lg: var(--neoverse-typography-display-md-size);
   --text-display-md: clamp(1.3rem, 1.9vw, 1.8rem);
   --text-display-sm: clamp(1.18rem, 2vw, 1.6rem);
-  --text-subtitle: clamp(1rem, 1.55vw, 1.25rem);
+  --text-subtitle: var(--neoverse-typography-title-lg-size);
   --text-card-title: clamp(1rem, 1.35vw, 1.2rem);
   --text-card-title-narrow: clamp(1rem, 4.5vw, 1.3rem);
   --text-card-title-sm: clamp(1rem, 1.2vw, 1.12rem);

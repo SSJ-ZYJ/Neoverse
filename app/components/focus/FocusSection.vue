@@ -64,7 +64,7 @@ const stageAlign = (index: number) => {
 
     <!-- 成长路径图：三个方向 × 探索/学习/构建/应用。档位来自真实 status，
          当前阶段节点高亮、其余弱化；刻意不做完成度填充，避免被读成百分比。 -->
-    <UiCard surface="glass-card" class="focus-journey">
+    <UiCard surface="glass-elevated" class="focus-journey">
       <div class="focus-journey__bar">
         <span class="focus-journey__command">
           <IconLucideTerminal class="focus-journey__command-icon" aria-hidden="true" />
@@ -120,7 +120,7 @@ const stageAlign = (index: number) => {
     </UiCard>
 
     <!-- 轻量兴趣区：补足页面下半部分的信息密度，保持克制。 -->
-    <UiCard as="aside" surface="glass-card" class="focus-interests" :aria-label="String(t('focus.exploring.label'))">
+    <UiCard as="aside" surface="glass-elevated" class="focus-interests" :aria-label="String(t('focus.exploring.label'))">
       <div class="focus-interests__head">
         <IconLucideCompass class="focus-interests__icon" aria-hidden="true" />
         <span class="focus-interests__label">{{ t('focus.exploring.label') }}</span>
@@ -288,7 +288,7 @@ const stageAlign = (index: number) => {
 }
 
 /* 阶段徽标：直接使用阶段名（探索/学习/构建/应用），语义与轨道一致。
-   玻璃化：复用 glass-card 的折射渐变、内高光与毛玻璃滤镜。 */
+   玻璃化：复用 glass-elevated 的折射渐变、内高光与毛玻璃滤镜。 */
 .track-row__stage {
   flex: 0 0 auto;
   margin-left: auto;

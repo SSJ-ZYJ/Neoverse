@@ -12,9 +12,9 @@ type Rule = {
 
 const rules: Rule[] = [
   {
-    id: 'compat-glass-wrapper',
+    id: 'removed-glass-wrapper',
     pattern: /\bUiGlassSurface\b/g,
-    message: 'Use UiCard / UiSurface with the shared surface prop instead of UiGlassSurface.',
+    message: 'UiGlassSurface was removed in Neoverse UI 0.2. Use UiCard or UiSurface.',
   },
   {
     id: 'material-class-leak',
@@ -32,16 +32,28 @@ const rules: Rule[] = [
     message: 'Use semantic Surface props instead of Glass renderer/runtime data attributes.',
   },
   {
-    id: 'glass-card-bypasses-card',
-    pattern: /<UiSurface\b[^>]*\bsurface\s*=\s*["']glass-card["'][^>]*>/g,
-    message: 'Standard glass cards must use <UiCard surface="glass-card"> so card geometry stays DS-owned.',
+    id: 'removed-glass-card-surface',
+    pattern: /\bsurface\s*=\s*["']glass-card["']/g,
+    message: 'The glass-card preset was removed in Neoverse UI 0.2. Use glass-elevated for cards.',
+  },
+  {
+    id: 'removed-typography-token',
+    pattern:
+      /--neoverse-typography-(?:display|heading|subtitle|body|label)-(?:size|line-height|weight|letter-spacing)\b/g,
+    message:
+      'Use the canonical Neoverse UI 0.2 typography scales (display-lg, display-md, title-lg, body-md, label-md).',
+  },
+  {
+    id: 'removed-motion-api',
+    pattern: /\b(?:motionTransitions|MotionTransition)\b|--neoverse-motion-micro-[\w-]+/g,
+    message: 'Use Neoverse UI 0.2 motionRoles / MotionRole and feedback, state, or spatial tokens.',
   },
   {
     id: 'bottom-dock-component-internal-override',
     pattern:
-      /\.bottom-dock(?:__[\w-]+)?[^,{]*\.ui-(?:button|navigation-item(?:__[\w-]+)?|segmented-control(?:__[\w-]+)?)/g,
+      /\.bottom-dock(?:__[\w-]+)?[^,{]*\.ui-(?:dock|control-surface(?:__[\w-]+)?|button|navigation-item(?:__[\w-]+)?|segmented-control(?:__[\w-]+)?)/g,
     message:
-      'BottomDock may style its own composition hooks, but must consume UiButton, UiNavigationItem, and UiSegmentedControl geometry from Neoverse-UI.',
+      'BottomDock may constrain viewport placement, but must consume UiDock and its shared control geometry from Neoverse-UI.',
   },
 ];
 

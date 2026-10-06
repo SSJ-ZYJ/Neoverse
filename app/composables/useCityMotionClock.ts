@@ -38,7 +38,7 @@ export const CITY_WINDOW_RECT = { x: 195, y: 79, w: 1060, h: 674 } as const;
 /** HomeCosmos renders this exact crop from the same decoded source image. */
 export const HOME_CITY_SIZE = { w: CITY_WINDOW_RECT.w, h: CITY_WINDOW_RECT.h } as const;
 
-/** Duration of the shared city handoff (`--motion-city-return` = `--motion-expressive` = 760ms). */
+/** Product camera timeline, matching `--motion-city-return` independently of UI motion roles. */
 export const CITY_WINDOW_HANDOFF_DURATION = 760;
 
 /**

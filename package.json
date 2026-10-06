@@ -10,26 +10,29 @@
     "preview": "nuxt preview",
     "generate": "nuxt generate",
     "test:fouc": "bun scripts/check-critical-shell.ts",
+    "test:dev": "bun scripts/check-dev-server.ts",
+    "test:repository-pulse": "bun test scripts/check-repository-pulse.test.ts",
+    "test:ui-css": "bun scripts/check-ui-css.ts",
     "check:ui-boundary": "bun scripts/check-ui-boundary.ts",
     "typecheck": "nuxt typecheck",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "check": "biome check --write . && bun run check:ui-boundary && nuxt typecheck"
+    "check": "biome check --write . && bun run check:ui-boundary && bun run test:ui-css && nuxt typecheck"
   },
   "dependencies": {
-    "@neoverse-ui/glass-runtime": "^0.1.0",
-    "@neoverse-ui/motion": "^0.1.0",
-    "@neoverse-ui/tailwind": "^0.1.0",
-    "@neoverse-ui/tokens": "^0.1.0",
-    "@neoverse-ui/vue": "^0.1.0",
+    "@neoverse-ui/glass-runtime": "^0.2.0",
+    "@neoverse-ui/motion": "^0.2.0",
+    "@neoverse-ui/tailwind": "^0.2.0",
+    "@neoverse-ui/tokens": "^0.2.0",
+    "@neoverse-ui/vue": "^0.2.0",
     "@nuxtjs/i18n": "^10.6.0",
     "nuxt": "^4.5.2"
   },
   "overrides": {
-    "@neoverse-ui/tokens": "^0.1.0",
-    "@neoverse-ui/motion": "^0.1.0"
+    "@neoverse-ui/tokens": "^0.2.0",
+    "@neoverse-ui/motion": "^0.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.10",

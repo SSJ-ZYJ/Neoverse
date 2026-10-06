@@ -124,6 +124,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
   css: ['~/assets/css/main.css'],
+  build: {
+    // These 0.2.0 packages emit extensionless relative ESM imports. Let Vite
+    // resolve them during development SSR instead of delegating to Node.
+    transpile: ['@neoverse-ui/glass-runtime', '@neoverse-ui/motion'],
+  },
   modules: ['@nuxtjs/i18n'],
   i18n: {
     locales: [
@@ -141,6 +146,11 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [tailwindcss(), Icons({ compiler: 'vue3' })],
+  },
+  postcss: {
+    // Tailwind 4 handles prefixing. Autoprefixer cannot parse the UI bundle's
+    // combined declaration + selector(::details-content) feature query.
+    plugins: { autoprefixer: false },
   },
   typescript: {
     strict: true,

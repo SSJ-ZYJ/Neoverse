@@ -1,11 +1,15 @@
 import { createEmptyPulse } from '#shared/constants';
 import type { ContributionDay, GithubPulse, RecentCommit, RepositoryActivity } from '#shared/types/github';
+import { loadPublicRepositoryPulse, type PublicCommitSearchResponse } from '../../utils/github-repository-pulse';
 
 const GITHUB_USER = 'SSJ-ZYJ';
 const GITHUB_API = 'https://api.github.com';
 const RECENT_BRANCH_LIMIT = 4;
 const RECENT_COMMIT_LIMIT = 4;
 const REPOSITORY_WINDOW_DAYS = 30;
+const GITHUB_REQUEST_TIMEOUT_MS = 7000;
+const GITHUB_DIAGNOSTIC_TIMEOUT_MS = 5000;
+const PULSE_LOG_PREFIX = '[pulse:github]';
 
 interface GithubEventResponse {
   type: string;
@@ -35,19 +39,6 @@ interface GithubCommitResponse {
   };
 }
 
-interface GithubCommitNode {
-  oid: string;
-  messageHeadline: string;
-  committedDate: string;
-  url: string;
-}
-
-interface RepositoryHistoryResponse {
-  object?: {
-    history?: { nodes: GithubCommitNode[] };
-  } | null;
-}
-
 interface ContributionCalendarResponse {
   totalContributions: number;
   weeks: Array<{
@@ -61,7 +52,17 @@ interface RepositoryContributionResponse {
     url: string;
     isPrivate: boolean;
   };
-  contributions: { totalCount: number };
+  contributions: { nodes: Array<{ commitCount: number }> };
+}
+
+interface GithubGraphqlError {
+  message: string;
+  type?: string;
+  path?: Array<string | number>;
+  extensions?: {
+    code?: string;
+    type?: string;
+  };
 }
 
 interface ContributionsGraphqlResponse {
@@ -75,12 +76,31 @@ interface ContributionsGraphqlResponse {
       };
     };
   };
+  errors?: GithubGraphqlError[];
+}
+
+interface ViewerGraphqlResponse {
+  data?: {
+    viewer?: { login: string };
+  };
+  errors?: GithubGraphqlError[];
 }
 
 interface GithubContributionResult {
   contributions: GithubPulse['contributions'] | null;
+  graphqlErrors: string[];
+}
+
+interface GithubRepositoryPulseResult {
   repositoryPulse: GithubPulse['repositoryPulse'];
-  recentCommits: RecentCommit[];
+  graphqlErrors: string[];
+}
+
+interface GithubProbeResult {
+  ok: boolean;
+  durationMs: number;
+  expectedUser?: boolean;
+  error?: Record<string, string | number>;
 }
 
 const apiHeaders = (token?: string) => ({
@@ -93,8 +113,114 @@ const apiHeaders = (token?: string) => ({
 const fetchGithub = <T>(path: string, token?: string) =>
   $fetch<T>(`${GITHUB_API}${path}`, {
     headers: apiHeaders(token),
-    timeout: 7000,
+    timeout: GITHUB_REQUEST_TIMEOUT_MS,
   });
+
+const asRecord = (value: unknown): Record<string, unknown> | undefined =>
+  typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : undefined;
+
+const sanitizeLogText = (value: string) =>
+  value
+    .replace(/Bearer\s+[^\s"']+/gi, 'Bearer <REDACTED>')
+    .replace(/github_pat_[A-Za-z0-9_]+/g, '<REDACTED>')
+    .replace(/gh[pousr]_[A-Za-z0-9]+/g, '<REDACTED>')
+    .replace(/(github\.com\/settings\/personal-access-tokens\/)\d+/gi, '$1<REDACTED>')
+    .slice(0, 280);
+
+const summarizeError = (error: unknown): Record<string, string | number> => {
+  const record = asRecord(error);
+  const cause = asRecord(record?.cause);
+  const summary: Record<string, string | number> = {};
+  const name = error instanceof Error ? error.name : typeof record?.name === 'string' ? record.name : undefined;
+  const message = error instanceof Error ? error.message : typeof record?.message === 'string' ? record.message : undefined;
+  const status =
+    typeof record?.statusCode === 'number'
+      ? record.statusCode
+      : typeof record?.status === 'number'
+        ? record.status
+        : undefined;
+  const code =
+    typeof record?.code === 'string'
+      ? record.code
+      : typeof cause?.code === 'string'
+        ? cause.code
+        : undefined;
+
+  if (name) summary.name = sanitizeLogText(name);
+  if (message) summary.message = sanitizeLogText(message);
+  if (status !== undefined) summary.status = status;
+  if (code) summary.code = sanitizeLogText(code);
+  return summary;
+};
+
+const summarizeGraphqlErrors = (errors: GithubGraphqlError[] | undefined) =>
+  (errors ?? []).slice(0, 4).map((error) => sanitizeLogText(error.message));
+
+const logPulseDiagnostic = (
+  level: 'info' | 'warn' | 'error',
+  event: string,
+  details: Record<string, unknown>,
+) => {
+  const line = `${PULSE_LOG_PREFIX} ${JSON.stringify({ event, ...details })}`;
+  console[level](line);
+};
+
+const probeGithubRestAuth = async (token: string): Promise<GithubProbeResult> => {
+  const startedAt = Date.now();
+  try {
+    const response = await $fetch<{ login: string }>(`${GITHUB_API}/user`, {
+      headers: apiHeaders(token),
+      timeout: GITHUB_DIAGNOSTIC_TIMEOUT_MS,
+    });
+    return {
+      ok: true,
+      durationMs: Date.now() - startedAt,
+      expectedUser: response.login === GITHUB_USER,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      durationMs: Date.now() - startedAt,
+      error: summarizeError(error),
+    };
+  }
+};
+
+const probeGithubGraphql = async (token: string): Promise<GithubProbeResult> => {
+  const startedAt = Date.now();
+  try {
+    const response = await $fetch<ViewerGraphqlResponse>(`${GITHUB_API}/graphql`, {
+      method: 'POST',
+      headers: { ...apiHeaders(token), 'Content-Type': 'application/json' },
+      body: { query: 'query PulseDiagnosticViewer { viewer { login } }' },
+      timeout: GITHUB_DIAGNOSTIC_TIMEOUT_MS,
+    });
+    const errors = summarizeGraphqlErrors(response.errors);
+    if (errors.length || !response.data?.viewer) {
+      return {
+        ok: false,
+        durationMs: Date.now() - startedAt,
+        error: { message: errors.join(' | ') || 'GitHub GraphQL diagnostic response is missing viewer data' },
+      };
+    }
+    return {
+      ok: true,
+      durationMs: Date.now() - startedAt,
+      expectedUser: response.data.viewer.login === GITHUB_USER,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      durationMs: Date.now() - startedAt,
+      error: summarizeError(error),
+    };
+  }
+};
+
+const runGithubFailureProbes = async (token: string) => {
+  const [restAuth, minimalGraphql] = await Promise.all([probeGithubRestAuth(token), probeGithubGraphql(token)]);
+  return { restAuth, minimalGraphql };
+};
 
 const levelForCount = (count: number): ContributionDay['level'] => {
   if (count === 0) return 0;
@@ -192,15 +318,33 @@ const mergeRecentCommits = (commits: RecentCommit[]) => {
     .slice(0, RECENT_COMMIT_LIMIT);
 };
 
+const fetchRecentBranchCommits = async (branch: RecentBranch, token?: string): Promise<GithubCommitResponse[]> => {
+  const path = `/repos/${branch.repositoryPath}/commits?sha=${encodeURIComponent(branch.head)}&per_page=${String(RECENT_COMMIT_LIMIT)}`;
+  if (!token) return fetchGithub<GithubCommitResponse[]>(path);
+
+  try {
+    return await fetchGithub<GithubCommitResponse[]>(path, token);
+  } catch (authenticatedError) {
+    try {
+      const commits = await fetchGithub<GithubCommitResponse[]>(path);
+      logPulseDiagnostic('warn', 'recent_commits_anonymous_retry', {
+        repository: branch.repositoryPath,
+        authenticatedError: summarizeError(authenticatedError),
+      });
+      return commits;
+    } catch (anonymousError) {
+      logPulseDiagnostic('warn', 'recent_commits_failed', {
+        repository: branch.repositoryPath,
+        authenticatedError: summarizeError(authenticatedError),
+        anonymousError: summarizeError(anonymousError),
+      });
+      throw anonymousError;
+    }
+  }
+};
+
 const fetchRecentCommitsFromBranches = async (branches: RecentBranch[], token?: string): Promise<RecentCommit[]> => {
-  const results = await Promise.allSettled(
-    branches.map((branch) =>
-      fetchGithub<GithubCommitResponse[]>(
-        `/repos/${branch.repositoryPath}/commits?sha=${encodeURIComponent(branch.head)}&per_page=${String(RECENT_COMMIT_LIMIT)}`,
-        token,
-      ),
-    ),
-  );
+  const results = await Promise.allSettled(branches.map((branch) => fetchRecentBranchCommits(branch, token)));
   const commits: RecentCommit[] = [];
 
   results.forEach((result, index) => {
@@ -223,47 +367,32 @@ const fetchRecentCommitsFromBranches = async (branches: RecentBranch[], token?: 
   return mergeRecentCommits(commits);
 };
 
-const queryGithubContributions = async (
-  token: string,
-  branches: RecentBranch[],
-): Promise<GithubContributionResult | null> => {
+const queryGithubContributions = async (token: string): Promise<GithubContributionResult> => {
   const to = new Date();
   const yearFrom = new Date(to);
   yearFrom.setUTCFullYear(yearFrom.getUTCFullYear() - 1);
   yearFrom.setUTCDate(yearFrom.getUTCDate() + 1);
-  const repositoryFrom = new Date(to.getTime() - REPOSITORY_WINDOW_DAYS * 86_400_000);
-  const branchVariableDefinitions = branches
-    .map(
-      (_, index) =>
-        `,$branchOwner${String(index)}:String!,$branchName${String(index)}:String!,$branchHead${String(index)}:String!`,
-    )
-    .join('');
-  const branchSelections = branches
-    .map(
-      (_, index) =>
-        `branch${String(index)}:repository(owner:$branchOwner${String(index)},name:$branchName${String(index)}){object(expression:$branchHead${String(index)}){... on Commit{history(first:${String(RECENT_COMMIT_LIMIT)}){nodes{oid,messageHeadline,committedDate,url}}}}}`,
-    )
-    .join('');
-  const query = `query($login:String!,$yearFrom:DateTime!,$repositoryFrom:DateTime!,$to:DateTime!${branchVariableDefinitions}){user(login:$login){year:contributionsCollection(from:$yearFrom,to:$to){contributionCalendar{totalContributions,weeks{contributionDays{date,contributionCount,contributionLevel}}}}recent:contributionsCollection(from:$repositoryFrom,to:$to){commitContributionsByRepository(maxRepositories:100){repository{name,url,isPrivate},contributions(first:100){totalCount}}}}${branchSelections}}`;
-  const variables: Record<string, string> = {
+  const query = `query($login:String!,$yearFrom:DateTime!,$to:DateTime!){user(login:$login){year:contributionsCollection(from:$yearFrom,to:$to){contributionCalendar{totalContributions,weeks{contributionDays{date,contributionCount,contributionLevel}}}}}}`;
+  const variables = {
     login: GITHUB_USER,
     yearFrom: yearFrom.toISOString(),
-    repositoryFrom: repositoryFrom.toISOString(),
     to: to.toISOString(),
   };
-  branches.forEach((branch, index) => {
-    variables[`branchOwner${String(index)}`] = branch.owner;
-    variables[`branchName${String(index)}`] = branch.repository;
-    variables[`branchHead${String(index)}`] = branch.head;
-  });
-  const response = await $fetch<ContributionsGraphqlResponse>('https://api.github.com/graphql', {
+  const response = await $fetch<ContributionsGraphqlResponse>(`${GITHUB_API}/graphql`, {
     method: 'POST',
     headers: { ...apiHeaders(token), 'Content-Type': 'application/json' },
     body: { query, variables },
-    timeout: 7000,
+    timeout: GITHUB_REQUEST_TIMEOUT_MS,
   });
+  const graphqlErrors = summarizeGraphqlErrors(response.errors);
   const user = response.data?.user;
-  if (!user) return null;
+  if (!user) {
+    throw new Error(
+      graphqlErrors.length
+        ? `GitHub GraphQL response is missing user data: ${graphqlErrors.join(' | ')}`
+        : 'GitHub GraphQL response is missing user data',
+    );
+  }
 
   const calendar = user.year?.contributionCalendar;
   const days = calendar
@@ -286,15 +415,44 @@ const queryGithubContributions = async (
       }
     : null;
 
+  return { contributions, graphqlErrors };
+};
+
+const queryGithubRepositoryPulse = async (token: string): Promise<GithubRepositoryPulseResult> => {
+  const to = new Date();
+  const repositoryFrom = new Date(to.getTime() - REPOSITORY_WINDOW_DAYS * 86_400_000);
+  const query = `query($login:String!,$from:DateTime!,$to:DateTime!){user(login:$login){recent:contributionsCollection(from:$from,to:$to){commitContributionsByRepository(maxRepositories:100){repository{name,url,isPrivate},contributions(first:100){nodes{commitCount}}}}}}`;
+  const variables = {
+    login: GITHUB_USER,
+    from: repositoryFrom.toISOString(),
+    to: to.toISOString(),
+  };
+  const response = await $fetch<ContributionsGraphqlResponse>(`${GITHUB_API}/graphql`, {
+    method: 'POST',
+    headers: { ...apiHeaders(token), 'Content-Type': 'application/json' },
+    body: { query, variables },
+    timeout: GITHUB_REQUEST_TIMEOUT_MS,
+  });
+  const graphqlErrors = summarizeGraphqlErrors(response.errors);
+  const user = response.data?.user;
+  if (!user) {
+    throw new Error(
+      graphqlErrors.length
+        ? `GitHub repository pulse response is missing user data: ${graphqlErrors.join(' | ')}`
+        : 'GitHub repository pulse response is missing user data',
+    );
+  }
+
   const repositoryGroups = user.recent?.commitContributionsByRepository;
   const repositories: RepositoryActivity[] = Array.isArray(repositoryGroups)
     ? repositoryGroups
-        .filter((group) => !group.repository.isPrivate && group.contributions.totalCount > 0)
+        .filter((group) => !group.repository.isPrivate)
         .map((group) => ({
           repository: group.repository.name,
           repositoryUrl: group.repository.url,
-          contributions: group.contributions.totalCount,
+          contributions: group.contributions.nodes.reduce((sum, day) => sum + day.commitCount, 0),
         }))
+        .filter((repository) => repository.contributions > 0)
         .sort((first, second) => second.contributions - first.contributions)
     : [];
   const repositoryPulse: GithubPulse['repositoryPulse'] = Array.isArray(repositoryGroups)
@@ -308,19 +466,7 @@ const queryGithubContributions = async (
       }
     : createEmptyPulse().repositoryPulse;
 
-  const branchCommits = branches.flatMap((branch, index) => {
-    const repository = response.data?.[`branch${String(index)}`] as RepositoryHistoryResponse | undefined;
-    return (repository?.object?.history?.nodes ?? []).map((commit) => ({
-      id: `${branch.repositoryPath}:${commit.oid}`,
-      message: commit.messageHeadline.trim() || commit.oid.slice(0, 7),
-      repository: branch.repository,
-      repositoryUrl: `https://github.com/${branch.repositoryPath}`,
-      url: commit.url,
-      date: commit.committedDate,
-    }));
-  });
-
-  return { contributions, repositoryPulse, recentCommits: mergeRecentCommits(branchCommits) };
+  return { repositoryPulse, graphqlErrors };
 };
 
 export default defineCachedEventHandler(
@@ -328,29 +474,125 @@ export default defineCachedEventHandler(
     const empty = createEmptyPulse();
     const token = useRuntimeConfig().githubToken || undefined;
 
+    const handlerStartedAt = Date.now();
     try {
       let events: GithubEventResponse[] = [];
+      const publicEventsStartedAt = Date.now();
+      let publicEventsDurationMs = 0;
       try {
         events = await fetchGithub<GithubEventResponse[]>(`/users/${GITHUB_USER}/events/public?per_page=100`, token);
-      } catch {
+        publicEventsDurationMs = Date.now() - publicEventsStartedAt;
+      } catch (error) {
+        publicEventsDurationMs = Date.now() - publicEventsStartedAt;
+        logPulseDiagnostic('warn', 'public_events_failed', {
+          tokenPresent: Boolean(token),
+          durationMs: publicEventsDurationMs,
+          error: summarizeError(error),
+        });
         events = [];
       }
+
       const branches = getRecentBranches(events);
       let githubContributions: GithubContributionResult | null = null;
+      let githubRepositoryPulse: GithubRepositoryPulseResult | null = null;
       if (token) {
+        const graphqlStartedAt = Date.now();
         try {
-          githubContributions = await queryGithubContributions(token, branches);
-        } catch {
+          githubContributions = await queryGithubContributions(token);
+          const graphqlDurationMs = Date.now() - graphqlStartedAt;
+          const contributionScope = githubContributions.contributions?.scope ?? 'unavailable';
+          const hasContributionCalendar = githubContributions.contributions !== null;
+
+          if (githubContributions.graphqlErrors.length || !hasContributionCalendar) {
+            const probes = !hasContributionCalendar ? await runGithubFailureProbes(token) : undefined;
+            logPulseDiagnostic('warn', 'graphql_partial', {
+              durationMs: graphqlDurationMs,
+              publicEventsDurationMs,
+              publicEventCount: events.length,
+              contributionScope,
+              graphqlErrors: githubContributions.graphqlErrors,
+              ...(probes ? { probes } : {}),
+            });
+          } else {
+            logPulseDiagnostic('info', 'graphql_success', {
+              durationMs: graphqlDurationMs,
+              publicEventsDurationMs,
+              publicEventCount: events.length,
+              contributionScope,
+              contributionDays: githubContributions.contributions?.days.length ?? 0,
+              contributionTotal: githubContributions.contributions?.total ?? 0,
+            });
+          }
+        } catch (error) {
+          const graphqlDurationMs = Date.now() - graphqlStartedAt;
+          const probes = await runGithubFailureProbes(token);
+          logPulseDiagnostic('warn', 'graphql_failed', {
+            durationMs: graphqlDurationMs,
+            publicEventsDurationMs,
+            publicEventCount: events.length,
+            error: summarizeError(error),
+            probes,
+          });
           githubContributions = null;
         }
+
+        const repositoryGraphqlStartedAt = Date.now();
+        try {
+          githubRepositoryPulse = await queryGithubRepositoryPulse(token);
+          const repositoryGraphqlDurationMs = Date.now() - repositoryGraphqlStartedAt;
+          const repositoryDetails = {
+            durationMs: repositoryGraphqlDurationMs,
+            repositoryScope: githubRepositoryPulse.repositoryPulse.scope,
+            repositoryCount: githubRepositoryPulse.repositoryPulse.repositories.length,
+            graphqlErrors: githubRepositoryPulse.graphqlErrors,
+          };
+          logPulseDiagnostic(
+            githubRepositoryPulse.graphqlErrors.length ? 'warn' : 'info',
+            githubRepositoryPulse.graphqlErrors.length ? 'repository_graphql_partial' : 'repository_graphql_success',
+            repositoryDetails,
+          );
+        } catch (error) {
+          logPulseDiagnostic('warn', 'repository_graphql_failed', {
+            durationMs: Date.now() - repositoryGraphqlStartedAt,
+            error: summarizeError(error),
+          });
+          githubRepositoryPulse = null;
+        }
+      } else {
+        logPulseDiagnostic('warn', 'graphql_skipped', {
+          reason: 'missing_token',
+          publicEventsDurationMs,
+          publicEventCount: events.length,
+          branchCount: branches.length,
+        });
       }
+
       const contributions = githubContributions?.contributions ?? buildRecentLandscape(events);
-      const recentCommits = githubContributions?.recentCommits.length
-        ? githubContributions.recentCommits
-        : await fetchRecentCommitsFromBranches(branches, token);
-      const repositoryPulse = githubContributions?.repositoryPulse ?? empty.repositoryPulse;
+      const recentCommits = await fetchRecentCommitsFromBranches(branches, token);
+      let repositoryPulse = githubRepositoryPulse?.repositoryPulse ?? empty.repositoryPulse;
+      if (repositoryPulse.scope === 'unavailable') {
+        try {
+          repositoryPulse = await loadPublicRepositoryPulse(
+            (query, page) =>
+              fetchGithub<PublicCommitSearchResponse>(
+                `/search/commits?q=${encodeURIComponent(query)}&per_page=100&page=${String(page)}&sort=author-date&order=desc`,
+              ),
+            GITHUB_USER,
+          );
+          logPulseDiagnostic('info', 'repository_public_search_success', {
+            repositoryCount: repositoryPulse.repositories.length,
+            commitCount: repositoryPulse.totalContributions,
+          });
+        } catch (error) {
+          logPulseDiagnostic('warn', 'repository_public_search_failed', { error: summarizeError(error) });
+        }
+      }
 
       if (contributions.scope === 'unavailable' && !recentCommits.length && repositoryPulse.scope === 'unavailable') {
+        logPulseDiagnostic('warn', 'pulse_unavailable', {
+          tokenPresent: Boolean(token),
+          durationMs: Date.now() - handlerStartedAt,
+        });
         return empty;
       }
 
@@ -361,12 +603,17 @@ export default defineCachedEventHandler(
         source: 'github',
         updatedAt: new Date().toISOString(),
       };
-    } catch {
+    } catch (error) {
+      logPulseDiagnostic('error', 'handler_failed', {
+        tokenPresent: Boolean(token),
+        durationMs: Date.now() - handlerStartedAt,
+        error: summarizeError(error),
+      });
       return empty;
     }
   },
   {
-    getKey: () => (useRuntimeConfig().githubToken ? 'pulse-repository-v3-token' : 'pulse-repository-v3-public'),
+    getKey: () => (useRuntimeConfig().githubToken ? 'pulse-repository-v5-token' : 'pulse-repository-v5-public'),
     // 源站与浏览器统一 2 分钟新鲜期。刻意不用 swr：nitro 会输出
     // stale-while-revalidate，浏览器会先回一年前那种过期缓存体再后台
     // 更新（swr: true 时甚至是无限期），dock 切换拿到的永远是旧数据。

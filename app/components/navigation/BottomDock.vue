@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiControlSurface, UiNavigationItem, UiSegmentedControl } from '@neoverse-ui/vue';
+import { UiDock, UiNavigationItem, UiSegmentedControl } from '@neoverse-ui/vue';
 import type { Component } from 'vue';
 import { NAV_ITEMS } from '#shared/constants';
 import IconLucideActivity from '~icons/lucide/activity';
@@ -67,14 +67,11 @@ const localeRef = computed({
 </script>
 
 <template>
-  <UiControlSurface
+  <UiDock
     v-bind="attrs"
-    as="nav"
-    surface="chrome"
-    hover-mode="static"
-    navigation-indicator
     :scale="compactNavigation ? 'md' : 'lg'"
-    :class="['bottom-dock', { 'bottom-dock--compact': compactNavigation }]"
+    :compact="compactNavigation"
+    class="bottom-dock"
     :aria-label="t('nav.aria')"
   >
     <UiNavigationItem
@@ -83,7 +80,6 @@ const localeRef = computed({
       :as="appLink"
       :to="item.path"
       :label="t(`nav.${item.id}`)"
-      class="bottom-dock__item"
       :compact="compactNavigation"
       :active="activeView === item.id"
       draggable="false"
@@ -104,7 +100,7 @@ const localeRef = computed({
         :aria-label="t('language.label')"
       />
     </template>
-  </UiControlSurface>
+  </UiDock>
 </template>
 
 <style scoped>

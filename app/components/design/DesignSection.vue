@@ -96,7 +96,7 @@ const motionRows = computed(() => {
       <section class="design-block" aria-labelledby="design-motion-title">
         <h2 id="design-motion-title">{{ t('design.motion.title') }}</h2>
         <p class="design-block__hint">{{ t('design.motion.hint') }}</p>
-        <UiCard as="ol" surface="glass-card" class="design-motion">
+        <UiCard as="ol" surface="glass-elevated" class="design-motion">
           <li v-for="row in motionRows" :key="row.id" class="design-motion__row">
             <div class="design-motion__meta">
               <span class="design-motion__label">{{ row.label }}</span>

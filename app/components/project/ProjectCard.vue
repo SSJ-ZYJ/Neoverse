@@ -58,7 +58,7 @@ const formatArticleDate = (value: string | null) => {
 </script>
 
 <template>
-  <UiCard as="article" surface="glass-card" class="project-card">
+  <UiCard as="article" surface="glass-elevated" class="project-card">
     <div class="project-card__main">
       <div class="project-card__preview">
         <UiSurface

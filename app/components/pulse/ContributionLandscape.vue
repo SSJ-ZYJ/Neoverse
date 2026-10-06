@@ -431,7 +431,7 @@ function hideDayTooltip(day: ContributionDay) {
 </script>
 
 <template>
-  <UiCard :ref="setCardElement" surface="glass-card" class="contribution-card">
+  <UiCard :ref="setCardElement" surface="glass-elevated" class="contribution-card">
     <div class="contribution-card__header">
       <div class="contribution-card__header-main">
         <h3>{{ t('pulse.landscape.title') }}</h3>
@@ -562,12 +562,12 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-card__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(0.7rem, 1.4vw, 1.1rem); margin-top: clamp(0.7rem, 1.4vw, 1.05rem); }
 .contribution-card__chart { display: grid; min-width: 0; align-content: center; overflow-x: auto; overflow-y: hidden; padding: 0.2rem 0 0.4rem; scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-y; user-select: none; contain: paint; }
 .contribution-card__chart > * { transform: translate3d(var(--contribution-edge-offset, 0px), 0, 0); }
-/* 流式网格：格子随容器拉伸填满左列（宽屏格子更大），aspect-ratio 保持正方；
-   min-cell 兜底，过窄时交给 overflow-x 滚动；0.68rem 保证月份标签（较宽的 10月/11月）不重叠。 */
-.contribution-card__months, .contribution-grid { --contribution-gap: clamp(0.16rem, 0.22vw, 0.22rem); --contribution-min-cell: 0.68rem; }
-.contribution-card__months { display: grid; grid-template-columns: repeat(var(--contribution-columns), minmax(var(--contribution-min-cell), 1fr)); column-gap: var(--contribution-gap); margin: 0 0 0.45rem; color: var(--text-muted); font-size: var(--text-xs); }
+/* 热力图单格尺寸有上限，不再让少量周数通过 1fr 撑满整行；
+   全年数据保持接近原有密度，recent 降级态则按真实周数右对齐，窄屏继续横向滚动。 */
+.contribution-card__months, .contribution-grid { --contribution-gap: var(--pulse-heatmap-cell-gap); --contribution-cell-size: var(--pulse-heatmap-cell-size); }
+.contribution-card__months { display: grid; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); justify-content: end; column-gap: var(--contribution-gap); margin: 0 0 0.45rem; color: var(--text-muted); font-size: var(--text-xs); }
 .contribution-card__months span { grid-column: var(--month-column); white-space: nowrap; }
-.contribution-grid { display: grid; grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), minmax(var(--contribution-min-cell), 1fr)); grid-template-rows: repeat(7, auto); gap: var(--contribution-gap); }
+.contribution-grid { display: grid; grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); grid-template-rows: repeat(7, auto); justify-content: end; gap: var(--contribution-gap); }
 @container contribution-card (max-width: 40rem) {
   .contribution-card__legend--header { display: flex; }
   .contribution-card__legend--chart { display: none; }
@@ -575,9 +575,9 @@ function hideDayTooltip(day: ContributionDay) {
 @container contribution-card (max-width: 36rem) {
   .contribution-card__months span:nth-child(even) { display: none; }
 }
-.contribution-card__loading-chart { --contribution-columns: 53; --contribution-gap: clamp(0.22rem, 0.3vw, 0.32rem); --contribution-min-cell: 0.68rem; --contribution-grid-width: calc(var(--contribution-columns) * var(--contribution-min-cell) + (var(--contribution-columns) - 1) * var(--contribution-gap)); display: grid; min-width: 0; align-content: center; gap: 0; }
+.contribution-card__loading-chart { --contribution-columns: 53; --contribution-gap: var(--pulse-heatmap-cell-gap); --contribution-cell-size: var(--pulse-heatmap-cell-size); --contribution-grid-width: calc(var(--contribution-columns) * var(--contribution-cell-size) + (var(--contribution-columns) - 1) * var(--contribution-gap)); display: grid; min-width: 0; align-content: center; gap: 0; }
 /* 容器保持透明，只显示互相分离的静态格子；避免背景填满间隙后黏成灰色整块。 */
-.contribution-card__skeleton-grid { display: grid; width: 100%; min-width: var(--contribution-grid-width); grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), minmax(var(--contribution-min-cell), 1fr)); grid-template-rows: repeat(7, auto); gap: var(--contribution-gap); opacity: 0.56; }
+.contribution-card__skeleton-grid { display: grid; width: 100%; min-width: var(--contribution-grid-width); grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); grid-template-rows: repeat(7, auto); justify-content: end; gap: var(--contribution-gap); opacity: 0.56; }
 .contribution-card__skeleton-cell { min-width: 0; aspect-ratio: 1; border-radius: min(var(--radius-xs), 25%); background: var(--neoverse-skeleton-fill); box-shadow: var(--neoverse-skeleton-edge); }
 .contribution-card__loading-chart > .contribution-card__legend--chart { margin-top: 0.5rem; }
 .contribution-day { display: block; aspect-ratio: 1; border: 0; border-radius: min(var(--radius-xs), 25%); padding: 0; cursor: pointer; transition: filter var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard), transform var(--motion-fast) var(--motion-ease-standard); }

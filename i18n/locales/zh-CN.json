@@ -128,6 +128,8 @@
       "scope": "最近 30 天",
       "activeRepositories": "活跃仓库",
       "commitContributions": "提交贡献",
+      "publicCommits": "公开提交",
+      "searchNote": "来自 GitHub 默认分支的公开提交检索，新提交可能尚未被索引。",
       "mostActive": "最活跃仓库",
       "other": "其他",
       "empty": "此期间没有记录到公开提交贡献。",

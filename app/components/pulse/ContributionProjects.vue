@@ -55,7 +55,7 @@ const formatPercentage = (ratio: number) =>
 
 <template>
   <div class="activity-grid">
-    <UiCard as="section" surface="glass-card" class="activity-column" aria-labelledby="recent-commits-title">
+    <UiCard as="section" surface="glass-elevated" class="activity-column" aria-labelledby="recent-commits-title">
       <h3 id="recent-commits-title">{{ t('pulse.projects.commitsTitle') }}</h3>
       <div v-if="loading" class="activity-list" aria-hidden="true">
         <div v-for="row in 3" :key="row" class="activity-row activity-row--skeleton">
@@ -90,7 +90,7 @@ const formatPercentage = (ratio: number) =>
       <p v-else class="activity-empty">{{ t('pulse.projects.emptyCommits') }}</p>
     </UiCard>
 
-    <UiCard as="section" surface="glass-card" class="activity-column" aria-labelledby="repository-pulse-title">
+    <UiCard as="section" surface="glass-elevated" class="activity-column" aria-labelledby="repository-pulse-title">
       <header class="repository-pulse__header">
         <h3 id="repository-pulse-title">{{ t('pulse.repositoryPulse.title') }}</h3>
         <span>{{ t('pulse.repositoryPulse.scope') }}</span>
@@ -104,7 +104,7 @@ const formatPercentage = (ratio: number) =>
             <dd><UiSkeleton variant="title" width="3.5rem" height="var(--text-display-sm)" /></dd>
           </div>
           <div>
-            <dt>{{ t('pulse.repositoryPulse.commitContributions') }}</dt>
+            <dt>{{ t(repositoryPulse.scope === 'search' ? 'pulse.repositoryPulse.publicCommits' : 'pulse.repositoryPulse.commitContributions') }}</dt>
             <dd><UiSkeleton variant="title" width="3.5rem" height="var(--text-display-sm)" /></dd>
           </div>
         </dl>
@@ -128,7 +128,7 @@ const formatPercentage = (ratio: number) =>
             <dd>{{ formatNumber(repositoryPulse.activeRepositories) }}</dd>
           </div>
           <div>
-            <dt>{{ t('pulse.repositoryPulse.commitContributions') }}</dt>
+            <dt>{{ t(repositoryPulse.scope === 'search' ? 'pulse.repositoryPulse.publicCommits' : 'pulse.repositoryPulse.commitContributions') }}</dt>
             <dd>{{ formatNumber(repositoryPulse.totalContributions) }}</dd>
           </div>
         </dl>
@@ -154,6 +154,9 @@ const formatPercentage = (ratio: number) =>
           </ul>
           <p v-else class="repository-distribution__empty">{{ t('pulse.repositoryPulse.empty') }}</p>
         </div>
+        <p v-if="repositoryPulse.scope === 'search'" class="repository-pulse__source">
+          {{ t('pulse.repositoryPulse.searchNote') }}
+        </p>
       </template>
 
       <p v-else class="activity-empty repository-pulse__unavailable">
@@ -399,6 +402,12 @@ const formatPercentage = (ratio: number) =>
   text-align: center;
 }
 .repository-distribution__track--skeleton i { width: 100%; background: var(--neoverse-skeleton-fill); }
+.repository-pulse__source {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
 .repository-pulse__unavailable {
   min-height: 11rem;
 }

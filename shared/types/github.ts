@@ -1,6 +1,6 @@
 export type PulseSource = 'github' | 'unavailable';
 export type ContributionScope = 'year' | 'recent' | 'unavailable';
-export type RepositoryPulseScope = 'month' | 'unavailable';
+export type RepositoryPulseScope = 'month' | 'search' | 'unavailable';
 
 export interface ContributionDay {
   date: string;

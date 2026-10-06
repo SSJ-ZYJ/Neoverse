@@ -128,6 +128,8 @@
       "scope": "Last 30 days",
       "activeRepositories": "Active repositories",
       "commitContributions": "Commit contributions",
+      "publicCommits": "Public commits",
+      "searchNote": "From GitHub public commit search on default branches; search indexing may lag behind new commits.",
       "mostActive": "Most Active",
       "other": "Other",
       "empty": "No public commit contributions were recorded in this period.",
