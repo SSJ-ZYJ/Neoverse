@@ -132,7 +132,8 @@ const summarizeError = (error: unknown): Record<string, string | number> => {
   const cause = asRecord(record?.cause);
   const summary: Record<string, string | number> = {};
   const name = error instanceof Error ? error.name : typeof record?.name === 'string' ? record.name : undefined;
-  const message = error instanceof Error ? error.message : typeof record?.message === 'string' ? record.message : undefined;
+  const message =
+    error instanceof Error ? error.message : typeof record?.message === 'string' ? record.message : undefined;
   const status =
     typeof record?.statusCode === 'number'
       ? record.statusCode
@@ -140,11 +141,7 @@ const summarizeError = (error: unknown): Record<string, string | number> => {
         ? record.status
         : undefined;
   const code =
-    typeof record?.code === 'string'
-      ? record.code
-      : typeof cause?.code === 'string'
-        ? cause.code
-        : undefined;
+    typeof record?.code === 'string' ? record.code : typeof cause?.code === 'string' ? cause.code : undefined;
 
   if (name) summary.name = sanitizeLogText(name);
   if (message) summary.message = sanitizeLogText(message);
@@ -156,11 +153,7 @@ const summarizeError = (error: unknown): Record<string, string | number> => {
 const summarizeGraphqlErrors = (errors: GithubGraphqlError[] | undefined) =>
   (errors ?? []).slice(0, 4).map((error) => sanitizeLogText(error.message));
 
-const logPulseDiagnostic = (
-  level: 'info' | 'warn' | 'error',
-  event: string,
-  details: Record<string, unknown>,
-) => {
+const logPulseDiagnostic = (level: 'info' | 'warn' | 'error', event: string, details: Record<string, unknown>) => {
   const line = `${PULSE_LOG_PREFIX} ${JSON.stringify({ event, ...details })}`;
   console[level](line);
 };
