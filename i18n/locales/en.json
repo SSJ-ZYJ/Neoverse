@@ -14,10 +14,13 @@
     "email": "Contact Me"
   },
   "home": {
+    "brandAria": "Neoverse home",
+    "introSubtitle": "Shenshijun's Space",
     "tagline": "Explore. Dream. Discover.",
     "role": "Software Engineering · Full-Stack · Open Source",
     "bio": "I hope that one day, I’ll sit by a high-rise window, coffee in hand, watching the city lights and AI at work, while writing down what I see and think.",
     "currentlyBuilding": "Currently building",
+    "currentlyBuildingItem": "XCA-Portal, Neoverse Series",
     "linksAria": "Profile links"
   },
   "nav": {

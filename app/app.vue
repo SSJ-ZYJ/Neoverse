@@ -12,6 +12,27 @@ onMounted(() => glassRenderer?.mount());
 onBeforeUnmount(() => glassRenderer?.destroy());
 
 const isBooting = ref(true);
+const homeIntroPending = ref(route.path === '/');
+const homeIntroPlaying = ref(false);
+const homeIntroPlayed = ref(false);
+const bottomChromeEntering = ref(false);
+
+function finishBoot() {
+  if (!isBooting.value) return;
+  bottomChromeEntering.value = homeIntroPlayed.value;
+  isBooting.value = false;
+}
+
+function finishBottomChromeEnter(event: AnimationEvent) {
+  if (event.target !== event.currentTarget || event.animationName !== 'home-intro-chrome-enter') return;
+  bottomChromeEntering.value = false;
+}
+
+function finishHomeIntro() {
+  finishBoot();
+  homeIntroPending.value = false;
+  homeIntroPlaying.value = false;
+}
 const pageTransitionName = ref('route-forward');
 const viewIndex = (path: string) =>
   Math.max(
@@ -124,6 +145,9 @@ function settleStageAfterEnter() {
 if (import.meta.client) {
   useRouter().beforeEach((to, from) => {
     if (!from || to.path === from.path) return;
+    if (homeIntroPending.value) finishHomeIntro();
+    homeIntroPlayed.value = false;
+    bottomChromeEntering.value = false;
     isRouteTransitioning.value = true;
     armRouteTransitionFailsafe();
     // 主页与三个正式子页共享同一段城市构图：涉及主页时由背景完成
@@ -160,23 +184,40 @@ onMounted(async () => {
   const legacyView = window.location.hash.slice(1);
   const legacyTarget = NAV_ITEMS.find((item) => item.id === legacyView && item.path !== '/');
   if (route.path === '/' && legacyTarget) await navigateTo(legacyTarget.path, { replace: true });
+  if (homeIntroPending.value && route.path === '/') {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reducedMotion && !document.hidden) {
+      homeIntroPlayed.value = true;
+      homeIntroPlaying.value = true;
+      return;
+    }
+    finishHomeIntro();
+    return;
+  }
+  homeIntroPending.value = false;
   await new Promise((resolve) => window.setTimeout(resolve, 420));
   // 与 pulse.vue 的揭示逻辑同理：后台/被遮挡标签页 rAF 会被暂停，
   // 只依赖 rAF 会让启动骨架屏永不消散，超时兜底保证一定能进入页面。
   let booted = false;
-  const finishBoot = () => {
+  const settleBoot = () => {
     if (booted) return;
     booted = true;
-    isBooting.value = false;
+    finishBoot();
   };
-  requestAnimationFrame(finishBoot);
-  window.setTimeout(finishBoot, 400);
+  requestAnimationFrame(settleBoot);
+  window.setTimeout(settleBoot, 400);
 });
 </script>
 
 <template>
   <a class="skip-link" href="#main-content">{{ t('common.skipToContent') }}</a>
-  <DashboardSkeleton v-show="isBooting" :view="skeletonView" />
+  <HomeIntro
+    v-if="homeIntroPending"
+    :playing="homeIntroPlaying"
+    @reveal="finishBoot"
+    @complete="finishHomeIntro"
+  />
+  <DashboardSkeleton v-else v-show="isBooting" :view="skeletonView" />
   <div
     class="app-view-stage"
     :class="{
@@ -184,6 +225,8 @@ onMounted(async () => {
       'app-view-stage--city-from-home': cityTransitionDirection === 'from-home',
       'app-view-stage--city-to-home': cityTransitionDirection === 'to-home',
       'app-view-stage--home-restored': homeContentSettled,
+      'app-view-stage--intro-played': homeIntroPlayed,
+      'app-view-stage--intro-pending': homeIntroPending,
     }"
   >
     <div class="app-view-background" aria-hidden="true">
@@ -203,7 +246,14 @@ onMounted(async () => {
       <NuxtPage :transition="pageTransition" />
     </div>
   </div>
-  <div class="bottom-chrome" :aria-hidden="isBooting" :inert="isBooting">
+  <div
+    class="bottom-chrome"
+    :class="{ 'bottom-chrome--intro-reveal': bottomChromeEntering }"
+    :aria-hidden="isBooting"
+    :inert="isBooting"
+    @animationend="finishBottomChromeEnter"
+    @animationcancel="finishBottomChromeEnter"
+  >
     <NavigationBottomDock />
     <SiteFooter />
   </div>
@@ -244,6 +294,59 @@ onMounted(async () => {
 .app-view-content--booting .home-panel__status {
   opacity: 0 !important;
   animation: none !important;
+}
+/* These overrides belong only to the initial home instance. Route navigation
+   clears intro-played and keeps the existing city handoff untouched. */
+.app-view-stage.app-view-stage--intro-played .home-panel__header {
+  opacity: 1;
+  animation: none;
+  filter: none;
+  transform: none;
+  will-change: auto;
+}
+.app-view-stage.app-view-stage--intro-pending .home-brand { visibility: hidden; }
+.app-view-stage.app-view-stage--intro-played :is(.home-avatar, .home-panel__copy, .home-socials a) {
+  animation-name: home-intro-content-enter;
+  animation-duration: var(--motion-intro-content);
+  animation-timing-function: linear;
+  animation-delay: 0ms;
+  will-change: auto;
+}
+.app-view-stage.app-view-stage--intro-played .home-panel__copy { animation-delay: var(--motion-intro-content-stagger); }
+.app-view-stage.app-view-stage--intro-played .home-socials a {
+  animation-delay: calc(2 * var(--motion-intro-content-stagger) + var(--home-intro-link-index) * var(--motion-intro-content-stagger));
+}
+.app-view-stage.app-view-stage--intro-played .home-panel__status {
+  animation-delay: calc(4 * var(--motion-intro-content-stagger));
+}
+.bottom-chrome--intro-reveal {
+  /* Release the opacity/transform compositing boundary after entry so the
+     glass Dock can sample the page backdrop, even if animationend is missed. */
+  animation: home-intro-chrome-enter var(--motion-intro-chrome) var(--motion-ease-emphasized)
+    calc(2 * var(--motion-intro-content-stagger)) backwards;
+}
+@keyframes home-intro-content-enter {
+  0% {
+    opacity: 0;
+    filter: blur(var(--motion-intro-content-blur));
+    transform: translate3d(0, var(--motion-intro-content-distance), 0);
+  }
+  /* Raise opacity while still blurred so the focus change remains visible. */
+  15% {
+    opacity: 0.65;
+    filter: blur(var(--motion-intro-content-blur));
+    transform: translate3d(0, calc(var(--motion-intro-content-distance) * 0.75), 0);
+  }
+  45% {
+    opacity: 1;
+    filter: blur(calc(var(--motion-intro-content-blur) * 0.5));
+    transform: translate3d(0, calc(var(--motion-intro-content-distance) * 0.25), 0);
+  }
+  100% { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
+}
+@keyframes home-intro-chrome-enter {
+  from { opacity: 0; transform: translate3d(0, var(--motion-intro-content-distance), 0); }
+  to { opacity: 1; transform: none; }
 }
 /* 手机桌面式整屏横滑：两页同速平移、全程不透明。enter/leave 的 active 类
    声明完全相同的 transform 过渡，快速连点打断时浏览器对同一属性做平滑
@@ -312,6 +415,13 @@ onMounted(async () => {
 }
 html.route-transition-scroll-lock { overflow: hidden !important; }
 @media (prefers-reduced-motion: reduce) {
+  .app-view-stage.app-view-stage--intro-played :is(.home-avatar, .home-panel__copy, .home-socials a),
+  .bottom-chrome--intro-reveal {
+    opacity: 1;
+    animation: none;
+    filter: none;
+    transform: none;
+  }
   .route-forward-enter-active,
   .route-forward-leave-active,
   .route-back-enter-active,

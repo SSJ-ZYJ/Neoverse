@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiBadge, UiCard, UiIconButton, UiSurface } from '@neoverse-ui/vue';
+import { UiBadge, UiCard, UiIconButton, UiSkeleton, UiSurface } from '@neoverse-ui/vue';
 import type { ProjectIcon, ProjectId, ProjectTone } from '#shared/constants';
 import type { ProjectPreview } from '#shared/types/projects';
 import IconLucideBookOpen from '~icons/lucide/book-open';
@@ -76,8 +76,8 @@ const formatArticleDate = (value: string | null) => {
             <ol v-if="project.id === 'docs'" class="project-card__docs-list project-card__preview-loading">
               <li v-for="row in 3" :key="row" class="project-card__loading-row" aria-hidden="true">
                 <div>
-                  <i class="skeleton-surface project-card__loading-line project-card__loading-line--title" />
-                  <i class="skeleton-surface project-card__loading-line project-card__loading-line--description" />
+                  <UiSkeleton variant="rect" class="project-card__loading-line project-card__loading-line--title" />
+                  <UiSkeleton variant="rect" class="project-card__loading-line project-card__loading-line--description" />
                 </div>
               </li>
               <li v-if="docsAfterword" class="is-featured">
@@ -90,8 +90,8 @@ const formatArticleDate = (value: string | null) => {
             <ol v-else class="project-card__article-list project-card__preview-loading">
               <li v-for="row in 3" :key="row" class="project-card__loading-row" aria-hidden="true">
                 <div>
-                  <i class="skeleton-surface project-card__loading-line project-card__loading-line--date" />
-                  <i class="skeleton-surface project-card__loading-line" />
+                  <UiSkeleton variant="rect" class="project-card__loading-line project-card__loading-line--date" />
+                  <UiSkeleton variant="rect" class="project-card__loading-line" />
                 </div>
               </li>
             </ol>
@@ -266,7 +266,7 @@ const formatArticleDate = (value: string | null) => {
 }
 .project-card__docs-list li.is-featured a { padding: 0.62rem 0.7rem; }
 .project-card__docs-list strong,
-.project-card__docs-list span {
+.project-card__docs-list a span {
   display: -webkit-box;
   overflow: hidden;
   line-height: 1.35;
@@ -279,8 +279,8 @@ const formatArticleDate = (value: string | null) => {
   -webkit-line-clamp: 1;
 }
 .project-card__docs-list li.is-featured strong { color: var(--text-primary); font-size: var(--text-md); font-weight: var(--weight-bold); }
-.project-card__docs-list li.is-featured span { color: var(--text-secondary); }
-.project-card__docs-list span {
+.project-card__docs-list li.is-featured a span { color: var(--text-secondary); }
+.project-card__docs-list a span {
   color: var(--text-muted);
   font-size: var(--text-xs);
   -webkit-line-clamp: 1;
@@ -331,11 +331,10 @@ const formatArticleDate = (value: string | null) => {
   width: 72%;
   height: 0.58rem;
   border-radius: var(--radius-control);
-  opacity: 0.34;
 }
-.project-card__loading-line--title { width: 42%; height: 0.68rem; opacity: 0.46; }
+.project-card__loading-line--title { width: 42%; height: 0.68rem; }
 .project-card__loading-line--description { width: 78%; }
-.project-card__loading-line--date { width: 24%; height: 0.5rem; opacity: 0.28; }
+.project-card__loading-line--date { width: 24%; height: 0.5rem; }
 .project-card__docs-list a:hover strong,
 .project-card__article-list a:hover strong { color: var(--accent-primary); }
 .project-card__preview-unavailable {
@@ -370,7 +369,7 @@ const formatArticleDate = (value: string | null) => {
   .project-card__docs-list { flex: none; }
   .project-card__docs-list > li { flex: none; }
   .project-card__docs-list strong,
-  .project-card__docs-list span {
+  .project-card__docs-list a span {
     display: block;
     overflow: visible;
     -webkit-line-clamp: unset;

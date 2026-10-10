@@ -118,6 +118,38 @@ body {
   letter-spacing: 0.02em;
   transform: translate(-50%, -50%);
 }
+.home-intro {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.home-intro__scrim {
+  position: absolute;
+  inset: 0;
+  background: #050b14;
+  opacity: 0.84;
+}
+.home-intro__brand {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(17rem, 34vw, 34rem);
+  transform: translate(-50%, -50%);
+}
+.home-intro__logo { color: #f7fbff; }
+.home-intro__caption { position: absolute; width: 100%; margin: 0; opacity: 0; }
+.home-intro .neoverse-wordmark { display: block; aspect-ratio: 2050 / 270; }
+.home-intro .neoverse-wordmark svg { display: block; width: 100%; height: 100%; }
+.home-intro__logo path { fill-opacity: 0; }
+.home-intro__status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 620px) {
+  .home-intro__brand { width: 68vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-intro { display: none; }
+}
 `;
 
 export default defineNuxtConfig({

@@ -59,7 +59,7 @@ const formatPercentage = (ratio: number) =>
       <h3 id="recent-commits-title">{{ t('pulse.projects.commitsTitle') }}</h3>
       <div v-if="loading" class="activity-list" aria-hidden="true">
         <div v-for="row in 3" :key="row" class="activity-row activity-row--skeleton">
-          <span class="skeleton-surface activity-row__dot" />
+          <UiSkeleton variant="circle" width="0.58rem" height="0.58rem" class="activity-row__skeleton-dot" />
           <span class="activity-row__copy">
             <UiSkeleton variant="text" width="85%" />
             <UiSkeleton variant="text" width="48%" />
@@ -113,9 +113,12 @@ const formatPercentage = (ratio: number) =>
           <ul>
             <li v-for="(row, index) in 3" :key="index">
               <UiSkeleton variant="text" :width="`${[58, 34, 44][index]}%`" />
-              <span class="repository-distribution__track repository-distribution__track--skeleton">
-                <i :style="{ width: `${String([88, 62, 74][index])}%` }" />
-              </span>
+              <UiSkeleton
+                variant="rect"
+                :width="`${[88, 62, 74][index]}%`"
+                height="0.32rem"
+                radius="var(--radius-pill)"
+              />
             </li>
           </ul>
         </div>
@@ -277,9 +280,7 @@ const formatPercentage = (ratio: number) =>
   min-height: 3.98rem;
   grid-template-columns: auto minmax(0, 1fr);
 }
-.activity-row--skeleton .activity-row__dot {
-  box-shadow: none;
-}
+.activity-row__skeleton-dot { margin-top: 0.32rem; }
 .activity-empty {
   display: grid;
   min-height: 8rem;
@@ -401,7 +402,6 @@ const formatPercentage = (ratio: number) =>
   font-size: var(--text-md);
   text-align: center;
 }
-.repository-distribution__track--skeleton i { width: 100%; background: var(--neoverse-skeleton-fill); }
 .repository-pulse__source {
   margin: 0.75rem 0 0;
   color: var(--text-muted);

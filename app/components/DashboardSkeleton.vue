@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiCard } from '@neoverse-ui/vue';
+import { UiCard, UiSkeleton } from '@neoverse-ui/vue';
 import { createEmptyPulse, FOCUS_DOMAINS, PROJECTS, type ViewId } from '#shared/constants';
 
 type SkeletonView = ViewId | 'design';
@@ -27,9 +27,9 @@ const emptyPulse = createEmptyPulse();
       <section v-else-if="view === 'projects'" class="dashboard-loading__panel dashboard-loading__panel--projects">
         <div class="dashboard-loading__panel-heading dashboard-loading__panel-heading--projects">
           <div class="dashboard-loading__panel-heading-copy">
-            <div class="skeleton-surface dashboard-loading__heading-line dashboard-loading__heading-line--title" />
+            <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--title" />
             <div class="dashboard-loading__heading-description">
-              <div class="skeleton-surface dashboard-loading__heading-line dashboard-loading__heading-line--description" />
+              <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--description" />
             </div>
           </div>
         </div>
@@ -45,8 +45,8 @@ const emptyPulse = createEmptyPulse();
             <div class="dashboard-loading__project-preview">
               <div class="dashboard-loading__project-preview-frame">
                 <div class="dashboard-loading__project-preview-head">
-                  <span class="skeleton-surface" />
-                  <span class="skeleton-surface" />
+                  <UiSkeleton variant="rect" />
+                  <UiSkeleton variant="rect" />
                 </div>
                 <div class="dashboard-loading__project-preview-rows">
                   <div
@@ -54,35 +54,37 @@ const emptyPulse = createEmptyPulse();
                     :key="row"
                     class="dashboard-loading__project-preview-row"
                   >
-                    <span
-                      class="skeleton-surface dashboard-loading__project-preview-line dashboard-loading__project-preview-line--primary"
+                    <UiSkeleton
+                      variant="rect"
+                      class="dashboard-loading__project-preview-line dashboard-loading__project-preview-line--primary"
                     />
-                    <span class="skeleton-surface dashboard-loading__project-preview-line" />
+                    <UiSkeleton variant="rect" class="dashboard-loading__project-preview-line" />
                   </div>
                 </div>
               </div>
             </div>
             <div class="dashboard-loading__project-copy">
               <div class="dashboard-loading__project-title-row">
-                <div class="skeleton-surface dashboard-loading__project-icon" />
-                <div class="skeleton-surface dashboard-loading__project-line dashboard-loading__project-line--title" />
+                <UiSkeleton variant="rect" class="dashboard-loading__project-icon" />
+                <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--title" />
               </div>
-              <div class="skeleton-surface dashboard-loading__project-line dashboard-loading__project-line--category" />
+              <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--category" />
               <div class="dashboard-loading__project-description">
-                <div class="skeleton-surface dashboard-loading__project-line" />
-                <div class="skeleton-surface dashboard-loading__project-line dashboard-loading__project-line--description-2" />
-                <div class="skeleton-surface dashboard-loading__project-line dashboard-loading__project-line--description-3" />
+                <UiSkeleton variant="rect" class="dashboard-loading__project-line" />
+                <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--description-2" />
+                <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--description-3" />
               </div>
             </div>
             <div class="dashboard-loading__project-footer">
               <div class="dashboard-loading__project-tags">
-                <div
+                <UiSkeleton
+                  variant="rect"
                   v-for="tag in project.id === 'docs' ? 6 : 4"
                   :key="tag"
-                  class="skeleton-surface dashboard-loading__project-tag"
+                  class="dashboard-loading__project-tag"
                 />
               </div>
-              <div class="skeleton-surface dashboard-loading__project-repo" />
+              <UiSkeleton variant="rect" class="dashboard-loading__project-repo" />
             </div>
           </UiCard>
         </div>
@@ -91,55 +93,55 @@ const emptyPulse = createEmptyPulse();
       <section v-else-if="view === 'focus'" class="dashboard-loading__panel dashboard-loading__panel--focus">
         <div class="dashboard-loading__panel-heading dashboard-loading__panel-heading--focus">
           <div class="dashboard-loading__panel-heading-copy">
-            <div class="skeleton-surface dashboard-loading__heading-line dashboard-loading__heading-line--title" />
+            <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--title" />
             <div class="dashboard-loading__heading-description">
-              <div class="skeleton-surface dashboard-loading__heading-line dashboard-loading__heading-line--description" />
-              <div class="skeleton-surface dashboard-loading__heading-line dashboard-loading__heading-line--description dashboard-loading__heading-line--description-2" />
+              <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--description" />
+              <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--description dashboard-loading__heading-line--description-2" />
             </div>
           </div>
         </div>
 
         <UiCard surface="glass-elevated" class="dashboard-loading__focus-journey">
           <div class="dashboard-loading__focus-journey-bar">
-            <div class="skeleton-surface dashboard-loading__focus-command" />
-            <div class="skeleton-surface dashboard-loading__focus-meta" />
+            <UiSkeleton variant="rect" class="dashboard-loading__focus-command" />
+            <UiSkeleton variant="rect" class="dashboard-loading__focus-meta" />
           </div>
           <div class="dashboard-loading__focus-journey-body">
             <div class="dashboard-loading__stage-head">
               <div class="dashboard-loading__stage-spacer" />
               <div class="dashboard-loading__stage-labels">
-                <span v-for="stage in 4" :key="stage" class="skeleton-surface" />
+                <UiSkeleton variant="rect" v-for="stage in 4" :key="stage" />
               </div>
             </div>
             <div v-for="domain in FOCUS_DOMAINS" :key="domain.id" class="dashboard-loading__track-row">
               <div class="dashboard-loading__track-info">
                 <div class="dashboard-loading__track-head">
-                  <span class="skeleton-surface dashboard-loading__track-icon" />
-                  <span class="skeleton-surface dashboard-loading__track-label" />
-                  <span class="skeleton-surface dashboard-loading__track-stage" />
+                  <UiSkeleton variant="rect" class="dashboard-loading__track-icon" />
+                  <UiSkeleton variant="rect" class="dashboard-loading__track-label" />
+                  <UiSkeleton variant="rect" class="dashboard-loading__track-stage" />
                 </div>
                 <div class="dashboard-loading__track-items">
-                  <span v-for="item in 4" :key="item" class="skeleton-surface" />
+                  <UiSkeleton variant="rect" v-for="item in 4" :key="item" />
                 </div>
               </div>
               <div class="dashboard-loading__track">
-                <span v-for="stage in 4" :key="stage" class="skeleton-surface dashboard-loading__track-node" />
+                <UiSkeleton variant="circle" v-for="stage in 4" :key="stage" class="dashboard-loading__track-node" />
               </div>
             </div>
           </div>
           <div class="dashboard-loading__focus-footnote">
-            <span class="skeleton-surface" />
+            <UiSkeleton variant="rect" />
           </div>
         </UiCard>
 
         <UiCard surface="glass-elevated" class="dashboard-loading__focus-interests">
           <div class="dashboard-loading__focus-interests-head">
-            <span class="skeleton-surface dashboard-loading__focus-interests-icon" />
-            <span class="skeleton-surface dashboard-loading__focus-interests-label" />
-            <span class="skeleton-surface dashboard-loading__focus-interests-hint" />
+            <UiSkeleton variant="circle" class="dashboard-loading__focus-interests-icon" />
+            <UiSkeleton variant="rect" class="dashboard-loading__focus-interests-label" />
+            <UiSkeleton variant="rect" class="dashboard-loading__focus-interests-hint" />
           </div>
           <div class="dashboard-loading__focus-interests-list">
-            <span v-for="topic in 4" :key="topic" class="skeleton-surface" />
+            <UiSkeleton variant="rect" v-for="topic in 4" :key="topic" />
           </div>
         </UiCard>
       </section>
@@ -150,36 +152,36 @@ const emptyPulse = createEmptyPulse();
 
       <section v-else-if="view === 'design'" class="dashboard-loading__panel dashboard-loading__panel--design">
         <header class="dashboard-loading__design-header">
-          <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--kicker" />
-          <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--title" />
+          <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--kicker" />
+          <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--title" />
           <div class="dashboard-loading__design-description">
-            <div class="skeleton-surface dashboard-loading__design-line" />
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--description-2" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--description-2" />
           </div>
         </header>
 
         <div class="dashboard-loading__design-stack">
           <section class="dashboard-loading__design-block">
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--block-title" />
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--hint" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--block-title" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--hint" />
             <div class="dashboard-loading__design-buttons">
-              <span v-for="button in 5" :key="button" class="skeleton-surface" />
+              <UiSkeleton variant="rect" v-for="button in 5" :key="button" />
             </div>
           </section>
 
           <section class="dashboard-loading__design-block">
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--block-title" />
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--hint" />
-            <div class="skeleton-surface dashboard-loading__design-segmented" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--block-title" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--hint" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-segmented" />
           </section>
 
           <section class="dashboard-loading__design-block">
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--block-title" />
-            <div class="skeleton-surface dashboard-loading__design-line dashboard-loading__design-line--hint" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--block-title" />
+            <UiSkeleton variant="rect" class="dashboard-loading__design-line dashboard-loading__design-line--hint" />
             <div class="dashboard-loading__design-swatches">
               <span v-for="swatch in 5" :key="swatch">
-                <i class="skeleton-surface" />
-                <b class="skeleton-surface" />
+                <UiSkeleton variant="rect" />
+                <UiSkeleton variant="rect" />
               </span>
             </div>
           </section>
@@ -265,7 +267,6 @@ const emptyPulse = createEmptyPulse();
 
 .dashboard-loading__heading-line {
   border-radius: var(--radius-control);
-  opacity: 0.52;
 }
 
 .dashboard-loading__heading-line--title {
@@ -359,8 +360,8 @@ const emptyPulse = createEmptyPulse();
   padding-bottom: 0.65rem;
 }
 
-.dashboard-loading__project-preview-head span:first-child { width: 5.4rem; height: 0.78rem; opacity: 0.52; }
-.dashboard-loading__project-preview-head span:last-child { width: 7.2rem; height: 0.62rem; opacity: 0.36; }
+.dashboard-loading__project-preview-head span:first-child { width: 5.4rem; height: 0.78rem; }
+.dashboard-loading__project-preview-head span:last-child { width: 7.2rem; height: 0.62rem; }
 .dashboard-loading__project-preview-rows { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .dashboard-loading__project-preview-row {
   display: grid;
@@ -376,9 +377,8 @@ const emptyPulse = createEmptyPulse();
   width: 72%;
   height: 0.58rem;
   border-radius: var(--radius-control);
-  opacity: 0.34;
 }
-.dashboard-loading__project-preview-line--primary { width: 42%; height: 0.68rem; opacity: 0.46; }
+.dashboard-loading__project-preview-line--primary { width: 42%; height: 0.68rem; }
 
 .dashboard-loading__project-copy {
   display: flex;
@@ -393,7 +393,6 @@ const emptyPulse = createEmptyPulse();
   height: 2rem;
   flex: 0 0 auto;
   border-radius: var(--radius-control);
-  opacity: 0.55;
 }
 
 .dashboard-loading__project-title-row {
@@ -407,7 +406,6 @@ const emptyPulse = createEmptyPulse();
   width: 100%;
   height: 0.78rem;
   border-radius: var(--radius-control);
-  opacity: 0.52;
 }
 
 .dashboard-loading__project-line--title { width: min(100%, 12rem); height: 1.15rem; }
@@ -440,14 +438,13 @@ const emptyPulse = createEmptyPulse();
 }
 
 .dashboard-loading__project-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.dashboard-loading__project-tag { height: 1.65rem; border-radius: var(--radius-control); opacity: 0.45; }
+.dashboard-loading__project-tag { height: 1.65rem; border-radius: var(--radius-control); }
 
 .dashboard-loading__project-repo {
   width: 2rem;
   height: 2rem;
   flex: 0 0 auto;
   border-radius: var(--radius-control);
-  opacity: 0.45;
 }
 
 .dashboard-loading__focus-journey,
@@ -472,8 +469,8 @@ const emptyPulse = createEmptyPulse();
   padding: 0.72rem 1.15rem;
 }
 
-.dashboard-loading__focus-command { width: 11rem; height: 0.82rem; border-radius: var(--radius-control); opacity: 0.45; }
-.dashboard-loading__focus-meta { width: 8.4rem; height: 0.72rem; border-radius: var(--radius-control); opacity: 0.35; }
+.dashboard-loading__focus-command { width: 11rem; height: 0.82rem; border-radius: var(--radius-control); }
+.dashboard-loading__focus-meta { width: 8.4rem; height: 0.72rem; border-radius: var(--radius-control); }
 
 .dashboard-loading__focus-journey-body {
   display: flex;
@@ -495,7 +492,7 @@ const emptyPulse = createEmptyPulse();
   gap: 0.5rem;
 }
 
-.dashboard-loading__stage-labels span { width: 3.2rem; height: 0.62rem; border-radius: var(--radius-control); opacity: 0.34; }
+.dashboard-loading__stage-labels span { width: 3.2rem; height: 0.62rem; border-radius: var(--radius-control); }
 .dashboard-loading__stage-labels span:nth-child(2),
 .dashboard-loading__stage-labels span:nth-child(3) { justify-self: center; }
 .dashboard-loading__stage-labels span:last-child { justify-self: end; }
@@ -512,33 +509,33 @@ const emptyPulse = createEmptyPulse();
 }
 
 .dashboard-loading__track-head { display: flex; min-width: 0; align-items: center; gap: 0.55rem; }
-.dashboard-loading__track-icon { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; border-radius: var(--radius-control); opacity: 0.46; }
-.dashboard-loading__track-label { width: min(8rem, 42%); height: 0.82rem; border-radius: var(--radius-control); opacity: 0.48; }
-.dashboard-loading__track-stage { width: 4.2rem; height: 0.78rem; flex: 0 0 auto; margin-left: auto; border-radius: var(--radius-pill); opacity: 0.38; }
+.dashboard-loading__track-icon { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; border-radius: var(--radius-control); }
+.dashboard-loading__track-label { width: min(8rem, 42%); height: 0.82rem; border-radius: var(--radius-control); }
+.dashboard-loading__track-stage { width: 4.2rem; height: 0.78rem; flex: 0 0 auto; margin-left: auto; border-radius: var(--radius-pill); }
 .dashboard-loading__track-items { display: flex; flex-wrap: wrap; gap: 0.3rem 0.5rem; margin-top: 0.45rem; }
-.dashboard-loading__track-items span { width: 3.5rem; height: 0.58rem; border-radius: var(--radius-control); opacity: 0.34; }
+.dashboard-loading__track-items span { width: 3.5rem; height: 0.58rem; border-radius: var(--radius-control); }
 .dashboard-loading__track-items span:nth-child(2) { width: 4.4rem; }
 .dashboard-loading__track-items span:nth-child(3) { width: 3rem; }
 .dashboard-loading__track-items span:nth-child(4) { width: 5rem; }
 
 .dashboard-loading__track { position: relative; height: 2.2rem; }
 .dashboard-loading__track::before { position: absolute; top: 50%; right: 0; left: 0; height: 1px; background: var(--border-subtle); content: ''; transform: translateY(-50%); }
-.dashboard-loading__track-node { position: absolute; top: 50%; width: 0.6rem; height: 0.6rem; border: 2px solid var(--border-strong); border-radius: 50%; background: var(--surface-elevated); opacity: 0.5; transform: translate(-50%, -50%); }
+.dashboard-loading__track-node { position: absolute; top: 50%; width: 0.6rem; height: 0.6rem; transform: translate(-50%, -50%); }
 .dashboard-loading__track-node:nth-child(1) { left: 0; transform: translate(0, -50%); }
 .dashboard-loading__track-node:nth-child(2) { left: 33.333%; }
 .dashboard-loading__track-node:nth-child(3) { left: 66.666%; }
 .dashboard-loading__track-node:nth-child(4) { right: 0; transform: translate(0, -50%); }
 
 .dashboard-loading__focus-footnote { min-height: 2.55rem; margin: 0; border-top: 1px solid var(--border-subtle); padding: 0.65rem 1.35rem; }
-.dashboard-loading__focus-footnote span { display: block; width: 14rem; max-width: 72%; height: 0.62rem; border-radius: var(--radius-control); opacity: 0.34; }
+.dashboard-loading__focus-footnote span { display: block; width: 14rem; max-width: 72%; height: 0.62rem; border-radius: var(--radius-control); }
 
 .dashboard-loading__focus-interests { margin-top: 1rem; }
 .dashboard-loading__focus-interests-head { display: flex; min-height: 2.85rem; align-items: baseline; gap: 0.55rem; border-bottom: 1px solid var(--border-subtle); padding: 0.72rem 1.15rem; }
-.dashboard-loading__focus-interests-icon { align-self: center; width: 0.95rem; height: 0.95rem; flex: 0 0 auto; border-radius: 50%; opacity: 0.42; }
-.dashboard-loading__focus-interests-label { width: 7rem; height: 0.78rem; border-radius: var(--radius-control); opacity: 0.46; }
-.dashboard-loading__focus-interests-hint { width: 12rem; max-width: 42%; height: 0.62rem; border-radius: var(--radius-control); opacity: 0.28; }
+.dashboard-loading__focus-interests-icon { align-self: center; width: 0.95rem; height: 0.95rem; flex: 0 0 auto; }
+.dashboard-loading__focus-interests-label { width: 7rem; height: 0.78rem; border-radius: var(--radius-control); }
+.dashboard-loading__focus-interests-hint { width: 12rem; max-width: 42%; height: 0.62rem; border-radius: var(--radius-control); }
 .dashboard-loading__focus-interests-list { display: flex; flex-wrap: wrap; gap: 0.4rem 0.65rem; padding: 0.85rem 1.15rem 0.95rem; }
-.dashboard-loading__focus-interests-list span { width: 3.8rem; height: calc(var(--text-xs) * 1.55); border-radius: var(--radius-control); opacity: 0.36; }
+.dashboard-loading__focus-interests-list span { width: 3.8rem; height: calc(var(--text-xs) * 1.55); border-radius: var(--radius-control); }
 .dashboard-loading__focus-interests-list span:nth-child(2) { width: 3.8rem; }
 .dashboard-loading__focus-interests-list span:nth-child(3) { width: 5.75rem; }
 .dashboard-loading__focus-interests-list span:nth-child(4) { width: 2.4rem; }
@@ -560,7 +557,6 @@ const emptyPulse = createEmptyPulse();
   width: 100%;
   height: 0.86rem;
   border-radius: var(--radius-control);
-  opacity: 0.46;
 }
 
 .dashboard-loading__design-line--kicker { width: 5.4rem; height: var(--text-sm); }
@@ -570,18 +566,18 @@ const emptyPulse = createEmptyPulse();
 .dashboard-loading__design-stack { display: grid; gap: 2.25rem; }
 .dashboard-loading__design-block { min-width: 0; }
 .dashboard-loading__design-line--block-title { width: 9rem; height: var(--text-base); }
-.dashboard-loading__design-line--hint { width: min(21rem, 76%); height: var(--text-md); margin-top: 0.35rem; opacity: 0.34; }
+.dashboard-loading__design-line--hint { width: min(21rem, 76%); height: var(--text-md); margin-top: 0.35rem; }
 .dashboard-loading__design-buttons { display: flex; flex-wrap: wrap; align-items: center; gap: 0.65rem; margin-top: 1.1rem; }
-.dashboard-loading__design-buttons span { width: 7.2rem; height: var(--control-height-lg); border-radius: var(--radius-control); opacity: 0.5; }
+.dashboard-loading__design-buttons span { width: 7.2rem; height: var(--control-height-lg); border-radius: var(--radius-control); }
 .dashboard-loading__design-buttons span:nth-child(2) { width: 8.4rem; }
 .dashboard-loading__design-buttons span:nth-child(3) { width: 6.4rem; height: var(--control-height-md); }
 .dashboard-loading__design-buttons span:nth-child(4) { width: 7.8rem; height: var(--control-height-md); }
 .dashboard-loading__design-buttons span:nth-child(5) { width: 6.8rem; height: var(--control-height-sm); }
-.dashboard-loading__design-segmented { width: 11rem; height: calc(var(--control-height-md) + 0.44rem); margin-top: 1.1rem; border-radius: var(--radius-control); opacity: 0.5; }
+.dashboard-loading__design-segmented { width: 11rem; height: calc(var(--control-height-md) + 0.44rem); margin-top: 1.1rem; border-radius: var(--radius-control); }
 .dashboard-loading__design-swatches { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1.1rem; }
 .dashboard-loading__design-swatches > span { display: inline-flex; align-items: center; gap: 0.5rem; }
-.dashboard-loading__design-swatches i { width: 2.2rem; height: 2.2rem; border-radius: var(--radius-sm); opacity: 0.46; }
-.dashboard-loading__design-swatches b { width: 7.5rem; height: var(--text-sm); border-radius: var(--radius-control); opacity: 0.3; }
+.dashboard-loading__design-swatches > span > span:first-child { width: 2.2rem; height: 2.2rem; border-radius: var(--radius-sm); }
+.dashboard-loading__design-swatches > span > span:last-child { width: 7.5rem; height: var(--text-sm); border-radius: var(--radius-control); }
 
 @media (max-width: 900px) {
   .dashboard-loading__stage-head { grid-template-columns: 1fr; gap: 0.3rem; }

@@ -12,7 +12,18 @@ if (!criticalStyle) {
   throw new Error('SSR HTML is missing the neoverse-critical-shell inline style.');
 }
 
-for (const requiredRule of ['.skip-link', '.dashboard-loading', '.home-cosmos__fallback', '[inert]']) {
+for (const requiredRule of [
+  '.skip-link',
+  '.dashboard-loading',
+  '.home-cosmos__fallback',
+  '[inert]',
+  '.home-intro',
+  '.home-intro__logo',
+  '.home-intro__brand',
+  '.home-intro__caption',
+  '.home-intro__scrim',
+  '.home-intro__status',
+]) {
   if (!criticalStyle.includes(requiredRule)) {
     throw new Error(`Critical shell is missing the ${requiredRule} fallback rule.`);
   }

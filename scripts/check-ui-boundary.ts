@@ -12,6 +12,12 @@ type Rule = {
 
 const rules: Rule[] = [
   {
+    id: 'duplicate-skeleton-material',
+    pattern: /--neoverse-skeleton-[\w-]+|@keyframes\s+[\w-]*skeleton[\w-]*/g,
+    message:
+      'Use UiSkeleton for skeleton material and effects; product code only owns placeholder geometry and layout.',
+  },
+  {
     id: 'removed-glass-wrapper',
     pattern: /\bUiGlassSurface\b/g,
     message: 'UiGlassSurface was removed in Neoverse UI 0.2. Use UiCard or UiSurface.',

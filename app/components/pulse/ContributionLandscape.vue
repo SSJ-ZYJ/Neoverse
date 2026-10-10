@@ -459,7 +459,14 @@ function hideDayTooltip(day: ContributionDay) {
         <template v-if="loading" key="pulse-landscape-loading">
           <div class="contribution-card__loading-chart" aria-hidden="true">
             <div class="contribution-card__skeleton-grid">
-              <span v-for="cell in 371" :key="cell" class="contribution-card__skeleton-cell" />
+              <UiSkeleton
+                v-for="cell in 371"
+                :key="cell"
+                variant="rect"
+                effect="none"
+                radius="min(var(--radius-xs), 25%)"
+                class="contribution-card__skeleton-cell"
+              />
             </div>
             <span class="contribution-card__legend contribution-card__legend--chart">
               {{ t('pulse.landscape.less') }}
@@ -577,8 +584,8 @@ function hideDayTooltip(day: ContributionDay) {
 }
 .contribution-card__loading-chart { --contribution-columns: 53; --contribution-gap: var(--pulse-heatmap-cell-gap); --contribution-cell-size: var(--pulse-heatmap-cell-size); --contribution-grid-width: calc(var(--contribution-columns) * var(--contribution-cell-size) + (var(--contribution-columns) - 1) * var(--contribution-gap)); display: grid; min-width: 0; align-content: center; gap: 0; }
 /* 容器保持透明，只显示互相分离的静态格子；避免背景填满间隙后黏成灰色整块。 */
-.contribution-card__skeleton-grid { display: grid; width: 100%; min-width: var(--contribution-grid-width); grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); grid-template-rows: repeat(7, auto); justify-content: end; gap: var(--contribution-gap); opacity: 0.56; }
-.contribution-card__skeleton-cell { min-width: 0; aspect-ratio: 1; border-radius: min(var(--radius-xs), 25%); background: var(--neoverse-skeleton-fill); box-shadow: var(--neoverse-skeleton-edge); }
+.contribution-card__skeleton-grid { display: grid; width: 100%; min-width: var(--contribution-grid-width); grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); grid-template-rows: repeat(7, auto); justify-content: end; gap: var(--contribution-gap); }
+.contribution-card__skeleton-cell { min-width: 0; height: auto; aspect-ratio: 1; }
 .contribution-card__loading-chart > .contribution-card__legend--chart { margin-top: 0.5rem; }
 .contribution-day { display: block; aspect-ratio: 1; border: 0; border-radius: min(var(--radius-xs), 25%); padding: 0; cursor: pointer; transition: filter var(--motion-fast) var(--motion-ease-standard), box-shadow var(--motion-fast) var(--motion-ease-standard), transform var(--motion-fast) var(--motion-ease-standard); }
 .contribution-day:hover { filter: brightness(1.12); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 48%, transparent); transform: translateY(-1px); }

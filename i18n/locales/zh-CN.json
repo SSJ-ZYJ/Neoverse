@@ -14,10 +14,13 @@
     "email": "联系我"
   },
   "home": {
+    "brandAria": "Neoverse 首页",
+    "introSubtitle": "Shenshijun's Space",
     "tagline": "去探索 · 去梦想 · 去发现",
     "role": "软件工程 · 全栈 · 开源",
     "bio": "幻想着有一天，能坐在高楼窗边，俯瞰城市灯火，喝一杯咖啡，看着 AI，写下所见所想。",
     "currentlyBuilding": "正在开发",
+    "currentlyBuildingItem": "XCA-Portal, Neoverse Series",
     "linksAria": "个人链接"
   },
   "nav": {

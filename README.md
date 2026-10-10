@@ -1,42 +1,48 @@
 <div align="center">
 
-# Neoverse
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/images/neoverse-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="public/images/neoverse.svg">
+    <img src="public/images/neoverse.svg" alt="Neoverse" width="320">
+  </picture>
+</h1>
 
-Shenshijun's personal space for software engineering, open source, and agentic development.
+Hi, I'm Shenshijun. Neoverse is where I share my projects, open-source work, and what I'm exploring in software engineering and AI-assisted development.
 
 <p align="center">
-  <a href="https://nuxt.com"><img alt="Nuxt" src="https://img.shields.io/badge/Nuxt-framework-3dd6a6?style=flat-square&amp;labelColor=132134&amp;logo=nuxt&amp;logoColor=f4f8fc"></a>
-  <a href="https://vuejs.org"><img alt="Vue" src="https://img.shields.io/badge/Vue-interface-3dd6a6?style=flat-square&amp;labelColor=132134&amp;logo=vue.js&amp;logoColor=f4f8fc"></a>
-  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-language-8c9bff?style=flat-square&amp;labelColor=132134&amp;logo=typescript&amp;logoColor=f4f8fc"></a>
-  <a href="https://tailwindcss.com"><img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-styling-38bdf8?style=flat-square&amp;labelColor=132134&amp;logo=tailwindcss&amp;logoColor=f4f8fc"></a>
-  <a href="https://bun.sh"><img alt="Bun" src="https://img.shields.io/badge/Bun-runtime-38bdf8?style=flat-square&amp;labelColor=132134&amp;logo=bun&amp;logoColor=f4f8fc"></a>
+  <a href="https://nuxt.com"><img alt="Nuxt" src="https://img.shields.io/badge/Nuxt-framework-3dd6a6?style=flat&amp;labelColor=132134&amp;logo=nuxt&amp;logoColor=f4f8fc"></a>
+  <a href="https://vuejs.org"><img alt="Vue" src="https://img.shields.io/badge/Vue-interface-3dd6a6?style=flat&amp;labelColor=132134&amp;logo=vue.js&amp;logoColor=f4f8fc"></a>
+  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-language-8c9bff?style=flat&amp;labelColor=132134&amp;logo=typescript&amp;logoColor=f4f8fc"></a>
+  <a href="https://tailwindcss.com"><img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind%20CSS-styling-38bdf8?style=flat&amp;labelColor=132134&amp;logo=tailwindcss&amp;logoColor=f4f8fc"></a>
+  <a href="https://bun.sh"><img alt="Bun" src="https://img.shields.io/badge/Bun-runtime-38bdf8?style=flat&amp;labelColor=132134&amp;logo=bun&amp;logoColor=f4f8fc"></a>
 </p>
 
 </div>
 
 ## About
 
-Neoverse is Shenshijun's personal homepage and a small Nuxt portfolio with a persistent bottom dock, responsive glass UI, bilingual content, and a shared city background for coordinated route transitions. Missing external data is shown as unavailable; the site never fabricates activity.
+Neoverse is my Nuxt portfolio for the projects I build and the engineering topics I'm focused on. It brings together a responsive glass interface, English and Simplified Chinese content, a persistent bottom dock, and a city scene that carries across page transitions. When external data isn't available, the site says so instead of making up activity.
 
 ## Preview
 
-> Dark glass-morphism · shared city skyline · bottom dock — A site-wide dark theme built on the design tokens in `app/assets/css/tokens.css` and the frosted-glass `glass-elevated` material, with the city backdrop scaling in sync across route transitions.
+An animated city scene carries across pages, while frosted-glass cards and a bottom dock keep the main sections within easy reach. The dark theme uses shared design tokens and the `glass-elevated` material.
 
 <p align="center">
-  <img src="docs/screenshots/home.webp" alt="Home — city animation and glass quick links" width="100%" />
+  <img src="docs/screenshots/home.webp" alt="Neoverse home page" width="100%" />
   <br />
-  <em>Home <code>/</code> — Cosmos city animation, frosted-glass quick links, and the bottom dock (<code>HomeSection.vue</code> + <code>CityBackdrop.vue</code>)</em>
+  <em>Home — animated city backdrop, glass quick links, and the bottom dock.</em>
 </p>
 
 ## Routes
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Profile, links, and animated city scene |
-| `/projects` | Selected project previews |
-| `/focus` | Current engineering interests |
-| `/pulse` | GitHub contributions, commits, and activity |
-| `/design` | Hidden, `noindex` design-system reference |
+| `/` | My profile, selected links, and the animated city scene |
+| `/projects` | A selection of projects and previews |
+| `/focus` | The engineering topics I'm focused on |
+| `/pulse` | GitHub contributions, recent commits, and activity |
+| `/design` | Design-system reference, kept out of the main navigation and search index |
 
 ## Stack
 
@@ -45,7 +51,7 @@ Neoverse is Shenshijun's personal homepage and a small Nuxt portfolio with a per
 | Framework | [Nuxt](https://nuxt.com), Vue, and Nitro |
 | Language | TypeScript with strict type checking |
 | Styling | [Tailwind CSS](https://tailwindcss.com) via `@tailwindcss/vite` |
-| Design system | [Neoverse UI](https://github.com/SSJ-ZYJ/Neoverse-UI) 0.2.0 — Vue, Tokens, Motion, Tailwind, and Glass runtime |
+| Design system | [Neoverse UI 0.2.0](https://github.com/SSJ-ZYJ/Neoverse-UI) — shared tokens, Tailwind, Material and Motion systems, Vue/React adapters, and Glass runtime. See its [README for package details and the Design Lab](https://github.com/SSJ-ZYJ/Neoverse-UI#readme). |
 | Fonts | Inter Variable via `@fontsource-variable/inter` |
 | Icons | Iconify via `unplugin-icons` (Lucide and Simple Icons) |
 | Localization | [`@nuxtjs/i18n`](https://i18n.nuxtjs.org) — English and Simplified Chinese |
@@ -53,26 +59,18 @@ Neoverse is Shenshijun's personal homepage and a small Nuxt portfolio with a per
 
 ## Development
 
-Requires [Bun](https://bun.sh) to install and run the project.
+Install [Bun](https://bun.sh), then run:
 
 ```bash
 bun install
 bun run dev
 ```
 
-Open `http://localhost:3000`.
-
-The shared UI styles come from `@neoverse-ui/tailwind/index.css`. Glass edge refraction also requires `@neoverse-ui/glass-runtime`: `app/app.vue` mounts its renderer on the client and destroys it on unmount. Keep this lifecycle integration when updating the UI library; importing CSS alone does not enable the WebGL effect.
-
-Upgrade all five directly consumed `@neoverse-ui/*` packages together. The 0.2.0 integration uses `UiDock` for shared navigation geometry, `UiCard` with `glass-elevated` for cards, canonical typography scales and Motion roles, and the root `data-theme="dark"` contract. City camera choreography stays product-owned: its CSS return duration must match `CITY_WINDOW_HANDOFF_DURATION` in `app/composables/useCityMotionClock.ts`.
-
-Tailwind 4 handles vendor prefixes, so Nuxt's additional Autoprefixer pass is disabled. This preserves the Disclosure `@supports` query combining `interpolate-size` and `selector(::details-content)`, which Autoprefixer fails to process. `test:ui-css` runs the published UI bundle through the resolved production PostCSS configuration to guard this integration.
-
-The 0.2.0 Glass runtime and Motion packages contain extensionless relative ESM imports. Keep them in Nuxt's `build.transpile` list so Vite resolves these imports in development SSR; loading them directly with Node causes a module-resolution error. Run `test:dev` against the running development server after upgrading packages.
+Visit `http://localhost:3000` in your browser.
 
 ### Optional environment
 
-Copy `.env.example` to `.env` and set `NUXT_GITHUB_TOKEN` to enable the server-side GitHub GraphQL data path. The Pulse page still works without a token using its public-data fallback.
+Pulse can use GitHub's GraphQL API for contribution data when `NUXT_GITHUB_TOKEN` is set. To enable it, copy `.env.example` to `.env` and add your token. Without one, Pulse falls back to public GitHub data.
 
 ```dotenv
 NUXT_GITHUB_TOKEN=
@@ -82,25 +80,48 @@ NUXT_GITHUB_TOKEN=
 
 | Command | Description |
 | --- | --- |
-| `bun run dev` | Start the development server |
-| `bun run build` | Build for production |
-| `bun run preview` | Preview the production build |
+| `bun run dev` | Start the Nuxt development server |
+| `bun run build` | Build the app for production |
+| `bun run preview` | Preview the production build locally |
 | `bun run generate` | Generate a static site |
-| `bun run typecheck` | Run Nuxt type checking |
-| `bun run check` | Format, lint, and type-check |
-| `bun run test:fouc` | Check critical SSR shell styles; requires the dev server |
-| `bun run test:dev` | Check all routes on a running development server; accepts `NEOVERSE_TEST_URL` |
-| `bun run test:ui-css` | Check the published UI CSS against production PostCSS plugins |
+| `bun run typecheck` | Run Nuxt's type checker |
+| `bun run format` | Format files with Biome and write changes |
+| `bun run format:check` | Check formatting without writing changes |
+| `bun run lint` | Run Biome checks without applying fixes |
+| `bun run lint:fix` | Run Biome checks and write fixes |
+| `bun run check:ui-boundary` | Check app source against Neoverse UI boundaries |
+| `bun run test:repository-pulse` | Test Pulse aggregation, deduplication, pagination, and incomplete searches |
+| `bun run test:fouc` | Check critical fallback styles in SSR HTML; requires a dev server |
+| `bun run test:dev` | Smoke-test all routes on a dev server; accepts `NEOVERSE_TEST_URL` |
+| `bun run test:ui-css` | Check published UI CSS with the production PostCSS pipeline |
+| `bun run check` | Run Biome with autofixes, UI boundary and CSS checks, then Nuxt typecheck |
 
 ## Structure
 
 ```text
-app/                 # Pages, components, composables, and global styles
-i18n/                # English and Simplified Chinese locale files
-server/              # Cached GitHub and project-preview endpoints
-shared/              # Shared constants and TypeScript contracts
-public/              # Static assets
-scripts/             # Critical-shell verification
+app/
+  app.vue
+  assets/css/                 # Design tokens, global styles, and dock styles
+  components/                 # Shared shell plus home, focus, pulse, project, navigation, and design views
+  composables/                # Navigation, transitions, city motion, and data helpers
+  pages/                      # Home, projects, focus, pulse, and design routes
+i18n/
+  i18n.config.ts
+  locales/                    # English and Simplified Chinese
+server/
+  api/github/pulse.get.ts
+  api/projects/previews.get.ts
+  utils/                      # GitHub Pulse and project-preview helpers
+shared/
+  constants.ts                # Navigation and shared constants
+  types/
+    github.ts                 # GitHub Pulse contracts
+    projects.ts               # Project preview contracts
+public/
+  fonts/
+  images/
+scripts/                       # Formatting, boundary, CSS, Pulse, and SSR checks
+docs/screenshots/              # README preview image
 ```
 
 ## License
