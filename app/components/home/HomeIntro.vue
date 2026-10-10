@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { cssTimeToMilliseconds } from '~/utils/homeIntroTiming';
+
 const props = defineProps<{ playing: boolean }>();
 const emit = defineEmits<{ reveal: []; complete: [] }>();
 const { t } = useI18n();
@@ -19,16 +21,17 @@ const revealing = ref(false);
 const captionVisible = ref(false);
 const docking = ref(false);
 const animations: Animation[] = [];
-const timers: number[] = [];
+let started = false;
+let preparing = false;
 let finished = false;
 let disposed = false;
 let motionPreference: MediaQueryList | undefined;
+let pendingDock: (() => void) | undefined;
 
 function cleanup() {
-  for (const timer of timers) window.clearTimeout(timer);
+  pendingDock = undefined;
   for (const animation of animations) animation.cancel();
   document.removeEventListener('visibilitychange', onVisibilityChange);
-  window.removeEventListener('resize', complete);
   motionPreference?.removeEventListener('change', onMotionChange);
 }
 
@@ -41,7 +44,19 @@ function complete() {
 }
 
 function onVisibilityChange() {
-  if (document.hidden) complete();
+  if (!started) {
+    if (!document.hidden) void play();
+    return;
+  }
+  for (const animation of animations) {
+    if (document.hidden && animation.playState === 'running') animation.pause();
+    else if (!document.hidden && animation.playState === 'paused') animation.play();
+  }
+  if (!document.hidden && pendingDock) {
+    const dock = pendingDock;
+    pendingDock = undefined;
+    dock();
+  }
 }
 
 function onMotionChange() {
@@ -49,35 +64,52 @@ function onMotionChange() {
 }
 
 function schedule(callback: () => void, delay: number) {
-  timers.push(
-    window.setTimeout(() => {
+  // Use the animation timeline for cues too: wall-clock timers can run ahead
+  // of the first painted frame, or expire while a hidden tab is paused.
+  const cue = overlay.value?.animate([], { duration: delay });
+  if (!cue) return;
+  animations.push(cue);
+  void cue.finished.then(
+    () => {
       if (!finished && !disposed) callback();
-    }, delay),
+    },
+    () => {},
   );
 }
 
 async function play() {
+  if (started || preparing || finished || disposed) return;
+  preparing = true;
   await nextTick();
   if (finished || disposed) return;
   const mark = logo.value;
   const root = overlay.value;
-  motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!mark || !root || document.hidden || motionPreference.matches) {
+  motionPreference ??= window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (!mark || !root || motionPreference.matches) {
     complete();
     return;
   }
 
   document.addEventListener('visibilitychange', onVisibilityChange);
-  window.addEventListener('resize', complete);
   motionPreference.addEventListener('change', onMotionChange);
 
+  if (document.hidden) {
+    preparing = false;
+    return;
+  }
+  // Paint the initial empty contours before starting, including cached loads.
+  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+  preparing = false;
+  if (finished || disposed || document.hidden) return;
+  started = true;
+
   const styles = getComputedStyle(root);
-  const duration = (name: string) => Number.parseFloat(styles.getPropertyValue(name));
+  const duration = (name: string) => cssTimeToMilliseconds(styles.getPropertyValue(name));
   const draw = duration('--motion-intro-draw');
   const stagger = duration('--motion-intro-stagger');
-  const fillDelay = duration('--motion-intro-fill-delay');
+  const fillDelay = Math.max(duration('--motion-intro-fill-delay'), draw + stagger);
   const fill = duration('--motion-intro-fill');
-  const dockDelay = duration('--motion-intro-dock-delay');
+  const dockDelay = Math.max(duration('--motion-intro-dock-delay'), fillDelay + 2 * fill);
   const dock = duration('--motion-intro-dock');
   const revealLead = duration('--motion-intro-reveal-lead');
   const captionDelay = duration('--motion-intro-caption-delay');
@@ -87,10 +119,6 @@ async function play() {
     complete();
     return;
   }
-
-  // Animation completion events and rAF may pause in hidden tabs. A timer and
-  // visibility handler always release the boot gate independently of them.
-  schedule(complete, dockDelay + dock + 800);
 
   try {
     const paths = mark.querySelectorAll<SVGPathElement>('path');
@@ -105,14 +133,14 @@ async function play() {
           duration: draw,
           delay: progress * stagger,
           easing: 'ease-in-out',
-          fill: 'forwards',
+          fill: 'both',
         }),
       );
       animations.push(
         path.animate([{ strokeOpacity: 1 }, { strokeOpacity: 0 }], {
           duration: fill,
           delay: fillDelay + fill,
-          fill: 'forwards',
+          fill: 'both',
         }),
       );
       animations.push(
@@ -120,16 +148,24 @@ async function play() {
           duration: fill,
           delay: fillDelay,
           easing: 'ease-out',
-          fill: 'forwards',
+          fill: 'both',
         }),
       );
     }
+    const pathsFinished = Promise.all(animations.map((animation) => animation.finished));
+    // Unmounting or reduced motion can cancel the paths before the dock cue.
+    void pathsFinished.catch(() => {});
 
     schedule(() => {
       captionVisible.value = true;
     }, captionDelay);
 
-    schedule(() => {
+    const dockMark = () => {
+      if (finished || disposed) return;
+      if (document.hidden) {
+        pendingDock = dockMark;
+        return;
+      }
       try {
         const target = document.querySelector<HTMLElement>('.app-view-content .home-brand__mark');
         if (!target) {
@@ -152,19 +188,22 @@ async function play() {
         );
         animations.push(dockingAnimation);
         // Hand the mark to the header and start content only after it lands.
-        // The independent timeout above still releases a paused animation.
-        void dockingAnimation.finished.then(complete, complete);
+        void dockingAnimation.finished.then(complete, () => {});
+        schedule(
+          () => {
+            revealing.value = true;
+          },
+          Math.max(0, dock - revealLead),
+        );
       } catch {
         complete();
       }
-    }, dockDelay);
+    };
 
-    schedule(
-      () => {
-        revealing.value = true;
-      },
-      dockDelay + dock - revealLead,
-    );
+    schedule(() => {
+      // Do not cancel unfinished drawing/fill when a cold start delays frames.
+      void pathsFinished.then(dockMark, () => {});
+    }, dockDelay);
   } catch {
     complete();
   }

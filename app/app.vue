@@ -186,7 +186,7 @@ onMounted(async () => {
   if (route.path === '/' && legacyTarget) await navigateTo(legacyTarget.path, { replace: true });
   if (homeIntroPending.value && route.path === '/') {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reducedMotion && !document.hidden) {
+    if (!reducedMotion) {
       homeIntroPlayed.value = true;
       homeIntroPlaying.value = true;
       return;
