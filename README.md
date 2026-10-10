@@ -8,7 +8,7 @@
   </picture>
 </h1>
 
-Hi, I'm Shenshijun. Neoverse is where I share my projects, open-source work, and what I'm exploring in software engineering and AI-assisted development.
+Neoverse is Shenshijun's portfolio of software projects and open-source work, with a focus on software engineering and AI-assisted development.
 
 <p align="center">
   <a href="https://nuxt.com"><img alt="Nuxt" src="https://img.shields.io/badge/Nuxt-framework-3dd6a6?style=flat&amp;labelColor=132134&amp;logo=nuxt&amp;logoColor=f4f8fc"></a>
