@@ -29,21 +29,21 @@
     "@neoverse-ui/tokens": "^0.2.0",
     "@neoverse-ui/vue": "^0.2.0",
     "@nuxtjs/i18n": "^10.6.0",
-    "nuxt": "^4.5.2"
+    "nuxt": "^4.6.1"
   },
   "overrides": {
     "@neoverse-ui/tokens": "^0.2.0",
     "@neoverse-ui/motion": "^0.2.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.10",
-    "@iconify-json/lucide": "^1.2.126",
-    "@iconify-json/simple-icons": "^1.2.93",
-    "@playwright/test": "1.60.0",
+    "@biomejs/biome": "^2.5.15",
+    "@iconify-json/lucide": "^1.2.142",
+    "@iconify-json/simple-icons": "^1.2.99",
+    "@playwright/test": "1.64.0",
     "@tailwindcss/vite": "^4.3.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "unplugin-icons": "^23.0.1",
-    "vue-tsc": "^3.3.11"
+    "vue-tsc": "^3.3.12"
   }
 }
