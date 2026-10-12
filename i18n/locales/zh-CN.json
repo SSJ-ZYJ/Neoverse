@@ -1,7 +1,7 @@
 {
   "site": {
     "title": "Neoverse — Shenshijun 的个人空间",
-    "description": "软件工程专业学生 {'|'} 全栈 & 开源 {'|'} 正在编写 Neoverse Docs {'|'} 欢迎随时和我交流！"
+    "description": "软件工程在读 {'|'} 后端探索与开源实践 {'|'} 开发 Neoverse 项目和技术学习"
   },
   "common": {
     "skipToContent": "跳至主要内容",
@@ -17,7 +17,7 @@
     "brandAria": "Neoverse 首页",
     "introSubtitle": "Shenshijun's Space",
     "tagline": "去探索 · 去梦想 · 去发现",
-    "role": "软件工程 · 全栈 · 开源",
+    "role": "软件工程在读 · 后端探索 · 开源实践",
     "bio": "幻想着有一天，能坐在高楼窗边，俯瞰城市灯火，喝一杯咖啡，看着 AI，写下所见所想。",
     "currentlyBuilding": "正在开发",
     "currentlyBuildingItem": "XCA-Portal, Neoverse Series",
@@ -41,8 +41,32 @@
   },
   "projects": {
     "title": "我的项目",
-    "description": "设计、开发并长期维护的开源站点与工具。",
+    "description": "记录持续维护的开源作品，也记录仍在探索中的工程实践。",
     "viewSource": "查看源码",
+    "practiceHeading": "其他实践",
+    "practiceDescription": "从组件库到后端与社区项目，持续学习、逐步完善。",
+    "practiceStatus": {
+      "building": "持续开发",
+      "experimental": "实验探索",
+      "inDevelopment": "开发中"
+    },
+    "practice": {
+      "ui": {
+        "title": "Neoverse UI",
+        "category": "开源 UI 组件库",
+        "description": "围绕设计令牌、组件与玻璃材质构建共享设计系统，持续迭代。"
+      },
+      "nexus": {
+        "title": "Neoverse Nexus",
+        "category": "Go 后端练习项目",
+        "description": "以 Go 为核心，练习任务管理、运行时和智能体开发相关的后端架构。"
+      },
+      "xca": {
+        "title": "XCA Portal",
+        "category": "社团门户",
+        "description": "为计算机学社建设门户网站，实践内容组织与前端工程。"
+      }
+    },
     "preview": {
       "label": "{title} 的当前内容",
       "docsTitle": "内容导览",
@@ -100,6 +124,9 @@
     },
     "updated": "更新于 {date}",
     "notUpdated": "暂无更新时间",
+    "unavailable": "GitHub 活动数据暂时无法获取。这里不会展示模拟的贡献记录。",
+    "fallbackProjects": "查看我的项目",
+    "fallbackGithub": "前往 GitHub",
     "error": "GitHub 数据暂时不可用，页面不会使用模拟活动代替。",
     "retry": "重试",
     "landscape": {

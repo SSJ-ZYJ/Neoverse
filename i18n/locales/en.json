@@ -1,7 +1,7 @@
 {
   "site": {
     "title": "Neoverse — Shenshijun's Space",
-    "description": "Software Engineering Student {'|'} Full-Stack & Open Source {'|'} Writing Neoverse Docs {'|'} Welcome to reach out anytime!"
+    "description": "Software engineering student {'|'} Exploring backend systems and open source {'|'} Learning and developing Neoverse"
   },
   "common": {
     "skipToContent": "Skip to content",
@@ -17,7 +17,7 @@
     "brandAria": "Neoverse home",
     "introSubtitle": "Shenshijun's Space",
     "tagline": "Explore. Dream. Discover.",
-    "role": "Software Engineering · Full-Stack · Open Source",
+    "role": "Software Engineering Student · Exploring Backend & Open Source",
     "bio": "I hope that one day, I’ll sit by a high-rise window, coffee in hand, watching the city lights and AI at work, while writing down what I see and think.",
     "currentlyBuilding": "Currently building",
     "currentlyBuildingItem": "XCA-Portal, Neoverse Series",
@@ -41,8 +41,32 @@
   },
   "projects": {
     "title": "My Projects",
-    "description": "Open-source sites and tools I design, build, and maintain.",
+    "description": "Open-source work I maintain, alongside engineering projects still taking shape.",
     "viewSource": "View source",
+    "practiceHeading": "Other Work",
+    "practiceDescription": "Learning and iterating across UI systems, backend development, and community projects.",
+    "practiceStatus": {
+      "building": "Actively developing",
+      "experimental": "Experimental",
+      "inDevelopment": "In development"
+    },
+    "practice": {
+      "ui": {
+        "title": "Neoverse UI",
+        "category": "Open-source UI library",
+        "description": "A shared design system spanning tokens, components, and glass materials, under active iteration."
+      },
+      "nexus": {
+        "title": "Neoverse Nexus",
+        "category": "Go backend learning project",
+        "description": "Practicing backend architecture through task management, runtimes, and agentic development."
+      },
+      "xca": {
+        "title": "XCA Portal",
+        "category": "Student community portal",
+        "description": "Building a portal for a computer science community and learning content-driven frontend engineering."
+      }
+    },
     "preview": {
       "label": "Current content from {title}",
       "docsTitle": "Content guide",
@@ -100,6 +124,9 @@
     },
     "updated": "Updated {date}",
     "notUpdated": "No update available",
+    "unavailable": "GitHub activity is temporarily unavailable. No simulated contribution records are shown.",
+    "fallbackProjects": "Browse my projects",
+    "fallbackGithub": "Visit GitHub",
     "error": "GitHub data is temporarily unavailable. No simulated activity is shown.",
     "retry": "Retry",
     "landscape": {
