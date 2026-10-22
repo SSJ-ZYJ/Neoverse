@@ -43,8 +43,6 @@
     "title": "My Projects",
     "description": "Open-source work I maintain, alongside engineering projects still taking shape.",
     "viewSource": "View source",
-    "practiceHeading": "Other Work",
-    "practiceDescription": "Learning and iterating across UI systems, backend development, and community projects.",
     "practiceStatus": {
       "building": "Actively developing",
       "experimental": "Experimental",
@@ -58,13 +56,13 @@
       },
       "nexus": {
         "title": "Neoverse Nexus",
-        "category": "Go backend learning project",
-        "description": "Practicing backend architecture through task management, runtimes, and agentic development."
+        "category": "Agent task and execution platform",
+        "description": "A platform for personal agent workflows, connecting different models and runtimes to organize tasks, track execution, and explore more observable, extensible ways of working with AI."
       },
       "xca": {
         "title": "XCA Portal",
-        "category": "Student community portal",
-        "description": "Building a portal for a computer science community and learning content-driven frontend engineering."
+        "category": "Computer association portal",
+        "description": "A digital home for XCA, starting with accessible information and interactive experiences while growing toward a shared space for technical exchange, learning, and collaborative projects."
       }
     },
     "preview": {

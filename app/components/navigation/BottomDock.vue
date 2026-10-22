@@ -19,7 +19,8 @@ defineOptions({ inheritAttrs: false });
 const attrs = useAttrs();
 const appLink = resolveComponent('NuxtLink');
 const { activeView } = useViewNavigation();
-const { t, locale, setLocale, locales } = useI18n();
+const { t, locale, setLocaleCookie, locales } = useI18n();
+const { animateLocaleChange } = useLocaleTransition();
 const compactNavigation = ref(false);
 let compactNavigationQuery: MediaQueryList | undefined;
 const compactBreakpointToken = '--dock-compact-breakpoint';
@@ -55,11 +56,14 @@ const languageOptions = computed(() =>
 type LocaleCode = 'en' | 'zh-CN';
 
 async function selectLocale(code: LocaleCode) {
-  await setLocale(code);
+  if (locale.value === code) return;
+  await animateLocaleChange(() => {
+    setLocaleCookie(code);
+    locale.value = code;
+  });
 }
 
-// The DS segmented control is v-model based; bridge the i18n locale through
-// a writable ref so locale changes flow through the same path as setLocale.
+// Both locale messages are preloaded; direct assignment avoids setLocale's request.
 const localeRef = computed({
   get: () => locale.value,
   set: (code: string) => void selectLocale(code as LocaleCode),
@@ -69,7 +73,7 @@ const localeRef = computed({
 <template>
   <UiDock
     v-bind="attrs"
-    :scale="compactNavigation ? 'md' : 'lg'"
+    scale="md"
     :compact="compactNavigation"
     class="bottom-dock"
     :aria-label="t('nav.aria')"
@@ -83,6 +87,7 @@ const localeRef = computed({
       :compact="compactNavigation"
       :active="activeView === item.id"
       draggable="false"
+      data-locale-layout
       :aria-label="t('nav.goTo', { label: t(`nav.${item.id}`) })"
       :aria-current="activeView === item.id ? 'page' : undefined"
     >

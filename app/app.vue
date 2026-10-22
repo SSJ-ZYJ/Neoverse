@@ -2,8 +2,10 @@
 import { createGlassRenderer } from '@neoverse-ui/glass-runtime';
 import { UiScrollbar } from '@neoverse-ui/vue';
 import { NAV_ITEMS } from '#shared/constants';
+import { cssTimeToMilliseconds } from '~/utils/homeIntroTiming';
 
-const { t, locale } = useI18n();
+const STARTUP_LOCALE_CODES = ['en', 'zh-CN'] as const;
+const { t, locale, loadLocaleMessages } = useI18n();
 const route = useRoute();
 const { isRouteTransitioning } = useRouteTransitionState();
 const glassRenderer = import.meta.client ? createGlassRenderer() : undefined;
@@ -16,10 +18,45 @@ const homeIntroPending = ref(route.path === '/');
 const homeIntroPlaying = ref(false);
 const homeIntroPlayed = ref(false);
 const bottomChromeEntering = ref(false);
+const bootRevealing = ref(false);
+let bootDelayTimer: number | undefined;
+let bootRevealFrame: number | undefined;
+let bootFailsafeTimer: number | undefined;
+let bootRevealCleanupTimer: number | undefined;
+let bootDisposed = false;
+
+function clearBootSchedule() {
+  window.clearTimeout(bootDelayTimer);
+  window.clearTimeout(bootFailsafeTimer);
+  window.clearTimeout(bootRevealCleanupTimer);
+  if (bootRevealFrame !== undefined) cancelAnimationFrame(bootRevealFrame);
+  bootDelayTimer = undefined;
+  bootFailsafeTimer = undefined;
+  bootRevealFrame = undefined;
+  bootRevealCleanupTimer = undefined;
+}
+
+function retireLoadingLayer(el: Element) {
+  el.setAttribute('inert', '');
+  el.setAttribute('aria-hidden', 'true');
+}
 
 function finishBoot() {
-  if (!isBooting.value) return;
+  if (!isBooting.value || bootDisposed) return;
+  clearBootSchedule();
   bottomChromeEntering.value = homeIntroPlayed.value;
+  // HomeIntro owns its reveal. Ordinary boot reveals only foreground copy;
+  // neither the page nor the Dock becomes a glass compositing boundary.
+  bootRevealing.value = !homeIntroPending.value && !homeIntroPlayed.value;
+  if (bootRevealing.value) {
+    const duration = cssTimeToMilliseconds(
+      getComputedStyle(document.documentElement).getPropertyValue('--motion-loading-reveal'),
+    );
+    bootRevealCleanupTimer = window.setTimeout(() => {
+      bootRevealing.value = false;
+      bootRevealCleanupTimer = undefined;
+    }, duration);
+  }
   isBooting.value = false;
 }
 
@@ -148,6 +185,9 @@ if (import.meta.client) {
     if (homeIntroPending.value) finishHomeIntro();
     homeIntroPlayed.value = false;
     bottomChromeEntering.value = false;
+    bootRevealing.value = false;
+    window.clearTimeout(bootRevealCleanupTimer);
+    bootRevealCleanupTimer = undefined;
     isRouteTransitioning.value = true;
     armRouteTransitionFailsafe();
     // 主页与三个正式子页共享同一段城市构图：涉及主页时由背景完成
@@ -181,9 +221,12 @@ useHead({
 });
 
 onMounted(async () => {
+  // Start both message loads while the opening intro covers the page.
+  void Promise.allSettled(STARTUP_LOCALE_CODES.map((code) => loadLocaleMessages(code)));
   const legacyView = window.location.hash.slice(1);
   const legacyTarget = NAV_ITEMS.find((item) => item.id === legacyView && item.path !== '/');
   if (route.path === '/' && legacyTarget) await navigateTo(legacyTarget.path, { replace: true });
+  if (bootDisposed) return;
   if (homeIntroPending.value && route.path === '/') {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reducedMotion) {
@@ -195,17 +238,18 @@ onMounted(async () => {
     return;
   }
   homeIntroPending.value = false;
-  await new Promise((resolve) => window.setTimeout(resolve, 420));
-  // 与 pulse.vue 的揭示逻辑同理：后台/被遮挡标签页 rAF 会被暂停，
-  // 只依赖 rAF 会让启动骨架屏永不消散，超时兜底保证一定能进入页面。
-  let booted = false;
-  const settleBoot = () => {
-    if (booted) return;
-    booted = true;
-    finishBoot();
-  };
-  requestAnimationFrame(settleBoot);
-  window.setTimeout(settleBoot, 400);
+  bootDelayTimer = window.setTimeout(() => {
+    bootDelayTimer = undefined;
+    // Background tabs can suspend rAF. Keep the wall-clock fallback, and
+    // cancel both scheduled paths as soon as either one releases the page.
+    bootRevealFrame = requestAnimationFrame(finishBoot);
+    bootFailsafeTimer = window.setTimeout(finishBoot, 400);
+  }, 420);
+});
+
+onBeforeUnmount(() => {
+  bootDisposed = true;
+  clearBootSchedule();
 });
 </script>
 
@@ -217,7 +261,9 @@ onMounted(async () => {
     @reveal="finishBoot"
     @complete="finishHomeIntro"
   />
-  <DashboardSkeleton v-else v-show="isBooting" :view="skeletonView" />
+  <Transition name="boot-loading" @before-leave="retireLoadingLayer">
+    <DashboardSkeleton v-if="!homeIntroPending && isBooting" :view="skeletonView" />
+  </Transition>
   <div
     class="app-view-stage"
     :class="{
@@ -227,6 +273,7 @@ onMounted(async () => {
       'app-view-stage--home-restored': homeContentSettled,
       'app-view-stage--intro-played': homeIntroPlayed,
       'app-view-stage--intro-pending': homeIntroPending,
+      'app-view-stage--boot-revealed': bootRevealing,
     }"
   >
     <div class="app-view-background" aria-hidden="true">
@@ -248,7 +295,7 @@ onMounted(async () => {
   </div>
   <div
     class="bottom-chrome"
-    :class="{ 'bottom-chrome--intro-reveal': bottomChromeEntering }"
+    :class="{ 'bottom-chrome--intro-reveal': bottomChromeEntering, 'bottom-chrome--boot-revealed': bootRevealing }"
     :aria-hidden="isBooting"
     :inert="isBooting"
     @animationend="finishBottomChromeEnter"
@@ -287,6 +334,35 @@ onMounted(async () => {
   display: grid;
   visibility: hidden;
 }
+/* Fade only ordinary foreground copy. The fading skeleton supplies the
+   full-page handoff without compositing any real glass surface or ancestor. */
+.app-view-stage--boot-revealed :is(.panel-title, .panel-description, .project-card__copy),
+.bottom-chrome--boot-revealed :is(svg, .site-footer__filing) {
+  animation: boot-content-reveal var(--motion-loading-reveal) var(--motion-ease-emphasized) backwards;
+}
+.boot-loading-leave-active {
+  transition: opacity var(--motion-loading-exit) var(--motion-ease-standard);
+  pointer-events: none;
+}
+.boot-loading-leave-to { opacity: 0; }
+@keyframes boot-content-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Incoming content owns intrinsic size from its first frame. The outgoing
+   branch is only a clipped overlay, so removing it cannot shrink the carrier. */
+.loading-swap { position: relative; display: grid; min-width: 0; }
+.loading-swap > * { grid-area: 1 / 1; min-width: 0; }
+.loading-swap > .loading-swap-leave-active { position: absolute; inset: 0; overflow: hidden; }
+.loading-swap-enter-active {
+  transition: opacity var(--motion-loading-reveal) var(--motion-ease-emphasized);
+}
+.loading-swap-leave-active {
+  transition: opacity var(--motion-loading-exit) var(--motion-ease-standard);
+  pointer-events: none !important;
+}
+.loading-swap-enter-from,
+.loading-swap-leave-to { opacity: 0; }
 .app-view-content--booting .home-panel__header,
 .app-view-content--booting .home-avatar,
 .app-view-content--booting .home-panel__copy,
@@ -415,6 +491,11 @@ onMounted(async () => {
 }
 html.route-transition-scroll-lock { overflow: hidden !important; }
 @media (prefers-reduced-motion: reduce) {
+  .app-view-stage--boot-revealed :is(.panel-title, .panel-description, .project-card__copy),
+  .bottom-chrome--boot-revealed :is(svg, .site-footer__filing) { animation-duration: var(--motion-reduced-feedback); }
+  .boot-loading-leave-active,
+  .loading-swap-enter-active,
+  .loading-swap-leave-active { transition-duration: var(--motion-reduced-feedback); }
   .app-view-stage.app-view-stage--intro-played :is(.home-avatar, .home-panel__copy, .home-socials a),
   .bottom-chrome--intro-reveal {
     opacity: 1;

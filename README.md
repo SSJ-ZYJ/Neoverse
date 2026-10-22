@@ -44,6 +44,10 @@ An animated city scene carries across pages, while frosted-glass cards and a bot
 | `/pulse` | GitHub contributions, recent commits, and activity |
 | `/design` | Design-system reference, kept out of the main navigation and search index |
 
+Project previews load live documentation metadata and blog RSS entries. Preview panels size to their content rather than a fixed aspect ratio, and list rows must not shrink below their text height; otherwise clamped titles can collapse to zero height. Unavailable sources use the explicit unavailable state.
+
+The projects heading, featured cards, and practice section share the `--focus-content-max` width and centered margins so both card grids align at their left and right edges.
+
 ## Stack
 
 | Layer | Choice |
@@ -51,7 +55,7 @@ An animated city scene carries across pages, while frosted-glass cards and a bot
 | Framework | [Nuxt](https://nuxt.com), Vue, and Nitro |
 | Language | TypeScript with strict type checking |
 | Styling | [Tailwind CSS](https://tailwindcss.com) via `@tailwindcss/vite` |
-| Design system | [Neoverse UI 0.2.0](https://github.com/SSJ-ZYJ/Neoverse-UI) — shared tokens, Tailwind, Material and Motion systems, Vue/React adapters, and Glass runtime. See its [README for package details and the Design Lab](https://github.com/SSJ-ZYJ/Neoverse-UI#readme). |
+| Design system | [Neoverse UI 0.3.0](https://github.com/SSJ-ZYJ/Neoverse-UI) (published on npm) — shared tokens, Tailwind, Material and Motion systems, Vue/React adapters, and Glass runtime. See its [README for package details and the Design Lab](https://github.com/SSJ-ZYJ/Neoverse-UI#readme). |
 | Fonts | Inter Variable via `@fontsource-variable/inter` |
 | Icons | Iconify via `unplugin-icons` (Lucide and Simple Icons) |
 | Localization | [`@nuxtjs/i18n`](https://i18n.nuxtjs.org) — English and Simplified Chinese |
@@ -60,6 +64,8 @@ An animated city scene carries across pages, while frosted-glass cards and a bot
 ## Development
 
 Install [Bun](https://bun.sh), then run:
+The five `@neoverse-ui/*` packages are consumed as published npm releases. Upgrade all five together to the latest versions on the [Neoverse-UI repository](https://github.com/SSJ-ZYJ/Neoverse-UI), then run `bun install`.
+
 
 ```bash
 bun install

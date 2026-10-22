@@ -44,6 +44,21 @@ for (const legacy of [true, false]) {
           const rect = link.getBoundingClientRect();
           return link.contains(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2));
         });
+        const defaultActionHeightProbe = document.createElement('div');
+        defaultActionHeightProbe.style.cssText = [
+          'position:fixed',
+          'left:-9999px',
+          'min-height:var(--neoverse-action-height-md)',
+          'zoom:var(--neoverse-action-scale-md)',
+        ].join(';');
+        document.body.append(defaultActionHeightProbe);
+        const defaultActionHeight = defaultActionHeightProbe.getBoundingClientRect().height;
+        defaultActionHeightProbe.remove();
+        const socialLinks = [...document.querySelectorAll<HTMLAnchorElement>('.home-socials a')];
+        const linksUseDefaultActionHeight =
+          socialLinks.length > 0 &&
+          socialLinks.every((link) => link.getBoundingClientRect().height <= defaultActionHeight + 0.75);
+
         const fixture = document.createElement('div');
         fixture.style.cssText = `position:fixed;left:30px;top:30px;zoom:${1.25 * scale};z-index:2147483647;`;
         const child = document.createElement('div');
@@ -59,6 +74,7 @@ for (const legacy of [true, false]) {
           return {
             error,
             linksAligned,
+            linksUseDefaultActionHeight,
             widthError: Math.abs(rect.width - 17 * scale),
             heightError: Math.abs(rect.height - 19 * scale),
             rectListError: Math.abs(firstRect.x - rect.x) + Math.abs(itemRect.y - rect.y),
@@ -74,6 +90,7 @@ for (const legacy of [true, false]) {
       const label = `${legacy ? 'VS Code' : 'standard'}, nested CSS zoom ${zoom * 100}%`;
       assert.ok(result.error < 0.75, `${label}: indicator misaligned by ${result.error.toFixed(2)}px`);
       assert.ok(result.linksAligned, `${label}: social glass rectangles differ from painted links`);
+      assert.ok(result.linksUseDefaultActionHeight, `${label}: home social actions exceed the UI default size`);
       assert.ok(
         result.fixtureAligned && result.widthError < 0.1 && result.heightError < 0.1,
         `${label}: nested zoom / transform coordinates differ from viewport pixels`,

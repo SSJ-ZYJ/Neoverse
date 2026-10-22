@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeRouteLeave } from 'vue-router';
 import { createEmptyPulse, SITE } from '#shared/constants';
 
 const { t } = useI18n();
@@ -7,6 +8,7 @@ const { isRouteTransitioning } = useRouteTransitionState();
 const pulseData = computed(() => pulse.value ?? createEmptyPulse());
 const pulseRequestPending = computed(() => status.value === 'idle' || status.value === 'pending');
 const pulseContentReady = ref(false);
+const pulseLoadingOnHomeExit = ref<boolean | undefined>();
 let pulseRevealFrame: number | undefined;
 let pulseRevealTimer: number | undefined;
 
@@ -23,8 +25,7 @@ const clearPulseRevealTimers = () => {
 };
 
 const settlePulseReveal = () => {
-  pulseRevealFrame = undefined;
-  pulseRevealTimer = undefined;
+  clearPulseRevealTimers();
   if (!isRouteTransitioning.value && !pulseRequestPending.value) pulseContentReady.value = true;
 };
 
@@ -56,8 +57,14 @@ watch(
 onBeforeUnmount(clearPulseRevealTimers);
 
 const pulseDisplayLoading = computed(
-  () => isRouteTransitioning.value || pulseRequestPending.value || !pulseContentReady.value,
+  () =>
+    pulseLoadingOnHomeExit.value ??
+    (isRouteTransitioning.value || pulseRequestPending.value || !pulseContentReady.value),
 );
+// Keep the visible Pulse state stable while the outgoing page fades home.
+onBeforeRouteLeave((to) => {
+  if (to.path === '/') pulseLoadingOnHomeExit.value = pulseDisplayLoading.value;
+});
 const seoTitle = computed(() => `${t('pulse.title')} — ${SITE.name}`);
 
 useSeoMeta({

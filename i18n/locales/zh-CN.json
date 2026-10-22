@@ -43,8 +43,6 @@
     "title": "我的项目",
     "description": "记录持续维护的开源作品，也记录仍在探索中的工程实践。",
     "viewSource": "查看源码",
-    "practiceHeading": "其他实践",
-    "practiceDescription": "从组件库到后端与社区项目，持续学习、逐步完善。",
     "practiceStatus": {
       "building": "持续开发",
       "experimental": "实验探索",
@@ -58,13 +56,13 @@
       },
       "nexus": {
         "title": "Neoverse Nexus",
-        "category": "Go 后端练习项目",
-        "description": "以 Go 为核心，练习任务管理、运行时和智能体开发相关的后端架构。"
+        "category": "智能体任务与执行平台",
+        "description": "面向个人智能体实践的任务与执行平台，连接不同模型和运行环境，统一管理任务及执行过程，探索可追踪、可扩展的 Agent 工作流。"
       },
       "xca": {
         "title": "XCA Portal",
-        "category": "社团门户",
-        "description": "为计算机学社建设门户网站，实践内容组织与前端工程。"
+        "category": "计算机学社数字门户",
+        "description": "面向 XCA 计算机学社的线上门户，以内容展示和互动体验为起点，逐步连接技术交流、知识分享与项目实践，建设开放友好的校园技术社区入口。"
       }
     },
     "preview": {

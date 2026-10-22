@@ -34,6 +34,9 @@
   --motion-fast: var(--neoverse-motion-feedback-duration);
   --motion-standard: var(--neoverse-motion-state-duration);
   --motion-expressive: var(--neoverse-motion-spatial-duration);
+  --motion-loading-reveal: 320ms;
+  --motion-loading-exit: 240ms;
+  --motion-locale-layout: 260ms;
   --motion-city-content: 260ms;
   --motion-city-content-delay: 320ms;
   --motion-card-entry-duration: 360ms;

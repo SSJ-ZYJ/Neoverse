@@ -133,6 +133,14 @@ export const PROJECTS = [
 
 export type ProjectId = (typeof PROJECTS)[number]['id'];
 
+// Work without a live content preview stays separate from the Docs / Blog cards.
+// An unpublished project does not receive a made-up external URL.
+export const PRACTICE_PROJECTS = [
+  { id: 'ui', status: 'building', href: 'https://github.com/SSJ-ZYJ/Neoverse-UI' },
+  { id: 'nexus', status: 'experimental', href: null },
+  { id: 'xca', status: 'inDevelopment', href: null },
+] as const;
+
 export function createEmptyProjectPreviews(): ProjectPreviews {
   return {
     docs: {

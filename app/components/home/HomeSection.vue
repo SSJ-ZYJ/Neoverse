@@ -120,8 +120,6 @@ onMounted(() => {
           :tabindex="skeleton ? -1 : undefined"
           :variant="skeleton ? 'ghost' : 'secondary'"
           :surface="skeleton ? 'none' : 'glass-subtle'"
-          size="lg"
-          scale="lg"
           :style="skeleton ? undefined : getHomeLinkStyle(index)"
         >
           <template #leading>

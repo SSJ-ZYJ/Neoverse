@@ -37,7 +37,7 @@ const { t } = useI18n();
   border-radius: var(--radius-xs);
   padding: 0.12rem 0.4rem;
   color: var(--text-muted);
-  font-size: var(--text-md);
+  font-size: var(--text-xs);
   font-weight: var(--weight-semibold);
   line-height: 1.15;
   pointer-events: auto;
@@ -54,7 +54,7 @@ const { t } = useI18n();
   background: var(--neoverse-control-hover-background);
 }
 
-@media (max-width: 520px) { .site-footer__filing { padding: 0.1rem 0.3rem; font-size: var(--text-md); } }
+@media (max-width: 520px) { .site-footer__filing { padding: 0.1rem 0.3rem; } }
 
 @media print { .site-footer { display: none; } }
 </style>

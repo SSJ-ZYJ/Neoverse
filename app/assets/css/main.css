@@ -6,6 +6,20 @@
 /* Neoverse project tokens keep their own Hero/City/Pulse/layout vocabulary. */
 @import "./tokens.css";
 
+/* Only the foreground label clips as its live glass carrier resizes. Prose
+   retains its final wrapping; no page-wide text hiding or fade is involved. */
+.ui-action[data-locale-resizing] .ui-action__content,
+.home-panel__status[data-locale-resizing] .ui-status-indicator__label {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.home-panel__copy[data-locale-resizing],
+[data-surface="glass-elevated"][data-locale-resizing] {
+  overflow: clip;
+}
+
 @layer base {
   *,
   *::before,

@@ -14,6 +14,19 @@ body {
   background: #050b14;
   color: #f4f8fc;
 }
+/* UiScrollbar mounts client-side. Hide the document's native rail from the
+   first SSR paint so hydration never changes the viewport's usable width.
+   This hides only the rail; wheel, touch and keyboard scrolling stay native. */
+html,
+body {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 #__nuxt {
   min-height: 100vh;
   background-color: #050b14;
@@ -154,10 +167,10 @@ body {
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: false },
+  devServer: { port: 3006 },
   css: ['~/assets/css/main.css'],
   build: {
-    // These 0.2.0 packages emit extensionless relative ESM imports. Let Vite
+    // These packages emit extensionless relative ESM imports. Let Vite
     // resolve them during development SSR instead of delegating to Node.
     transpile: ['@neoverse-ui/glass-runtime', '@neoverse-ui/motion'],
   },
@@ -168,6 +181,10 @@ export default defineNuxtConfig({
       { code: 'zh-CN', language: 'zh-CN', name: '简体', file: 'zh-CN.json' },
     ],
     defaultLocale: 'en',
+    // Locale URLs are content-hashed, so a long browser cache remains safe across releases.
+    experimental: {
+      httpCacheDuration: 31_536_000,
+    },
     strategy: 'no_prefix',
     detectBrowserLanguage: {
       useCookie: true,

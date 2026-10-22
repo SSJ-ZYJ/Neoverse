@@ -17,8 +17,9 @@ const props = withDefaults(
     };
     preview: ProjectPreview;
     loading?: boolean;
+    skeleton?: boolean;
   }>(),
-  { loading: false },
+  { loading: false, skeleton: false },
 );
 
 const { t, tm, rt, locale } = useI18n();
@@ -58,21 +59,27 @@ const formatArticleDate = (value: string | null) => {
 </script>
 
 <template>
-  <UiCard as="article" surface="glass-elevated" class="project-card">
+  <UiCard as="article" surface="glass-elevated" class="project-card" :class="[`project-card--${project.id}`, { 'project-card--skeleton': skeleton }]" :aria-hidden="skeleton || undefined">
     <div class="project-card__main">
       <div class="project-card__preview">
         <UiSurface
           surface="inset"
           class="project-card__preview-frame"
           :aria-label="t('projects.preview.label', { title: copy.title })"
-          :aria-busy="loading"
+          :aria-busy="loading || skeleton"
         >
           <header class="project-card__preview-head">
             <span>{{ t(`projects.preview.${project.id}Title`) }}</span>
             <small>{{ projectHost }}</small>
           </header>
 
-          <template v-if="loading">
+          <div class="project-card__preview-content loading-swap">
+          <Transition
+            name="loading-swap"
+            @before-leave="($event as HTMLElement).inert = true"
+            @before-enter="($event as HTMLElement).inert = false"
+          >
+          <div v-if="loading || skeleton" key="loading" class="project-card__preview-skeleton" aria-hidden="true">
             <ol v-if="project.id === 'docs'" class="project-card__docs-list project-card__preview-loading">
               <li v-for="row in 3" :key="row" class="project-card__loading-row" aria-hidden="true">
                 <div>
@@ -80,11 +87,15 @@ const formatArticleDate = (value: string | null) => {
                   <UiSkeleton variant="rect" class="project-card__loading-line project-card__loading-line--description" />
                 </div>
               </li>
-              <li v-if="docsAfterword" class="is-featured">
-                <a :href="docsAfterword.href" target="_blank" rel="noreferrer">
-                  <strong>{{ t('projects.preview.afterwordTitle') }}</strong>
-                  <span>{{ t('projects.preview.afterwordDescription') }}</span>
-                </a>
+              <li
+                v-if="docsAfterword"
+                class="is-featured project-card__loading-row"
+                aria-hidden="true"
+              >
+                <div>
+                  <UiSkeleton variant="rect" class="project-card__loading-line project-card__loading-line--title" />
+                  <UiSkeleton variant="rect" class="project-card__loading-line project-card__loading-line--description" />
+                </div>
               </li>
             </ol>
             <ol v-else class="project-card__article-list project-card__preview-loading">
@@ -95,10 +106,9 @@ const formatArticleDate = (value: string | null) => {
                 </div>
               </li>
             </ol>
-          </template>
+          </div>
 
-          <template v-else-if="docsPreview && docsContent.length">
-            <ol class="project-card__docs-list">
+            <ol v-else-if="docsPreview && docsContent.length" key="docs" class="project-card__docs-list">
               <li v-for="item in docsContent" :key="item.title" :class="{ 'is-featured': item.featured }">
                 <a :href="item.href" target="_blank" rel="noreferrer">
                   <strong>{{ item.featured ? t('projects.preview.afterwordTitle') : item.title }}</strong>
@@ -106,9 +116,8 @@ const formatArticleDate = (value: string | null) => {
                 </a>
               </li>
             </ol>
-          </template>
 
-          <ol v-else-if="blogPreview?.source === 'rss'" class="project-card__article-list">
+          <ol v-else-if="blogPreview?.source === 'rss'" key="blog" class="project-card__article-list">
             <li v-for="article in blogPreview.articles" :key="`${article.title}:${article.publishedAt ?? ''}`">
               <a :href="article.href" target="_blank" rel="noreferrer">
                 <time v-if="article.publishedAt" :datetime="article.publishedAt">
@@ -122,24 +131,46 @@ const formatArticleDate = (value: string | null) => {
           <p v-else class="project-card__preview-unavailable" role="status">
             {{ t('projects.preview.unavailable') }}
           </p>
+          </Transition>
+          </div>
         </UiSurface>
       </div>
-      <a class="project-card__copy" :href="project.href" target="_blank" rel="noreferrer">
-          <div class="project-card__title-row">
-            <span class="project-card__icon" :class="`project-card__icon--${project.tone}`" aria-hidden="true">
-              <component :is="icon" />
-            </span>
-            <h3>{{ copy.title }}</h3>
-          </div>
-          <p class="project-card__category">{{ copy.category }}</p>
-          <p class="project-card__description">{{ copy.description }}</p>
-        </a>
+      <div v-if="skeleton" class="project-card__copy project-card__copy--skeleton">
+        <div class="project-card__title-row">
+          <UiSkeleton variant="rect" class="project-card__icon project-card__icon--skeleton" />
+          <UiSkeleton variant="rect" class="project-card__skeleton-title" />
+        </div>
+        <UiSkeleton variant="rect" class="project-card__skeleton-category" />
+        <div class="project-card__description project-card__description--skeleton">
+          <UiSkeleton variant="rect" v-for="line in 3" :key="line" />
+        </div>
+      </div>
+      <a v-else class="project-card__copy" :href="project.href" target="_blank" rel="noreferrer">
+        <div class="project-card__title-row">
+          <span class="project-card__icon" :class="`project-card__icon--${project.tone}`" aria-hidden="true">
+            <component :is="icon" />
+          </span>
+          <h3>{{ copy.title }}</h3>
+        </div>
+        <p class="project-card__category">{{ copy.category }}</p>
+        <p class="project-card__description">{{ copy.description }}</p>
+      </a>
     </div>
     <div class="project-card__footer">
       <div class="project-card__tags">
-        <UiBadge v-for="tag in copy.tags" :key="tag" variant="neutral" size="sm">{{ tag }}</UiBadge>
+        <template v-if="skeleton">
+          <UiSkeleton
+            v-for="(tag, index) in copy.tags"
+            :key="tag"
+            variant="rect"
+            class="project-card__tag-skeleton"
+          />
+        </template>
+        <UiBadge v-else v-for="tag in copy.tags" :key="tag" variant="neutral" size="sm">{{ tag }}</UiBadge>
       </div>
+      <UiSkeleton v-if="skeleton" variant="rect" class="project-card__repo-skeleton" />
       <UiIconButton
+        v-else
         class="project-card__repo"
         as="a"
         variant="secondary"
@@ -157,7 +188,7 @@ const formatArticleDate = (value: string | null) => {
 </template>
 
 <style scoped>
-/* 竖版卡：图上文下；主体链接负责站点，底部操作行负责仓库。 */
+/* 预览由内容撑高，避免固定比例与列表收缩将截断文本压至零高度；窄屏改为竖排。 */
 .project-card {
   display: flex;
   min-width: 0;
@@ -168,21 +199,25 @@ const formatArticleDate = (value: string | null) => {
 .project-card:hover,
 .project-card:has(.project-card__repo:hover) { transform: translateY(-2px); }
 .project-card__repo-icon--filled { fill: currentColor; stroke: none; }
+.project-card__repo {
+  --neoverse-control-button-tone-fill: var(--neoverse-badge-background);
+  --neoverse-control-button-filled-background: none;
+}
 .project-card__main {
-  display: flex;
+  display: grid;
   min-width: 0;
   flex: 1;
-  flex-direction: column;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   color: inherit;
   text-decoration: none;
 }
 .project-card__preview {
   display: grid;
   position: relative;
-  aspect-ratio: 16 / 10;
+  min-width: 0;
   overflow: hidden;
-  place-items: center;
-  border-bottom: 1px solid var(--border-subtle);
+  place-items: stretch;
+  border-right: 1px solid var(--border-subtle);
   padding: clamp(0.55rem, 1vw, 0.85rem);
   background: var(--neoverse-surface-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
 }
@@ -190,12 +225,13 @@ const formatArticleDate = (value: string | null) => {
   position: relative;
   display: flex;
   width: 100%;
-  height: 100%;
   overflow: hidden;
   flex-direction: column;
   border-radius: var(--radius-control);
   padding: clamp(0.85rem, 1.5vw, 1.15rem);
 }
+.project-card__preview-content { flex: 1; }
+.project-card__preview-skeleton { display: flex; min-width: 0; flex-direction: column; }
 .project-card__preview-head {
   display: flex;
   align-items: baseline;
@@ -231,7 +267,7 @@ const formatArticleDate = (value: string | null) => {
 .project-card__docs-list li {
   display: flex;
   min-height: 0;
-  flex: 1;
+  flex: 1 0 auto;
   border-bottom: 1px solid var(--border-subtle);
 }
 .project-card__docs-list a,
@@ -294,7 +330,7 @@ const formatArticleDate = (value: string | null) => {
 .project-card__article-list li {
   display: flex;
   min-height: 0;
-  flex: 1;
+  flex: 1 0 auto;
   border-bottom: 1px solid var(--border-subtle);
 }
 .project-card__article-list a { gap: 0.22rem; padding: 0.45rem 0; }
@@ -326,6 +362,8 @@ const formatArticleDate = (value: string | null) => {
   gap: 0.32rem;
   padding: 0.45rem 0;
 }
+.project-card__docs-list .project-card__loading-row > div { padding-inline: 0.7rem; }
+.project-card__docs-list li.is-featured.project-card__loading-row > div { padding-block: 0.62rem; }
 .project-card__loading-line {
   display: block;
   width: 72%;
@@ -357,23 +395,37 @@ const formatArticleDate = (value: string | null) => {
 .project-card__description { display: -webkit-box; overflow: hidden; margin: 0; color: var(--text-secondary); font-size: var(--text-card-description); line-height: 1.55; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .project-card__footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.65rem clamp(0.9rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.3vw, 1.15rem); border-top: 1px solid var(--border-subtle); }
 .project-card__tags { display: flex; min-width: 0; flex-wrap: wrap; gap: 0.3rem; }
+.project-card__icon--skeleton { border: 0; background: transparent; box-shadow: none; }
+.project-card__skeleton-title { width: min(100%, 12rem); height: 1.15rem; border-radius: var(--radius-control); }
+.project-card__skeleton-category { width: 7.4rem; height: 0.72rem; border-radius: var(--radius-control); }
+.project-card__description--skeleton { display: grid; gap: 0.4rem; margin-top: 0.35rem; }
+.project-card__description--skeleton span { display: block; width: 100%; height: 1.33rem; border-radius: var(--radius-control); }
+.project-card__description--skeleton span:last-child { width: 68%; }
+.project-card__tag-skeleton { height: 1.65rem; border-radius: var(--radius-control); }
+.project-card--docs .project-card__tag-skeleton:nth-child(1) { width: 3.9rem; }
+.project-card--docs .project-card__tag-skeleton:nth-child(2) { width: 3.4rem; }
+.project-card--docs .project-card__tag-skeleton:nth-child(3) { width: 5.2rem; }
+.project-card--docs .project-card__tag-skeleton:nth-child(4) { width: 3.05rem; }
+.project-card--docs .project-card__tag-skeleton:nth-child(5) { width: 4.6rem; }
+.project-card--docs .project-card__tag-skeleton:nth-child(6) { width: 3.7rem; }
+.project-card--blog .project-card__tag-skeleton:nth-child(1) { width: 3.3rem; }
+.project-card--blog .project-card__tag-skeleton:nth-child(2) { width: 3.8rem; }
+.project-card--blog .project-card__tag-skeleton:nth-child(3) { width: 3.6rem; }
+.project-card--blog .project-card__tag-skeleton:nth-child(4) { width: 6.2rem; }
+.project-card__repo-skeleton { width: 2rem; height: 2rem; flex: 0 0 auto; border-radius: var(--radius-control); }
+@media (max-width: 580px) {
+  .project-card__description--skeleton span { height: calc(var(--text-xs) * 1.55); }
+}
 @media (prefers-reduced-motion: reduce) { .project-card:hover, .project-card:has(.project-card__repo:hover) { transform: none; } }
+@media (max-width: 640px) {
+  .project-card__main { display: flex; flex-direction: column; }
+  .project-card__preview { border-right: 0; border-bottom: 1px solid var(--border-subtle); }
+}
 @media (max-width: 520px) {
   .project-card__preview {
-    aspect-ratio: 4 / 3;
     padding: 0.45rem;
   }
   .project-card__preview-frame { padding: 0.65rem; }
-  .project-card__preview:has(.project-card__docs-list) { aspect-ratio: auto; }
-  .project-card__preview:has(.project-card__docs-list) .project-card__preview-frame { height: auto; }
-  .project-card__docs-list { flex: none; }
-  .project-card__docs-list > li { flex: none; }
-  .project-card__docs-list strong,
-  .project-card__docs-list a span {
-    display: block;
-    overflow: visible;
-    -webkit-line-clamp: unset;
-  }
   .project-card__preview-head {
     gap: 0.5rem;
     padding-bottom: 0.5rem;
@@ -381,7 +433,8 @@ const formatArticleDate = (value: string | null) => {
   .project-card__preview-head small { max-width: 46%; }
   .project-card__docs-list a,
   .project-card__article-list a { padding-block: 0.35rem; }
-  .project-card__loading-row > div { padding-block: 0.35rem; }
+  .project-card__loading-row > div,
+  .project-card__docs-list li.is-featured.project-card__loading-row > div { padding-block: 0.35rem; }
   .project-card__copy {
     gap: 0.45rem;
     padding: 0.85rem;

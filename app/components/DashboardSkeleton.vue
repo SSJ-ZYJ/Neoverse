@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { UiCard, UiSkeleton } from '@neoverse-ui/vue';
-import { createEmptyPulse, FOCUS_DOMAINS, PROJECTS, type ViewId } from '#shared/constants';
+import { createEmptyPulse, FOCUS_DOMAINS, type ViewId } from '#shared/constants';
 
 type SkeletonView = ViewId | 'design';
 
@@ -24,71 +24,9 @@ const emptyPulse = createEmptyPulse();
     <div class="dashboard-loading__shell">
       <HomeSection v-if="view === 'home'" skeleton />
 
-      <section v-else-if="view === 'projects'" class="dashboard-loading__panel dashboard-loading__panel--projects">
-        <div class="dashboard-loading__panel-heading dashboard-loading__panel-heading--projects">
-          <div class="dashboard-loading__panel-heading-copy">
-            <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--title" />
-            <div class="dashboard-loading__heading-description">
-              <UiSkeleton variant="rect" class="dashboard-loading__heading-line dashboard-loading__heading-line--description" />
-            </div>
-          </div>
-        </div>
-
-        <div class="dashboard-loading__project-list">
-          <UiCard
-            v-for="project in PROJECTS"
-            :key="project.id"
-            surface="glass-elevated"
-            class="dashboard-loading__project-card"
-            :class="`dashboard-loading__project-card--${project.id}`"
-          >
-            <div class="dashboard-loading__project-preview">
-              <div class="dashboard-loading__project-preview-frame">
-                <div class="dashboard-loading__project-preview-head">
-                  <UiSkeleton variant="rect" />
-                  <UiSkeleton variant="rect" />
-                </div>
-                <div class="dashboard-loading__project-preview-rows">
-                  <div
-                    v-for="row in project.id === 'docs' ? 4 : 3"
-                    :key="row"
-                    class="dashboard-loading__project-preview-row"
-                  >
-                    <UiSkeleton
-                      variant="rect"
-                      class="dashboard-loading__project-preview-line dashboard-loading__project-preview-line--primary"
-                    />
-                    <UiSkeleton variant="rect" class="dashboard-loading__project-preview-line" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="dashboard-loading__project-copy">
-              <div class="dashboard-loading__project-title-row">
-                <UiSkeleton variant="rect" class="dashboard-loading__project-icon" />
-                <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--title" />
-              </div>
-              <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--category" />
-              <div class="dashboard-loading__project-description">
-                <UiSkeleton variant="rect" class="dashboard-loading__project-line" />
-                <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--description-2" />
-                <UiSkeleton variant="rect" class="dashboard-loading__project-line dashboard-loading__project-line--description-3" />
-              </div>
-            </div>
-            <div class="dashboard-loading__project-footer">
-              <div class="dashboard-loading__project-tags">
-                <UiSkeleton
-                  variant="rect"
-                  v-for="tag in project.id === 'docs' ? 6 : 4"
-                  :key="tag"
-                  class="dashboard-loading__project-tag"
-                />
-              </div>
-              <UiSkeleton variant="rect" class="dashboard-loading__project-repo" />
-            </div>
-          </UiCard>
-        </div>
-      </section>
+      <div v-else-if="view === 'projects'" class="view-shell">
+        <ProjectSection skeleton />
+      </div>
 
       <section v-else-if="view === 'focus'" class="dashboard-loading__panel dashboard-loading__panel--focus">
         <div class="dashboard-loading__panel-heading dashboard-loading__panel-heading--focus">
@@ -234,12 +172,8 @@ const emptyPulse = createEmptyPulse();
   box-shadow: none;
 }
 
-:is(.dashboard-loading__panel--projects, .dashboard-loading__panel--focus, .dashboard-loading__panel--pulse) {
+:is(.dashboard-loading__panel--focus, .dashboard-loading__panel--pulse) {
   background: transparent;
-}
-.dashboard-loading__panel--projects {
-  display: flex;
-  flex-direction: column;
 }
 
 .dashboard-loading__panel--focus {
@@ -290,10 +224,7 @@ const emptyPulse = createEmptyPulse();
   height: clamp(1.22rem, 1.45vw, 1.36rem);
 }
 
-.dashboard-loading__heading-line--description-2,
-.dashboard-loading__heading-line--description-3 {
-  display: none;
-}
+.dashboard-loading__heading-line--description-2 { display: none; }
 
 .dashboard-loading__panel-heading--focus,
 .dashboard-loading__focus-journey,
@@ -303,149 +234,9 @@ const emptyPulse = createEmptyPulse();
   margin-inline: auto;
 }
 
-.dashboard-loading__panel-heading--projects {
-  width: 100%;
-  max-width: var(--focus-content-max);
-  margin-inline: auto;
-}
 
 .dashboard-loading__panel-heading--focus .dashboard-loading__heading-line--title { width: 7rem; }
 
-.dashboard-loading__project-list {
-  display: grid;
-  flex: 1;
-  align-content: start;
-  width: 100%;
-  max-width: var(--focus-content-max);
-  margin-inline: auto;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: clamp(1rem, 1.8vw, 1.5rem);
-}
-
-.dashboard-loading__project-card {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 0;
-}
-
-.dashboard-loading__project-preview {
-  display: grid;
-  aspect-ratio: 16 / 10;
-  place-items: stretch;
-  border-bottom: 1px solid var(--border-subtle);
-  padding: clamp(0.55rem, 1vw, 0.85rem);
-  background: var(--neoverse-surface-inset-refraction), color-mix(in srgb, var(--surface-glass) 18%, transparent);
-}
-
-.dashboard-loading__project-preview-frame {
-  display: flex;
-  min-height: 0;
-  flex-direction: column;
-  border-radius: var(--radius-control);
-  padding: clamp(0.85rem, 1.5vw, 1.15rem);
-  background: var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
-  box-shadow: inset 0 0 0 1px var(--border-subtle), inset 0 1px 0 var(--neoverse-surface-inset-highlight);
-  -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
-  backdrop-filter: var(--neoverse-surface-inset-filter);
-}
-
-.dashboard-loading__project-preview-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 0.65rem;
-}
-
-.dashboard-loading__project-preview-head span:first-child { width: 5.4rem; height: 0.78rem; }
-.dashboard-loading__project-preview-head span:last-child { width: 7.2rem; height: 0.62rem; }
-.dashboard-loading__project-preview-rows { display: flex; min-height: 0; flex: 1; flex-direction: column; }
-.dashboard-loading__project-preview-row {
-  display: grid;
-  min-height: 0;
-  flex: 1;
-  align-content: center;
-  gap: 0.32rem;
-  border-bottom: 1px solid var(--border-subtle);
-}
-.dashboard-loading__project-preview-row:last-child { border-bottom: 0; }
-.dashboard-loading__project-preview-line {
-  display: block;
-  width: 72%;
-  height: 0.58rem;
-  border-radius: var(--radius-control);
-}
-.dashboard-loading__project-preview-line--primary { width: 42%; height: 0.68rem; }
-
-.dashboard-loading__project-copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.55rem;
-  padding: clamp(0.9rem, 1.3vw, 1.15rem);
-}
-
-.dashboard-loading__project-icon {
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  border-radius: var(--radius-control);
-}
-
-.dashboard-loading__project-title-row {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.dashboard-loading__project-line {
-  width: 100%;
-  height: 0.78rem;
-  border-radius: var(--radius-control);
-}
-
-.dashboard-loading__project-line--title { width: min(100%, 12rem); height: 1.15rem; }
-.dashboard-loading__project-line--category { width: 7.4rem; height: 0.72rem; }
-.dashboard-loading__project-description { display: grid; gap: 0.4rem; margin-top: 0.35rem; }
-.dashboard-loading__project-line--description-2,
-.dashboard-loading__project-line--description-3 { display: none; }
-.dashboard-loading__project-description .dashboard-loading__project-line { height: 1.33rem; }
-.dashboard-loading__project-line--description-3 { width: 68%; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-line--description-2 { width: 92%; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-tag:nth-child(1) { width: 3.9rem; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-tag:nth-child(2) { width: 3.4rem; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-tag:nth-child(3) { width: 5.2rem; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-tag:nth-child(4) { width: 3.05rem; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-tag:nth-child(5) { width: 4.6rem; }
-.dashboard-loading__project-card--docs .dashboard-loading__project-tag:nth-child(6) { width: 3.7rem; }
-.dashboard-loading__project-card--blog .dashboard-loading__project-tag:nth-child(1) { width: 3.3rem; }
-.dashboard-loading__project-card--blog .dashboard-loading__project-tag:nth-child(2) { width: 3.8rem; }
-.dashboard-loading__project-card--blog .dashboard-loading__project-tag:nth-child(3) { width: 3.6rem; }
-.dashboard-loading__project-card--blog .dashboard-loading__project-tag:nth-child(4) { width: 6.2rem; }
-
-.dashboard-loading__project-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: auto;
-  border-top: 1px solid var(--border-subtle);
-  padding: 0.65rem clamp(0.9rem, 1.3vw, 1.15rem) clamp(0.9rem, 1.3vw, 1.15rem);
-}
-
-.dashboard-loading__project-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; }
-.dashboard-loading__project-tag { height: 1.65rem; border-radius: var(--radius-control); }
-
-.dashboard-loading__project-repo {
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 auto;
-  border-radius: var(--radius-control);
-}
 
 .dashboard-loading__focus-journey,
 .dashboard-loading__focus-interests {
@@ -603,36 +394,8 @@ const emptyPulse = createEmptyPulse();
 @media (max-width: 620px) {
   .dashboard-loading__heading-line--description-2 { display: block; width: 92%; }
   .dashboard-loading__panel-heading--focus .dashboard-loading__heading-line--description-2 { display: none; }
-  .dashboard-loading__panel-heading--projects .dashboard-loading__heading-line--description-3,
-  .dashboard-loading__panel-heading--pulse .dashboard-loading__heading-line--description-3 { display: block; width: 74%; }
 }
 
-@media (max-width: 580px) {
-  .dashboard-loading__project-preview { min-height: 10.5rem; }
-  .dashboard-loading__project-description .dashboard-loading__project-line { height: calc(var(--text-xs) * 1.55); }
-  .dashboard-loading__project-card--docs .dashboard-loading__project-line--description-2 { display: block; }
-}
-
-@media (max-width: 520px) {
-  .dashboard-loading__project-preview {
-    aspect-ratio: 4 / 3;
-    padding: 0.45rem;
-  }
-  .dashboard-loading__project-preview-frame { padding: 0.65rem; }
-  .dashboard-loading__project-preview-head {
-    gap: 0.5rem;
-    padding-bottom: 0.5rem;
-  }
-  .dashboard-loading__project-copy {
-    gap: 0.45rem;
-    padding: 0.85rem;
-  }
-  .dashboard-loading__project-footer {
-    gap: 0.6rem;
-    padding: 0.6rem 0.85rem 0.85rem;
-  }
-  .dashboard-loading__project-tags { gap: 0.25rem; }
-}
 
 @media (max-width: 380px) {
   .dashboard-loading__track-row:last-child { min-height: 9.35rem; }

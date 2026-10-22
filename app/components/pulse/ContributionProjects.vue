@@ -57,6 +57,12 @@ const formatPercentage = (ratio: number) =>
   <div class="activity-grid">
     <UiCard as="section" surface="glass-elevated" class="activity-column" aria-labelledby="recent-commits-title">
       <h3 id="recent-commits-title">{{ t('pulse.projects.commitsTitle') }}</h3>
+      <div class="loading-swap">
+      <Transition
+        name="loading-swap"
+        @before-leave="($event as HTMLElement).inert = true"
+        @before-enter="($event as HTMLElement).inert = false"
+      >
       <div v-if="loading" class="activity-list" aria-hidden="true">
         <div v-for="row in 3" :key="row" class="activity-row activity-row--skeleton">
           <UiSkeleton variant="circle" width="0.58rem" height="0.58rem" class="activity-row__skeleton-dot" />
@@ -88,6 +94,8 @@ const formatPercentage = (ratio: number) =>
         </li>
       </ul>
       <p v-else class="activity-empty">{{ t('pulse.projects.emptyCommits') }}</p>
+      </Transition>
+      </div>
     </UiCard>
 
     <UiCard as="section" surface="glass-elevated" class="activity-column" aria-labelledby="repository-pulse-title">
@@ -96,7 +104,13 @@ const formatPercentage = (ratio: number) =>
         <span>{{ t('pulse.repositoryPulse.scope') }}</span>
       </header>
 
-      <template v-if="loading" key="pulse-projects-loading">
+      <div class="loading-swap">
+      <Transition
+        name="loading-swap"
+        @before-leave="($event as HTMLElement).inert = true"
+        @before-enter="($event as HTMLElement).inert = false"
+      >
+      <div v-if="loading" key="pulse-projects-loading">
         <!-- 静态文案直接展示，只为未知数值占位，避免满屏碎块。 -->
         <dl class="repository-metrics" aria-hidden="true">
           <div>
@@ -122,9 +136,9 @@ const formatPercentage = (ratio: number) =>
             </li>
           </ul>
         </div>
-      </template>
+      </div>
 
-      <template v-else-if="repositoryPulse.scope !== 'unavailable'" key="pulse-projects-data">
+      <div v-else-if="repositoryPulse.scope !== 'unavailable'" key="pulse-projects-data">
         <dl class="repository-metrics">
           <div>
             <dt>{{ t('pulse.repositoryPulse.activeRepositories') }}</dt>
@@ -160,11 +174,13 @@ const formatPercentage = (ratio: number) =>
         <p v-if="repositoryPulse.scope === 'search'" class="repository-pulse__source">
           {{ t('pulse.repositoryPulse.searchNote') }}
         </p>
-      </template>
+      </div>
 
       <p v-else class="activity-empty repository-pulse__unavailable">
         {{ t('pulse.repositoryPulse.unavailable') }}
       </p>
+      </Transition>
+      </div>
     </UiCard>
   </div>
 </template>

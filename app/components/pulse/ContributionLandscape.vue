@@ -112,8 +112,8 @@ function showDayTooltip(day: ContributionDay, event: Event) {
   tooltipPlacement.value =
     center < edgeThreshold ? 'start' : cardRect.width - center < edgeThreshold ? 'end' : 'center';
   tooltipStyle.value = {
-    left: `${String(center)}px`,
-    top: `${String(targetRect.top - cardRect.top)}px`,
+    left: `${String(targetRect.left + targetRect.width / 2)}px`,
+    top: `${String(targetRect.top)}px`,
   };
 }
 
@@ -379,6 +379,10 @@ async function scrollToLatestContributions() {
 }
 
 onMounted(() => {
+  // The tooltip samples the composited page from a body portal, outside the
+  // card's backdrop/paint containment. Its coordinates are viewport-relative.
+  window.addEventListener('scroll', clearDayTooltip, true);
+  window.addEventListener('resize', clearDayTooltip);
   void scrollToLatestContributions();
   const scroller = chartScroller.value;
   if (!scroller) return;
@@ -417,6 +421,8 @@ function onChartScroll() {
 }
 
 onBeforeUnmount(() => {
+  window.removeEventListener('scroll', clearDayTooltip, true);
+  window.removeEventListener('resize', clearDayTooltip);
   cancelChartMotion();
   cancelLatestAlignment();
   chartContentObserver?.disconnect();
@@ -456,8 +462,13 @@ function hideDayTooltip(day: ContributionDay) {
         @pointercancel="onChartPointerCancel"
         @scroll.passive="onChartScroll"
       >
-        <template v-if="loading" key="pulse-landscape-loading">
-          <div class="contribution-card__loading-chart" aria-hidden="true">
+        <div class="loading-swap">
+        <Transition
+          name="loading-swap"
+          @before-leave="($event as HTMLElement).inert = true"
+          @before-enter="($event as HTMLElement).inert = false"
+        >
+          <div v-if="loading" key="loading" class="contribution-card__loading-chart" aria-hidden="true">
             <div class="contribution-card__skeleton-grid">
               <UiSkeleton
                 v-for="cell in 371"
@@ -474,8 +485,12 @@ function hideDayTooltip(day: ContributionDay) {
               {{ t('pulse.landscape.more') }}
             </span>
           </div>
-        </template>
-        <template v-else-if="cells.length" key="pulse-landscape-data">
+        <div
+          v-else-if="cells.length"
+          key="data"
+          class="contribution-card__data-chart"
+          :style="{ '--contribution-columns': String(columnCount) }"
+        >
           <div
             class="contribution-card__months"
             :style="{ '--contribution-columns': String(columnCount) }"
@@ -513,39 +528,48 @@ function hideDayTooltip(day: ContributionDay) {
             <i v-for="level in 5" :key="level" :class="`level-${level - 1}`" />
             {{ t('pulse.landscape.more') }}
           </span>
-        </template>
-        <p v-else class="contribution-card__empty">{{ t('pulse.landscape.empty') }}</p>
+        </div>
+        <p v-else key="empty" class="contribution-card__empty">{{ t('pulse.landscape.empty') }}</p>
+        </Transition>
+        </div>
       </div>
 
       <dl class="contribution-stats">
         <div>
           <dt>{{ t('pulse.stats.contributions') }}</dt>
+          <Transition name="loading-swap">
           <dd v-if="loading"><UiSkeleton variant="title" width="4rem" height="var(--pulse-stat-skeleton-height)" /></dd>
           <dd v-else>{{ contributions.scope === 'unavailable' ? '—' : contributions.total.toLocaleString(locale) }}</dd>
+          </Transition>
         </div>
         <div>
           <dt>{{ t('pulse.stats.streak') }}</dt>
+          <Transition name="loading-swap">
           <dd v-if="loading"><UiSkeleton variant="title" width="3rem" height="var(--pulse-stat-skeleton-height)" /></dd>
           <dd v-else>{{ contributions.scope === 'unavailable' ? '—' : t('pulse.stats.days', { count: contributions.longestStreak }) }}</dd>
+          </Transition>
         </div>
         <div>
           <dt>{{ t('pulse.stats.range') }}</dt>
+          <Transition name="loading-swap">
           <dd v-if="loading"><UiSkeleton variant="text" width="5rem" height="calc(var(--text-sm) * 1.55)" /></dd>
           <dd v-else>{{ scopeLabel }}</dd>
+          </Transition>
         </div>
       </dl>
     </div>
 
-    <UiTooltipSurface
-      v-if="activeDay"
-      class="contribution-tooltip"
-      :class="`contribution-tooltip--${tooltipPlacement}`"
-      :style="tooltipStyle"
-      variant="accent"
-      aria-hidden="true"
-    >
-      {{ activeDayLabel }}
-    </UiTooltipSurface>
+    <Teleport v-if="activeDay" to="body">
+      <UiTooltipSurface
+        class="contribution-tooltip"
+        :class="`contribution-tooltip--${tooltipPlacement}`"
+        :style="tooltipStyle"
+        variant="accent"
+        aria-hidden="true"
+      >
+        {{ activeDayLabel }}
+      </UiTooltipSurface>
+    </Teleport>
   </UiCard>
 </template>
 
@@ -572,6 +596,7 @@ function hideDayTooltip(day: ContributionDay) {
 /* 热力图单格尺寸有上限，不再让少量周数通过 1fr 撑满整行；
    全年数据保持接近原有密度，recent 降级态则按真实周数右对齐，窄屏继续横向滚动。 */
 .contribution-card__months, .contribution-grid { --contribution-gap: var(--pulse-heatmap-cell-gap); --contribution-cell-size: var(--pulse-heatmap-cell-size); }
+.contribution-card__data-chart { min-width: calc(var(--contribution-columns) * var(--pulse-heatmap-cell-size) + (var(--contribution-columns) - 1) * var(--pulse-heatmap-cell-gap)); }
 .contribution-card__months { display: grid; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); justify-content: end; column-gap: var(--contribution-gap); margin: 0 0 0.45rem; color: var(--text-muted); font-size: var(--text-xs); }
 .contribution-card__months span { grid-column: var(--month-column); white-space: nowrap; }
 .contribution-grid { display: grid; grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); grid-template-rows: repeat(7, auto); justify-content: end; gap: var(--contribution-gap); }
@@ -594,13 +619,15 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-card__empty { display: grid; min-height: 8rem; place-items: center; margin: 0; color: var(--text-muted); font-size: var(--text-md); text-align: center; }
 /* 统计横排三列：取代原右侧纵向 16.5rem 的高柱。 */
 .contribution-stats { --pulse-stat-skeleton-height: var(--text-stat); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin: 0; }
-.contribution-stats div { display: grid; align-content: center; border-top: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); padding: 0.55rem 0.9rem; }
+.contribution-stats div { position: relative; display: grid; align-content: center; border-top: 1px solid var(--border-subtle); border-right: 1px solid var(--border-subtle); padding: 0.55rem 0.9rem; }
 .contribution-stats div:first-child { border-top: 0; }
 .contribution-stats div:last-child { border-right: 0; }
 .contribution-stats dt { color: var(--text-muted); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
-.contribution-stats dd { margin: 0.18rem 0 0; color: var(--text-primary); font-size: var(--text-stat); font-weight: var(--weight-display); letter-spacing: -0.05em; line-height: 1; }
+.contribution-stats dd { grid-area: 2 / 1; margin: 0.18rem 0 0; color: var(--text-primary); font-size: var(--text-stat); font-weight: var(--weight-display); letter-spacing: -0.05em; line-height: 1; }
+/* The leaving value must not hold the statistics row open until fade-out ends. */
+.contribution-stats dd.loading-swap-leave-active { position: absolute; inset: 0; overflow: hidden; }
 .contribution-stats div:last-child dd { color: var(--accent-primary); font-size: var(--text-stat-sm); letter-spacing: -0.03em; }
-.contribution-tooltip { position: absolute; z-index: 5; max-width: min(16rem, calc(100% - 1rem)); white-space: nowrap; pointer-events: none; transform: translate(-50%, calc(-100% - 0.65rem)); }
+.contribution-tooltip { position: fixed; z-index: 5; max-width: min(16rem, calc(100vw - 1rem)); white-space: nowrap; pointer-events: none; transform: translate(-50%, calc(-100% - 0.65rem)); }
 .contribution-tooltip--start { --ui-tooltip-arrow-left: 1rem; transform: translate(0, calc(-100% - 0.65rem)); }
 .contribution-tooltip--end { --ui-tooltip-arrow-left: calc(100% - 1rem); transform: translate(-100%, calc(-100% - 0.65rem)); }
 @media (max-width: 600px) {
