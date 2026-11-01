@@ -88,8 +88,7 @@
   --pulse-heatmap-edge-resistance: 0.28;
   --pulse-heatmap-edge-max-px: 52;
   --pulse-heatmap-inertia-friction: 0.92;
-  --pulse-heatmap-spring-stiffness: 0.00042;
-  --pulse-heatmap-spring-damping: 0.6;
+  --pulse-heatmap-spring-frequency: 0.012;
   --pulse-heatmap-cell-size: clamp(0.68rem, 1.3cqi, 0.95rem);
   --pulse-heatmap-cell-gap: clamp(0.16rem, 0.22cqi, 0.22rem);
   --content-max: 88rem;

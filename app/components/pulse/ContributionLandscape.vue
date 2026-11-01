@@ -27,8 +27,7 @@ const CHART_MOTION_DEFAULTS = {
   edgeResistance: 0.28,
   edgeMax: 52,
   inertiaFriction: 0.92,
-  springStiffness: 0.00042,
-  springDamping: 0.6,
+  springFrequency: 0.012,
 };
 
 const cardElement = ref<HTMLElement | null>(null);
@@ -137,9 +136,18 @@ function getChartMotionConfig() {
     edgeResistance: readChartMotionToken('--pulse-heatmap-edge-resistance', CHART_MOTION_DEFAULTS.edgeResistance),
     edgeMax: readChartMotionToken('--pulse-heatmap-edge-max-px', CHART_MOTION_DEFAULTS.edgeMax),
     inertiaFriction: readChartMotionToken('--pulse-heatmap-inertia-friction', CHART_MOTION_DEFAULTS.inertiaFriction),
-    springStiffness: readChartMotionToken('--pulse-heatmap-spring-stiffness', CHART_MOTION_DEFAULTS.springStiffness),
-    springDamping: readChartMotionToken('--pulse-heatmap-spring-damping', CHART_MOTION_DEFAULTS.springDamping),
+    springFrequency: readChartMotionToken('--pulse-heatmap-spring-frequency', CHART_MOTION_DEFAULTS.springFrequency),
   };
+}
+
+function getResistedChartOffset(distance: number, motion: ReturnType<typeof getChartMotionConfig>) {
+  const offset = distance * motion.edgeResistance;
+  return offset / (1 + Math.abs(offset) / motion.edgeMax);
+}
+
+function getChartEdgeVelocity(scrollVelocity: number, offset: number, motion: ReturnType<typeof getChartMotionConfig>) {
+  // Differentiate the resistance curve so release preserves the content's velocity.
+  return -scrollVelocity * motion.edgeResistance * (1 - Math.abs(offset) / motion.edgeMax) ** 2;
 }
 
 function setChartEdgeOffset(offset: number, maxOffset = getChartMotionConfig().edgeMax) {
@@ -159,21 +167,20 @@ function cancelLatestAlignment() {
 }
 
 function startChartEdgeSpring(initialOffset: number, initialVelocity = 0) {
-  const scroller = chartScroller.value;
-  if (!scroller) return;
+  if (!chartScroller.value) return;
 
   const motion = getChartMotionConfig();
   cancelChartMotion();
-  let position = initialOffset;
-  let velocity = initialVelocity;
-  let lastTimestamp = performance.now();
+  const startedAt = performance.now();
+  const springTerm = initialVelocity + motion.springFrequency * initialOffset;
 
   const step = (timestamp: number) => {
-    const elapsed = Math.min(32, Math.max(1, timestamp - lastTimestamp));
-    lastTimestamp = timestamp;
-    velocity += -position * motion.springStiffness * elapsed;
-    velocity *= motion.springDamping ** (elapsed / 16);
-    position += velocity * elapsed;
+    // Exact critically damped motion: continuous velocity, no oscillation,
+    // and the same return curve regardless of refresh rate or dropped frames.
+    const elapsed = Math.max(0, timestamp - startedAt);
+    const decay = Math.exp(-motion.springFrequency * elapsed);
+    const position = (initialOffset + springTerm * elapsed) * decay;
+    const velocity = (initialVelocity - motion.springFrequency * springTerm * elapsed) * decay;
     setChartEdgeOffset(position, motion.edgeMax);
 
     if (Math.abs(position) <= CHART_EDGE_OFFSET_EPSILON && Math.abs(velocity) <= CHART_SPRING_VELOCITY_EPSILON) {
@@ -184,7 +191,7 @@ function startChartEdgeSpring(initialOffset: number, initialVelocity = 0) {
     chartMotionFrame = requestAnimationFrame(step);
   };
 
-  setChartEdgeOffset(position, motion.edgeMax);
+  setChartEdgeOffset(initialOffset, motion.edgeMax);
   chartMotionFrame = requestAnimationFrame(step);
 }
 
@@ -207,20 +214,11 @@ function startChartInertia(initialVelocity: number) {
     const maxScroll = getChartMaxScroll(scroller);
     const nextScrollLeft = scroller.scrollLeft + velocity * elapsed;
 
-    if (nextScrollLeft < 0) {
-      scroller.scrollLeft = 0;
-      startChartEdgeSpring(
-        Math.min(motion.edgeMax, -nextScrollLeft * motion.edgeResistance),
-        velocity * motion.edgeResistance,
-      );
-      return;
-    }
-    if (nextScrollLeft > maxScroll) {
-      scroller.scrollLeft = maxScroll;
-      startChartEdgeSpring(
-        -Math.min(motion.edgeMax, (nextScrollLeft - maxScroll) * motion.edgeResistance),
-        velocity * motion.edgeResistance,
-      );
+    if (nextScrollLeft < 0 || nextScrollLeft > maxScroll) {
+      const boundary = nextScrollLeft < 0 ? 0 : maxScroll;
+      const offset = getResistedChartOffset(boundary - nextScrollLeft, motion);
+      scroller.scrollLeft = boundary;
+      startChartEdgeSpring(offset, getChartEdgeVelocity(velocity, offset, motion));
       return;
     }
 
@@ -243,12 +241,12 @@ function setChartDragPosition(rawScrollLeft: number) {
   const motion = getChartMotionConfig();
   if (rawScrollLeft < 0) {
     scroller.scrollLeft = 0;
-    setChartEdgeOffset(Math.min(motion.edgeMax, -rawScrollLeft * motion.edgeResistance), motion.edgeMax);
+    setChartEdgeOffset(getResistedChartOffset(-rawScrollLeft, motion), motion.edgeMax);
     return;
   }
   if (rawScrollLeft > maxScroll) {
     scroller.scrollLeft = maxScroll;
-    setChartEdgeOffset(-Math.min(motion.edgeMax, (rawScrollLeft - maxScroll) * motion.edgeResistance), motion.edgeMax);
+    setChartEdgeOffset(getResistedChartOffset(maxScroll - rawScrollLeft, motion), motion.edgeMax);
     return;
   }
 
@@ -268,13 +266,16 @@ function onChartPointerDown(event: PointerEvent) {
   chartInteractionStarted = true;
   cancelLatestAlignment();
   cancelChartMotion();
+  const motion = getChartMotionConfig();
+  const offset = chartEdgeOffset.value;
+  const edgeDistance = offset / Math.max(0.01, 1 - Math.abs(offset) / motion.edgeMax) / motion.edgeResistance;
   chartPointerSession = {
     pointerId: event.pointerId,
     startX: event.clientX,
     startY: event.clientY,
     lastX: event.clientX,
     lastTimestamp: performance.now(),
-    startScrollLeft: scroller.scrollLeft,
+    startScrollLeft: scroller.scrollLeft - edgeDistance,
     velocity: 0,
     axis: 'pending',
     dragged: false,
@@ -328,7 +329,8 @@ function finishChartPointer(event: PointerEvent, cancelled = false) {
   const edgeOffset = chartEdgeOffset.value;
   const motion = getChartMotionConfig();
   if (Math.abs(edgeOffset) > CHART_EDGE_OFFSET_EPSILON) {
-    startChartEdgeSpring(edgeOffset, cancelled ? 0 : session.velocity * motion.edgeResistance);
+    const releaseVelocity = session.velocity * Math.exp(-(performance.now() - session.lastTimestamp) / 64);
+    startChartEdgeSpring(edgeOffset, cancelled ? 0 : getChartEdgeVelocity(releaseVelocity, edgeOffset, motion));
     return;
   }
   if (cancelled) {
@@ -462,6 +464,7 @@ function hideDayTooltip(day: ContributionDay) {
         @pointercancel="onChartPointerCancel"
         @scroll.passive="onChartScroll"
       >
+        <div class="contribution-card__chart-content">
         <div class="loading-swap">
         <Transition
           name="loading-swap"
@@ -532,6 +535,7 @@ function hideDayTooltip(day: ContributionDay) {
         <p v-else key="empty" class="contribution-card__empty">{{ t('pulse.landscape.empty') }}</p>
         </Transition>
         </div>
+        </div>
       </div>
 
       <dl class="contribution-stats">
@@ -552,7 +556,7 @@ function hideDayTooltip(day: ContributionDay) {
         <div>
           <dt>{{ t('pulse.stats.range') }}</dt>
           <Transition name="loading-swap">
-          <dd v-if="loading"><UiSkeleton variant="text" width="5rem" height="calc(var(--text-sm) * 1.55)" /></dd>
+          <dd v-if="loading"><UiSkeleton variant="title" width="5rem" height="var(--pulse-stat-skeleton-height)" /></dd>
           <dd v-else>{{ scopeLabel }}</dd>
           </Transition>
         </div>
@@ -592,7 +596,13 @@ function hideDayTooltip(day: ContributionDay) {
 .level-4 { background: color-mix(in srgb, var(--accent-primary) 78%, var(--accent-secondary)); }
 .contribution-card__body { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(0.7rem, 1.4vw, 1.1rem); margin-top: clamp(0.7rem, 1.4vw, 1.05rem); }
 .contribution-card__chart { display: grid; min-width: 0; align-content: center; overflow-x: auto; overflow-y: hidden; padding: 0.2rem 0 0.4rem; scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; touch-action: pan-y; user-select: none; contain: paint; }
-.contribution-card__chart > * { transform: translate3d(var(--contribution-edge-offset, 0px), 0, 0); }
+/* Keep the scroll extent fixed while only the clipped inner content rebounds. */
+.contribution-card__chart-content { display: grid; width: max-content; min-width: 100%; overflow: clip; }
+.contribution-card__chart-content > .loading-swap { transform: translate3d(var(--contribution-edge-offset, 0px), 0, 0); }
+/* Standard scrollbar colors override WebKit's rounded thumb in Chromium. */
+@supports selector(::-webkit-scrollbar) {
+  .contribution-card__chart { scrollbar-width: auto; scrollbar-color: auto; }
+}
 /* 热力图单格尺寸有上限，不再让少量周数通过 1fr 撑满整行；
    全年数据保持接近原有密度，recent 降级态则按真实周数右对齐，窄屏继续横向滚动。 */
 .contribution-card__months, .contribution-grid { --contribution-gap: var(--pulse-heatmap-cell-gap); --contribution-cell-size: var(--pulse-heatmap-cell-size); }

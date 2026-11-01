@@ -112,7 +112,7 @@ const updatedLabel = computed(() => {
 }
 .pulse-state-enter-from,
 .pulse-state-leave-to { visibility: hidden; }
-:is(.pulse-state-enter-active, .pulse-state-leave-active) :deep(:is(.pulse-panel__fallback, .contribution-card__header-main, .contribution-card__chart > .loading-swap, .contribution-stats, .activity-column > h3, .activity-column > .loading-swap, .repository-pulse__header)) {
+:is(.pulse-state-enter-active, .pulse-state-leave-active) :deep(:is(.pulse-panel__fallback, .contribution-card__header-main, .contribution-card__chart-content > .loading-swap, .contribution-stats, .activity-column > h3, .activity-column > .loading-swap, .repository-pulse__header)) {
   animation: boot-content-reveal var(--pulse-state-duration) var(--pulse-state-easing) var(--pulse-state-direction) both;
 }
 @media (prefers-reduced-motion: reduce) {

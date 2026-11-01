@@ -138,7 +138,7 @@ export type ProjectId = (typeof PROJECTS)[number]['id'];
 export const PRACTICE_PROJECTS = [
   { id: 'ui', status: 'building', href: 'https://github.com/SSJ-ZYJ/Neoverse-UI' },
   { id: 'nexus', status: 'experimental', href: null },
-  { id: 'xca', status: 'inDevelopment', href: null },
+  { id: 'xca', status: 'inDevelopment', href: 'https://github.com/XAUFE-CA/XCA-Portal/' },
 ] as const;
 
 export function createEmptyProjectPreviews(): ProjectPreviews {

@@ -48,6 +48,10 @@ Project previews load live documentation metadata and blog RSS entries. Preview 
 
 The projects heading, featured cards, and practice section share the `--focus-content-max` width and centered margins so both card grids align at their left and right edges.
 
+Pulse's contribution chart keeps a fixed scroll extent while its inner content rebounds at the edges, so overscrolling cannot push the latest column out of view. Progressive drag resistance and a velocity-matched, critically damped return avoid hard stops and oscillation. Chromium uses the shared rounded scrollbar styling; all three statistic placeholders share the same title shape and responsive height.
+
+The XCA Portal practice card links to its [open-source repository](https://github.com/XAUFE-CA/XCA-Portal/).
+
 ## Stack
 
 | Layer | Choice |
