@@ -167,7 +167,11 @@ body::-webkit-scrollbar {
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devServer: { port: 3006 },
+  // `host` must be an explicit string: Nuxt 4.6.4 turns the unset `devServer.host`
+  // resolver into an empty object, which crashes the CLI's allowed-hosts check
+  // (`options.hostname.toLowerCase is not a function`). `localhost` is exactly
+  // what the previous implicit default resolved to, so binding is unchanged.
+  devServer: { port: 3006, host: 'localhost' },
   css: ['~/assets/css/main.css'],
   build: {
     // These packages emit extensionless relative ESM imports. Let Vite

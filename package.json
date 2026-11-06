@@ -24,23 +24,23 @@
     "check": "biome check --write . && bun run check:ui-boundary && bun run test:ui-css && nuxt typecheck"
   },
   "dependencies": {
-    "@neoverse-ui/glass-runtime": "^0.2.1",
-    "@neoverse-ui/motion": "^0.2.1",
-    "@neoverse-ui/tailwind": "^0.3.0",
-    "@neoverse-ui/tokens": "^0.3.0",
-    "@neoverse-ui/vue": "^0.3.0",
+    "@neoverse-ui/glass-runtime": "^0.2.2",
+    "@neoverse-ui/motion": "^0.2.2",
+    "@neoverse-ui/tailwind": "^0.3.1",
+    "@neoverse-ui/tokens": "^0.3.1",
+    "@neoverse-ui/vue": "^0.4.0",
     "@nuxtjs/i18n": "^10.6.0",
-    "nuxt": "^4.6.1"
+    "nuxt": "^4.6.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.15",
-    "@iconify-json/lucide": "^1.2.142",
-    "@iconify-json/simple-icons": "^1.2.99",
+    "@biomejs/biome": "^2.6.5",
+    "@iconify-json/lucide": "^1.2.151",
+    "@iconify-json/simple-icons": "^1.2.101",
     "@playwright/test": "1.64.0",
-    "@tailwindcss/vite": "^4.3.3",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3",
-    "unplugin-icons": "^23.0.1",
-    "vue-tsc": "^3.3.12"
+    "@tailwindcss/vite": "^4.3.4",
+    "tailwindcss": "^4.3.4",
+    "typescript": "^6.0.3",
+    "unplugin-icons": "^24.0.0",
+    "vue-tsc": "^3.3.14"
   }
 }

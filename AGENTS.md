@@ -4,6 +4,8 @@
 
 - All changes must pass `bun run typecheck` or the full `bun run check`. The full check runs `biome check --write .`, the UI boundary and CSS checks, then Nuxt typecheck.
 - **Style-only changes do not require visual verification.** Do not start a dev server or take screenshots; passing the code check is sufficient.
+- Biome 2.6 added Markdown/HTML formatting. `biome.json` disables the Markdown formatter so `bun run check` never reflows hand-authored documentation tables.
+- TypeScript stays on 6.x. `vue-tsc` runs through `@volar/typescript`, whose peer range is `typescript <7`, so a 7.x bump breaks typecheck until the Volar toolchain catches up.
 
 ## Conventions
 
@@ -12,6 +14,7 @@
 - Use design tokens from `app/assets/css/tokens.css` instead of hardcoded values.
 - The Pulse page must never use mock/simulated data; show the unavailable state instead.
 - `nuxt.config.ts` embeds critical fallback styles (`.skip-link`, `.dashboard-loading`, `[inert]`); keep them intact and ensure `bun run test:fouc` passes.
+- Keep `devServer.host` an explicit string. Nuxt 4.6.4 resolves an unset `devServer.host` to `{}`, which crashes the dev CLI with `options.hostname.toLowerCase is not a function`. `localhost` matches the previous implicit default.
 
 ## Neoverse UI maintenance
 

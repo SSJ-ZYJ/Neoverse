@@ -502,6 +502,7 @@ function hideDayTooltip(day: ContributionDay) {
             <span
               v-for="month in months"
               :key="month.key"
+              :class="{ 'is-trailing': month.column === columnCount }"
               :style="{ '--month-column': String(month.column) }"
             >{{ month.label }}</span>
           </div>
@@ -609,13 +610,13 @@ function hideDayTooltip(day: ContributionDay) {
 .contribution-card__data-chart { min-width: calc(var(--contribution-columns) * var(--pulse-heatmap-cell-size) + (var(--contribution-columns) - 1) * var(--pulse-heatmap-cell-gap)); }
 .contribution-card__months { display: grid; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); justify-content: end; column-gap: var(--contribution-gap); margin: 0 0 0.45rem; color: var(--text-muted); font-size: var(--text-xs); }
 .contribution-card__months span { grid-column: var(--month-column); white-space: nowrap; }
+/* 末列月份标签从最后一列起笔，文字比单格宽，超出的部分会被 chart-content 的 overflow: clip 截掉（"11月" 只剩 "11"）。
+   让它按内容宽度贴住网格右边缘，标签完整可见且不改变列宽。 */
+.contribution-card__months span.is-trailing { width: max-content; justify-self: end; margin-inline-end: 1px; }
 .contribution-grid { display: grid; grid-auto-flow: column; grid-template-columns: repeat(var(--contribution-columns), var(--contribution-cell-size)); grid-template-rows: repeat(7, auto); justify-content: end; gap: var(--contribution-gap); }
 @container contribution-card (max-width: 40rem) {
   .contribution-card__legend--header { display: flex; }
   .contribution-card__legend--chart { display: none; }
-}
-@container contribution-card (max-width: 36rem) {
-  .contribution-card__months span:nth-child(even) { display: none; }
 }
 .contribution-card__loading-chart { --contribution-columns: 53; --contribution-gap: var(--pulse-heatmap-cell-gap); --contribution-cell-size: var(--pulse-heatmap-cell-size); --contribution-grid-width: calc(var(--contribution-columns) * var(--contribution-cell-size) + (var(--contribution-columns) - 1) * var(--contribution-gap)); display: grid; min-width: 0; align-content: center; gap: 0; }
 /* 容器保持透明，只显示互相分离的静态格子；避免背景填满间隙后黏成灰色整块。 */

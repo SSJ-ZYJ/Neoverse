@@ -59,7 +59,7 @@ The XCA Portal practice card links to its [open-source repository](https://githu
 | Framework | [Nuxt](https://nuxt.com), Vue, and Nitro |
 | Language | TypeScript with strict type checking |
 | Styling | [Tailwind CSS](https://tailwindcss.com) via `@tailwindcss/vite` |
-| Design system | [Neoverse UI 0.3.0](https://github.com/SSJ-ZYJ/Neoverse-UI) (published on npm) — shared tokens, Tailwind, Material and Motion systems, Vue/React adapters, and Glass runtime. See its [README for package details and the Design Lab](https://github.com/SSJ-ZYJ/Neoverse-UI#readme). |
+| Design system | [Neoverse UI 0.4](https://github.com/SSJ-ZYJ/Neoverse-UI) (published on npm) — shared tokens, Tailwind, Aurora Glass Material and Motion systems, Vue/React adapters, and Glass runtime. See its [README for package details and the Design Lab](https://github.com/SSJ-ZYJ/Neoverse-UI#readme). |
 | Fonts | Inter Variable via `@fontsource-variable/inter` |
 | Icons | Iconify via `unplugin-icons` (Lucide and Simple Icons) |
 | Localization | [`@nuxtjs/i18n`](https://i18n.nuxtjs.org) — English and Simplified Chinese |
