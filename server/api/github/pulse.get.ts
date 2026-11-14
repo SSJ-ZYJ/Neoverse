@@ -6,6 +6,9 @@ const GITHUB_USER = 'SSJ-ZYJ';
 const GITHUB_API = 'https://api.github.com';
 const RECENT_BRANCH_LIMIT = 4;
 const RECENT_COMMIT_LIMIT = 4;
+// The search feed returns private repositories too; over-fetch so the
+// public-only list still has enough candidates after filtering.
+const RECENT_COMMIT_SEARCH_LIMIT = 12;
 const REPOSITORY_WINDOW_DAYS = 30;
 const GITHUB_REQUEST_TIMEOUT_MS = 7000;
 const GITHUB_DIAGNOSTIC_TIMEOUT_MS = 5000;
@@ -37,6 +40,24 @@ interface GithubCommitResponse {
     author?: { date?: string | null };
     committer?: { date?: string | null };
   };
+}
+
+interface GithubCommitSearchResponse {
+  items: Array<{
+    sha: string;
+    html_url: string;
+    commit: {
+      message: string;
+      author?: { date?: string | null };
+      committer?: { date?: string | null };
+    };
+    repository: {
+      name: string;
+      full_name: string;
+      html_url: string;
+      private: boolean;
+    };
+  }>;
 }
 
 interface ContributionCalendarResponse {
@@ -336,6 +357,46 @@ const fetchRecentBranchCommits = async (branch: RecentBranch, token?: string): P
   }
 };
 
+// Push events lag behind the repository (GitHub delays the public event feed
+// and omits pushes it did not attribute to the user), so a branch head taken
+// from the event feed can trail the contribution calendar by days. Commit
+// search reads repository data directly and stays aligned with that calendar;
+// private hits are dropped to keep the public-only contract. The branch
+// fan-out below still contributes non-default-branch pushes, which search
+// does not index.
+const fetchRecentCommitsFromSearch = async (token?: string): Promise<RecentCommit[]> => {
+  const path = `/search/commits?q=${encodeURIComponent(`author:${GITHUB_USER}`)}&sort=author-date&order=desc&per_page=${String(RECENT_COMMIT_SEARCH_LIMIT)}`;
+  let response: GithubCommitSearchResponse;
+  if (!token) {
+    response = await fetchGithub<GithubCommitSearchResponse>(path);
+  } else {
+    try {
+      response = await fetchGithub<GithubCommitSearchResponse>(path, token);
+    } catch (authenticatedError) {
+      logPulseDiagnostic('warn', 'recent_commits_search_authenticated_failed', {
+        authenticatedError: summarizeError(authenticatedError),
+      });
+      response = await fetchGithub<GithubCommitSearchResponse>(path);
+    }
+  }
+
+  return response.items
+    .filter((item) => !item.repository.private)
+    .map((item) => {
+      const date = item.commit.author?.date ?? item.commit.committer?.date;
+      if (!date) return null;
+      return {
+        id: `${item.repository.full_name}:${item.sha}`,
+        message: item.commit.message.split('\n')[0]?.trim() || item.sha.slice(0, 7),
+        repository: item.repository.name,
+        repositoryUrl: item.repository.html_url,
+        url: item.html_url,
+        date,
+      } satisfies RecentCommit;
+    })
+    .filter((commit): commit is RecentCommit => commit !== null);
+};
+
 const fetchRecentCommitsFromBranches = async (branches: RecentBranch[], token?: string): Promise<RecentCommit[]> => {
   const results = await Promise.allSettled(branches.map((branch) => fetchRecentBranchCommits(branch, token)));
   const commits: RecentCommit[] = [];
@@ -561,7 +622,14 @@ export default defineCachedEventHandler(
       }
 
       const contributions = githubContributions?.contributions ?? buildRecentLandscape(events);
-      const recentCommits = await fetchRecentCommitsFromBranches(branches, token);
+      const [searchedCommits, branchCommits] = await Promise.all([
+        fetchRecentCommitsFromSearch(token).catch((error) => {
+          logPulseDiagnostic('warn', 'recent_commits_search_failed', { error: summarizeError(error) });
+          return [] as RecentCommit[];
+        }),
+        fetchRecentCommitsFromBranches(branches, token),
+      ]);
+      const recentCommits = mergeRecentCommits([...searchedCommits, ...branchCommits]);
       let repositoryPulse = githubRepositoryPulse?.repositoryPulse ?? empty.repositoryPulse;
       if (repositoryPulse.scope === 'unavailable') {
         try {
@@ -606,7 +674,7 @@ export default defineCachedEventHandler(
     }
   },
   {
-    getKey: () => (useRuntimeConfig().githubToken ? 'pulse-repository-v5-token' : 'pulse-repository-v5-public'),
+    getKey: () => (useRuntimeConfig().githubToken ? 'pulse-repository-v6-token' : 'pulse-repository-v6-public'),
     // 源站与浏览器统一 2 分钟新鲜期。刻意不用 swr：nitro 会输出
     // stale-while-revalidate，浏览器会先回一年前那种过期缓存体再后台
     // 更新（swr: true 时甚至是无限期），dock 切换拿到的永远是旧数据。

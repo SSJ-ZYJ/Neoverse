@@ -277,7 +277,7 @@ onBeforeUnmount(() => {
     }"
   >
     <div class="app-view-background" aria-hidden="true">
-      <HomeCosmos />
+      <HomeCosmos :active="route.path === '/'"/>
     </div>
     <CityBackdrop
       :active="stageOrbitActive"

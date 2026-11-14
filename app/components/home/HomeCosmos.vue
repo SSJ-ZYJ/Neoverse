@@ -11,6 +11,9 @@ import {
 const canvas = ref<HTMLCanvasElement | null>(null);
 const backdropImage = ref<HTMLImageElement | null>(null);
 const { isRouteTransitioning } = useRouteTransitionState();
+// The child pages paint their own opaque city backdrop above this canvas, so
+// keeping the 30fps painter alive there only steals frames from route motion.
+const props = withDefaults(defineProps<{ active?: boolean }>(), { active: true });
 
 const FRAME_INTERVAL = 1000 / 30;
 const GLASS_BLUR_RADIUS = 10;
@@ -263,11 +266,42 @@ const draw = (time = 0) => {
 };
 
 const animate = (time: number) => {
+  if (!props.active) {
+    frame = 0;
+    return;
+  }
   if (time - lastFrame >= FRAME_INTERVAL) {
     lastFrame = time;
     draw(time);
   }
   if (!reducedMotion?.matches) frame = requestAnimationFrame(animate);
+};
+
+const resumePainting = () => {
+  if (!props.active || reducedMotion?.matches || document.hidden || frame) return;
+  lastFrame = 0;
+  frame = requestAnimationFrame(animate);
+};
+
+const suspendPainting = () => {
+  cancelAnimationFrame(frame);
+  frame = 0;
+};
+
+watch(
+  () => props.active,
+  (active) => {
+    if (!import.meta.client) return;
+    // Resuming redraws from the shared city clock, so the handoff that reveals
+    // this canvas again still matches the child camera's final frame.
+    if (active) resumePainting();
+    else suspendPainting();
+  },
+);
+
+const handleVisibilityChange = () => {
+  if (document.hidden) suspendPainting();
+  else resumePainting();
 };
 
 const handlePointer = (event: PointerEvent) => {
@@ -306,14 +340,15 @@ onMounted(() => {
 
   observer = new ResizeObserver(([entry]) => {
     resize(entry?.contentRect);
-    draw(performance.now());
+    if (props.active) draw(performance.now());
   });
   if (canvas.value) observer.observe(canvas.value);
   resize();
   if (image?.complete && image.naturalWidth > 0) paintBackdrop();
   window.addEventListener('pointermove', handlePointer, { passive: true });
   window.addEventListener('pointerleave', resetPointer);
-  frame = requestAnimationFrame(animate);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  resumePainting();
 });
 
 onBeforeUnmount(() => {
@@ -321,6 +356,7 @@ onBeforeUnmount(() => {
   observer?.disconnect();
   window.removeEventListener('pointermove', handlePointer);
   window.removeEventListener('pointerleave', resetPointer);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
   backdrop = undefined;
   glassSource = undefined;
   glassRegion = undefined;
